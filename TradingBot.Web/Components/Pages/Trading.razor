@@ -1,0 +1,685 @@
+@page "/trading"
+@using TradingBot.Web.Models
+@using TradingBot.Web.Services
+@inject ITradingApiClient TradingApi
+@inject BinanceApiClientWrapper BinanceApi
+@rendermode InteractiveServer
+
+<PageTitle>Trading - AI Strategies</PageTitle>
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                🤖 AI Trading Strategies
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400">
+                Generate signals, backtest strategies, and execute trades with professional AI-powered algorithms
+            </p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex space-x-8">
+                <button @onclick='() => activeTab = "signals"' 
+                        class="@(activeTab == "signals" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500") py-4 px-1 border-b-2 font-medium">
+                    📊 Signals
+                </button>
+                <button @onclick='() => activeTab = "backtest"' 
+                        class="@(activeTab == "backtest" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500") py-4 px-1 border-b-2 font-medium">
+                    🔬 Backtest
+                </button>
+                <button @onclick='() => activeTab = "trade"' 
+                        class="@(activeTab == "trade" ? "border-blue-500 text-blue-600" : "border-transparent text-gray-500") py-4 px-1 border-b-2 font-medium">
+                    💹 Trade
+                </button>
+            </nav>
+        </div>
+
+        <!-- Error Message -->
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-red-700">@errorMessage</p>
+                    </div>
+                    <button @onclick="() => errorMessage = null" class="ml-auto">
+                        <span class="text-red-500 hover:text-red-700">&times;</span>
+                    </button>
+                </div>
+            </div>
+        }
+
+        <!-- Signals Tab -->
+        @if (activeTab == "signals")
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Signal Generation Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Generate Signal</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Symbol</label>
+                                <input @bind="signalSymbol" type="text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white" placeholder="BTCUSDT"/>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Strategy</label>
+                                <select @bind="signalStrategy" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="Combined Multi-Indicator">⭐ Combined Multi-Indicator (Best)</option>
+                                    <option value="MACD">MACD Strategy</option>
+                                    <option value="RSI">RSI Strategy</option>
+                                    <option value="MA Crossover">MA Crossover</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interval</label>
+                                <select @bind="signalInterval" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="15m">15 Minutes</option>
+                                    <option value="1h">1 Hour</option>
+                                    <option value="4h">4 Hours</option>
+                                    <option value="1d">1 Day</option>
+                                </select>
+                            </div>
+
+                            <button @onclick="GenerateSignal" disabled="@isLoading" 
+                                    class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                                @if (isLoading)
+                                {
+                                    <svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>Analyzing...</span>
+                                }
+                                else
+                                {
+                                    <span>🎯 Generate Signal</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signal Results -->
+                <div class="lg:col-span-2">
+                    @if (currentSignal != null)
+                    {
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center justify-between mb-6">
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Signal Result</h2>
+                                <span class="text-sm text-gray-500">@currentSignal.Timestamp.ToString("yyyy-MM-dd HH:mm")</span>
+                            </div>
+
+                            <!-- Signal Badge -->
+                            <div class="mb-6">
+                                <div class="flex items-center space-x-4">
+                                    <span class="text-4xl">
+                                        @(currentSignal.Type switch
+                                        {
+                                            "StrongBuy" => "🚀",
+                                            "Buy" => "⬆️",
+                                            "Hold" => "➡️",
+                                            "Sell" => "⬇️",
+                                            "StrongSell" => "🔻",
+                                            _ => "❓"
+                                        })
+                                    </span>
+                                    <div>
+                                        <h3 class="text-3xl font-bold @GetSignalColor(currentSignal.Type)">
+                                            @currentSignal.Type.ToUpper()
+                                        </h3>
+                                        <p class="text-gray-600 dark:text-gray-400">@currentSignal.Symbol at $@currentSignal.Price.ToString("N2")</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Confidence -->
+                            <div class="mb-6">
+                                <div class="flex justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Confidence</span>
+                                    <span class="text-sm font-bold">@((currentSignal.Confidence * 100).ToString("F1"))%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="@GetConfidenceColor(currentSignal.Confidence) h-3 rounded-full transition-all duration-500" 
+                                         style="width: @((currentSignal.Confidence * 100).ToString("F1"))%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-l-4 border-blue-500">
+                                <p class="text-sm font-medium text-blue-900 dark:text-blue-200 mb-1">Analysis</p>
+                                <p class="text-blue-800 dark:text-blue-300">@currentSignal.Reason</p>
+                            </div>
+
+                            <!-- Indicators -->
+                            @if (currentSignal.Indicators.Any())
+                            {
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    @foreach (var indicator in currentSignal.Indicators)
+                                    {
+                                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">@indicator.Key</p>
+                                            <p class="text-lg font-semibold text-gray-900 dark:text-white">
+                                                @FormatIndicatorValue(indicator.Value)
+                                            </p>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No signal generated</h3>
+                            <p class="mt-1 text-sm text-gray-500">Generate a signal to see trading recommendations</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Backtest Tab -->
+        @if (activeTab == "backtest")
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Backtest Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Backtest Settings</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Symbol</label>
+                                <input @bind="backtestSymbol" type="text" class="input-field" placeholder="BTCUSDT"/>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Strategy</label>
+                                <select @bind="backtestStrategy" class="input-field">
+                                    <option value="Combined Multi-Indicator">⭐ Combined (Recommended)</option>
+                                    <option value="MACD">MACD Strategy</option>
+                                    <option value="RSI">RSI Strategy</option>
+                                    <option value="MA Crossover">MA Crossover</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Interval</label>
+                                <select @bind="backtestInterval" class="input-field">
+                                    <option value="1h">1 Hour</option>
+                                    <option value="4h">4 Hours</option>
+                                    <option value="1d">1 Day</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date</label>
+                                <input @bind="backtestStartDate" type="date" class="input-field"/>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date</label>
+                                <input @bind="backtestEndDate" type="date" class="input-field"/>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Initial Capital ($)</label>
+                                <input @bind="backtestCapital" type="number" class="input-field" placeholder="10000"/>
+                            </div>
+
+                            <button @onclick="RunBacktest" disabled="@isLoading" class="w-full btn-primary">
+                                @if (isLoading)
+                                {
+                                    <svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>Running...</span>
+                                }
+                                else
+                                {
+                                    <span>🔬 Run Backtest</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Backtest Results -->
+                <div class="lg:col-span-2">
+                    @if (backtestResult != null)
+                    {
+                        <div class="space-y-6">
+                            <!-- Performance Summary -->
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Performance Summary</h2>
+                                
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div class="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 rounded-lg">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Net Profit</p>
+                                        <p class="text-2xl font-bold @(backtestResult.NetProfit >= 0 ? "text-green-600" : "text-red-600")">
+                                            $@backtestResult.NetProfit.ToString("N2")
+                                        </p>
+                                    </div>
+
+                                    <div class="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 rounded-lg">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Return</p>
+                                        <p class="text-2xl font-bold text-blue-600">
+                                            @backtestResult.ReturnPercentage.ToString("F2")%
+                                        </p>
+                                    </div>
+
+                                    <div class="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 rounded-lg">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Win Rate</p>
+                                        <p class="text-2xl font-bold text-purple-600">
+                                            @backtestResult.WinRate.ToString("F1")%
+                                        </p>
+                                    </div>
+
+                                    <div class="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 rounded-lg">
+                                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Trades</p>
+                                        <p class="text-2xl font-bold text-orange-600">
+                                            @backtestResult.TotalTrades
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Profit Factor</p>
+                                        <p class="text-lg font-semibold">@backtestResult.ProfitFactor.ToString("F2")</p>
+                                    </div>
+                                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Max Drawdown</p>
+                                        <p class="text-lg font-semibold text-red-600">@backtestResult.MaxDrawdownPercentage.ToString("F2")%</p>
+                                    </div>
+                                    <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">Sharpe Ratio</p>
+                                        <p class="text-lg font-semibold">@backtestResult.SharpeRatio.ToString("F2")</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Trades -->
+                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Recent Trades</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead>
+                                            <tr>
+                                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry</th>
+                                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">Exit</th>
+                                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">P/L</th>
+                                                <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase">%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                            @foreach (var trade in backtestResult.Trades.TakeLast(10).Reverse())
+                                            {
+                                                <tr>
+                                                    <td class="px-3 py-3 text-sm">
+                                                        <div>$@trade.EntryPrice.ToString("N2")</div>
+                                                        <div class="text-xs text-gray-500">@trade.EntryTime.ToString("MM/dd HH:mm")</div>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-sm">
+                                                        <div>$@trade.ExitPrice.ToString("N2")</div>
+                                                        <div class="text-xs text-gray-500">@trade.ExitTime.ToString("MM/dd HH:mm")</div>
+                                                    </td>
+                                                    <td class="px-3 py-3 text-sm font-semibold @(trade.Profit >= 0 ? "text-green-600" : "text-red-600")">
+                                                        $@trade.Profit.ToString("N2")
+                                                    </td>
+                                                    <td class="px-3 py-3 text-sm font-semibold @(trade.ProfitPercentage >= 0 ? "text-green-600" : "text-red-600")">
+                                                        @trade.ProfitPercentage.ToString("F2")%
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 border border-gray-200 dark:border-gray-700 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No backtest results</h3>
+                            <p class="mt-1 text-sm text-gray-500">Run a backtest to see strategy performance</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Trade Tab -->
+        @if (activeTab == "trade")
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Order Form -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Place Order</h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Symbol</label>
+                            <input @bind="orderSymbol" type="text" class="input-field" placeholder="BTCUSDT"/>
+                        </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Side</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button @onclick='() => orderSide = "Buy"' 
+                                            class="@(orderSide == "Buy" ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700") py-2 px-4 rounded-lg font-semibold">
+                                        ⬆️ Buy
+                                    </button>
+                                    <button @onclick='() => orderSide = "Sell"' 
+                                            class="@(orderSide == "Sell" ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700") py-2 px-4 rounded-lg font-semibold">
+                                        ⬇️ Sell
+                                    </button>
+                                </div>
+                            </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Order Type</label>
+                            <select @bind="orderType" class="input-field">
+                                <option value="Market">Market</option>
+                                <option value="Limit">Limit</option>
+                                <option value="StopLoss">Stop Loss</option>
+                                <option value="TakeProfit">Take Profit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quantity</label>
+                            <input @bind="orderQuantity" type="number" step="0.000001" class="input-field" placeholder="0.001"/>
+                        </div>
+
+                        @if (orderType == "Limit")
+                        {
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price</label>
+                                <input @bind="orderPrice" type="number" step="0.01" class="input-field" placeholder="96000"/>
+                            </div>
+                        }
+
+                        @if (orderType == "StopLoss" || orderType == "TakeProfit")
+                        {
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Stop Price</label>
+                                <input @bind="orderStopPrice" type="number" step="0.01" class="input-field" placeholder="95000"/>
+                            </div>
+                        }
+
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border-l-4 border-yellow-500">
+                            <p class="text-sm text-yellow-800 dark:text-yellow-200">
+                                ⚠️ <strong>Warning:</strong> Make sure you're in TestMode before placing real orders!
+                            </p>
+                        </div>
+
+                        <button @onclick="PlaceOrder" disabled="@isLoading" class="w-full btn-success">
+                            @if (isLoading)
+                            {
+                                <svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Placing...</span>
+                            }
+                            else
+                            {
+                                <span>💹 Place @orderSide Order</span>
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Result / Account Info -->
+                <div class="space-y-6">
+                    @if (orderResult != null)
+                    {
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Order Confirmation</h2>
+                            
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Order ID:</span>
+                                    <span class="font-semibold">@orderResult.OrderId</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Symbol:</span>
+                                    <span class="font-semibold">@orderResult.Symbol</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Side:</span>
+                                    <span class="font-semibold @(orderResult.Side == "Buy" ? "text-green-600" : "text-red-600")">
+                                        @orderResult.Side
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Quantity:</span>
+                                    <span class="font-semibold">@orderResult.Quantity</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Price:</span>
+                                    <span class="font-semibold">$@orderResult.Price.ToString("N2")</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Status:</span>
+                                    <span class="badge-success">@orderResult.Status</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 dark:text-gray-400">Time:</span>
+                                    <span class="font-semibold">@orderResult.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <p class="text-sm text-green-800 dark:text-green-200">
+                                    ✅ @orderResult.Message
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Account Balances -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Account Balances</h2>
+                        <button @onclick="LoadAccountInfo" class="w-full btn-secondary mb-4">
+                            🔄 Refresh Balances
+                        </button>
+
+                        @if (accountInfo != null && accountInfo.Balances.Any())
+                        {
+                            <div class="space-y-2">
+                                @foreach (var balance in accountInfo.Balances.Where(b => b.Total > 0).Take(10))
+                                {
+                                    <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                        <div>
+                                            <span class="font-semibold">@balance.Asset</span>
+                                            <span class="text-xs text-gray-500 ml-2">Free: @balance.Free.ToString("F8")</span>
+                                        </div>
+                                        <span class="font-bold">@balance.Total.ToString("F8")</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-gray-500 text-center py-4">No balances to display</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string activeTab = "signals";
+    private bool isLoading = false;
+    private string? errorMessage = null;
+
+    // Signal generation
+    private string signalSymbol = "BTCUSDT";
+    private string signalStrategy = "Combined Multi-Indicator";
+    private string signalInterval = "1h";
+    private TradingSignal? currentSignal = null;
+
+    // Backtesting
+    private string backtestSymbol = "BTCUSDT";
+    private string backtestStrategy = "Combined Multi-Indicator";
+    private string backtestInterval = "1h";
+    private DateTime backtestStartDate = DateTime.Now.AddMonths(-3);
+    private DateTime backtestEndDate = DateTime.Now;
+    private decimal backtestCapital = 10000m;
+    private BacktestResult? backtestResult = null;
+
+    // Trading
+    private string orderSymbol = "BTCUSDT";
+    private string orderSide = "Buy";
+    private string orderType = "Limit";
+    private decimal orderQuantity = 0.001m;
+    private decimal? orderPrice = null;
+    private decimal? orderStopPrice = null;
+    private OrderResult? orderResult = null;
+    private BinanceAccountInfo? accountInfo = null;
+
+    private async Task GenerateSignal()
+    {
+        isLoading = true;
+        errorMessage = null;
+        currentSignal = null;
+
+        try
+        {
+            var request = new GenerateSignalRequest(signalSymbol, signalStrategy, signalInterval);
+            currentSignal = await TradingApi.GenerateSignalAsync(request);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error generating signal: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RunBacktest()
+    {
+        isLoading = true;
+        errorMessage = null;
+        backtestResult = null;
+
+        try
+        {
+            var request = new BacktestRequest(
+                backtestStrategy,
+                backtestSymbol,
+                backtestInterval,
+                backtestStartDate,
+                backtestEndDate,
+                backtestCapital);
+
+            backtestResult = await TradingApi.RunBacktestAsync(request);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error running backtest: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task PlaceOrder()
+    {
+        isLoading = true;
+        errorMessage = null;
+        orderResult = null;
+
+        try
+        {
+            var request = new PlaceOrderRequest(
+                orderSymbol,
+                orderSide,
+                orderType,
+                orderQuantity,
+                orderPrice,
+                orderStopPrice);
+
+            orderResult = await TradingApi.PlaceOrderAsync(request);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error placing order: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadAccountInfo()
+    {
+        try
+        {
+            accountInfo = await BinanceApi.GetAccountInfoAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading account: {ex.Message}";
+        }
+    }
+
+    private string GetSignalColor(string signalType)
+    {
+        return signalType switch
+        {
+            "StrongBuy" => "text-green-600",
+            "Buy" => "text-green-500",
+            "Hold" => "text-gray-600",
+            "Sell" => "text-red-500",
+            "StrongSell" => "text-red-600",
+            _ => "text-gray-600"
+        };
+    }
+
+    private string GetConfidenceColor(decimal confidence)
+    {
+        if (confidence >= 0.8m) return "bg-green-500";
+        if (confidence >= 0.6m) return "bg-blue-500";
+        if (confidence >= 0.4m) return "bg-yellow-500";
+        return "bg-red-500";
+    }
+
+    private string FormatIndicatorValue(object value)
+    {
+        if (value is decimal d)
+            return d.ToString("F2");
+        if (value is double db)
+            return db.ToString("F2");
+        if (value is int i)
+            return i.ToString();
+        return value.ToString() ?? "";
+    }
+}
+

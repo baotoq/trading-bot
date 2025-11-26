@@ -6,8 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <base href="/"/>
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]"/>
+    <link href="_content/AntDesign/css/ant-design-blazor.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="@Assets["css/app.css"]"/>
     <link rel="stylesheet" href="@Assets["app.css"]"/>
     <link rel="stylesheet" href="@Assets["TradingBot.Web.styles.css"]"/>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <ImportMap/>
     <link rel="icon" type="image/png" href="favicon.png"/>
     <HeadOutlet/>
@@ -16,6 +19,8 @@
 <body>
 <Routes/>
 <script src="@Assets["_framework/blazor.web.js"]"></script>
+<script src="_content/AntDesign/js/ant-design-blazor.js"></script>
+<script src="js/tradingview-chart.js"></script>
 </body>
 
 </html>

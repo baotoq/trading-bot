@@ -155,5 +155,81 @@ public class BinanceService : IBinanceService
             return false;
         }
     }
+
+    public async Task<OrderResult?> PlaceSpotOrderAsync(
+        string symbol,
+        OrderSide side,
+        OrderType type,
+        decimal quantity,
+        decimal? price = null,
+        decimal? stopPrice = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var binanceSide = side == OrderSide.Buy 
+                ? Binance.Net.Enums.OrderSide.Buy 
+                : Binance.Net.Enums.OrderSide.Sell;
+
+            var binanceType = type switch
+            {
+                OrderType.Market => Binance.Net.Enums.SpotOrderType.Market,
+                OrderType.Limit => Binance.Net.Enums.SpotOrderType.Limit,
+                OrderType.StopLoss => Binance.Net.Enums.SpotOrderType.StopLoss,
+                OrderType.StopLossLimit => Binance.Net.Enums.SpotOrderType.StopLossLimit,
+                OrderType.TakeProfit => Binance.Net.Enums.SpotOrderType.TakeProfit,
+                OrderType.TakeProfitLimit => Binance.Net.Enums.SpotOrderType.TakeProfitLimit,
+                _ => Binance.Net.Enums.SpotOrderType.Market
+            };
+
+            var result = await _restClient.SpotApi.Trading.PlaceOrderAsync(
+                symbol,
+                binanceSide,
+                binanceType,
+                quantity,
+                price: price,
+                stopPrice: stopPrice,
+                ct: cancellationToken);
+
+            if (!result.Success)
+            {
+                _logger.LogError("Failed to place order: {Error}", result.Error?.Message);
+                return null;
+            }
+
+            var order = result.Data;
+            return new OrderResult
+            {
+                OrderId = order.Id,
+                Symbol = order.Symbol,
+                Side = side,
+                Type = type,
+                Quantity = order.Quantity,
+                Price = order.Price > 0 ? order.Price : order.Quantity > 0 ? order.QuoteQuantity / order.Quantity : 0m,
+                Status = MapOrderStatus(order.Status),
+                Timestamp = order.CreateTime,
+                Message = $"Order placed successfully"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error placing spot order");
+            return null;
+        }
+    }
+
+    private OrderStatus MapOrderStatus(Binance.Net.Enums.OrderStatus binanceStatus)
+    {
+        return binanceStatus switch
+        {
+            Binance.Net.Enums.OrderStatus.New => OrderStatus.New,
+            Binance.Net.Enums.OrderStatus.PartiallyFilled => OrderStatus.PartiallyFilled,
+            Binance.Net.Enums.OrderStatus.Filled => OrderStatus.Filled,
+            Binance.Net.Enums.OrderStatus.Canceled => OrderStatus.Canceled,
+            Binance.Net.Enums.OrderStatus.Rejected => OrderStatus.Rejected,
+            Binance.Net.Enums.OrderStatus.Expired => OrderStatus.Expired,
+            _ => OrderStatus.New
+        };
+    }
 }
 

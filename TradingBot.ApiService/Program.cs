@@ -34,11 +34,21 @@ builder.Services.AddSingleton<IBinanceRestClient>(_ =>
             opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
         });
     }
-    
+
     return new BinanceRestClient();
 });
 
 builder.Services.AddScoped<IBinanceService, BinanceService>();
+
+// Register trading services
+builder.Services.AddScoped<TradingBot.ApiService.Services.IHistoricalDataService, TradingBot.ApiService.Services.HistoricalDataService>();
+builder.Services.AddScoped<TradingBot.ApiService.Services.Backtesting.IBacktestingService, TradingBot.ApiService.Services.Backtesting.BacktestingService>();
+
+// Register trading strategies
+builder.Services.AddScoped<TradingBot.ApiService.Services.Strategy.MovingAverageCrossoverStrategy>();
+builder.Services.AddScoped<TradingBot.ApiService.Services.Strategy.RSIStrategy>();
+builder.Services.AddScoped<TradingBot.ApiService.Services.Strategy.MACDStrategy>();
+builder.Services.AddScoped<TradingBot.ApiService.Services.Strategy.CombinedStrategy>();
 
 var app = builder.Build();
 
@@ -50,33 +60,14 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-string[] summaries =
-    ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-app.MapGet("/", () => "API service is running. Navigate to /weatherforecast to see sample data.");
-
-app.MapGet("/weatherforecast", () =>
-    {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
-                new WeatherForecast
-                (
-                    DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                    Random.Shared.Next(-20, 55),
-                    summaries[Random.Shared.Next(summaries.Length)]
-                ))
-            .ToArray();
-        return forecast;
-    })
-    .WithName("GetWeatherForecast");
+app.MapGet("/", () => "Trading Bot API service is running. Visit /binance or /trading endpoints.");
 
 // Map Binance API endpoints
 app.MapBinanceEndpoints();
 
+// Map Trading endpoints
+app.MapTradingEndpoints();
+
 app.MapDefaultEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

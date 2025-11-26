@@ -1,5 +1,4 @@
 using Refit;
-using TradingBot.Web;
 using TradingBot.Web.Components;
 using TradingBot.Web.Services;
 
@@ -13,12 +12,8 @@ builder.AddRedisOutputCache("cache");
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
-{
-    // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-    // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-    client.BaseAddress = new("https+http://apiservice");
-});
+// Add Ant Design
+builder.Services.AddAntDesign();
 
 // Register Refit client for Binance API
 builder.Services
@@ -30,6 +25,14 @@ builder.Services
 
 // Register wrapper for better error handling in UI
 builder.Services.AddScoped<BinanceApiClientWrapper>();
+
+// Register Trading API client
+builder.Services
+    .AddRefitClient<ITradingApiClient>()
+    .ConfigureHttpClient(client =>
+    {
+        client.BaseAddress = new Uri("https+http://apiservice");
+    });
 
 var app = builder.Build();
 

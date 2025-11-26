@@ -28,6 +28,18 @@ public interface IBinanceService
     /// Get current exchange information and trading rules
     /// </summary>
     Task<bool> TestConnectionAsync(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Place a spot trading order
+    /// </summary>
+    Task<OrderResult?> PlaceSpotOrderAsync(
+        string symbol,
+        OrderSide side,
+        OrderType type,
+        decimal quantity,
+        decimal? price = null,
+        decimal? stopPrice = null,
+        CancellationToken cancellationToken = default);
 }
 
 
