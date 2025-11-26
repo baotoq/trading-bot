@@ -1,5 +1,7 @@
+using Refit;
 using TradingBot.Web;
 using TradingBot.Web.Components;
+using TradingBot.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +19,17 @@ builder.Services.AddHttpClient<WeatherApiClient>(client =>
     // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
     client.BaseAddress = new("https+http://apiservice");
 });
+
+// Register Refit client for Binance API
+builder.Services
+    .AddRefitClient<IBinanceApiClient>()
+    .ConfigureHttpClient(client =>
+    {
+        client.BaseAddress = new Uri("https+http://apiservice");
+    });
+
+// Register wrapper for better error handling in UI
+builder.Services.AddScoped<BinanceApiClientWrapper>();
 
 var app = builder.Build();
 

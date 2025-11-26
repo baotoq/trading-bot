@@ -1,3 +1,10 @@
+using Binance.Net;
+using Binance.Net.Clients;
+using Binance.Net.Interfaces.Clients;
+using CryptoExchange.Net.Authentication;
+using TradingBot.ApiService.Endpoints;
+using TradingBot.ApiService.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add service defaults & Aspire client integrations.
@@ -8,6 +15,30 @@ builder.Services.AddProblemDetails();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Add MediatR
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+// Configure Binance API
+var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;
+var apiSecret = builder.Configuration["Binance:ApiSecret"] ?? string.Empty;
+var testMode = builder.Configuration.GetValue<bool>("Binance:TestMode");
+
+builder.Services.AddSingleton<IBinanceRestClient>(_ =>
+{
+    if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
+    {
+        return new BinanceRestClient(opts =>
+        {
+            opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
+            opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+        });
+    }
+    
+    return new BinanceRestClient();
+});
+
+builder.Services.AddScoped<IBinanceService, BinanceService>();
 
 var app = builder.Build();
 
@@ -37,6 +68,9 @@ app.MapGet("/weatherforecast", () =>
         return forecast;
     })
     .WithName("GetWeatherForecast");
+
+// Map Binance API endpoints
+app.MapBinanceEndpoints();
 
 app.MapDefaultEndpoints();
 
