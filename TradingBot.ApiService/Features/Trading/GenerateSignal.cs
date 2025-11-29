@@ -82,7 +82,6 @@ public static class GenerateSignal
                 "ma crossover" => _serviceProvider.GetService<MovingAverageCrossoverStrategy>(),
                 "rsi" => _serviceProvider.GetService<RSIStrategy>(),
                 "macd" => _serviceProvider.GetService<MACDStrategy>(),
-                "combined multi-indicator" => _serviceProvider.GetService<CombinedStrategy>(),
                 _ => null
             };
         }

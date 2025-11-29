@@ -24,10 +24,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapGet("/", () => "Trading Bot API service is running. Visit /binance or /trading endpoints.");
+app.MapGet("/", () => "Trading Bot API service is running. Visit /binance, /trading, or /realtime endpoints.");
 app.MapDefaultEndpoints();
 
 app.MapBinanceEndpoints();
 app.MapTradingEndpoints();
+app.MapRealTimeTradingEndpoints();
 
 app.Run();

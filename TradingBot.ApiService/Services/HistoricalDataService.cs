@@ -28,7 +28,7 @@ public class HistoricalDataService : IHistoricalDataService
         try
         {
             var klineInterval = ParseInterval(interval);
-            
+
             var result = await _binanceClient.SpotApi.ExchangeData.GetKlinesAsync(
                 symbol,
                 klineInterval,

@@ -11,17 +11,18 @@ public interface IStrategy
     /// Strategy name
     /// </summary>
     string Name { get; }
-    
+
     /// <summary>
     /// Strategy description
     /// </summary>
     string Description { get; }
-    
+
     /// <summary>
     /// Analyze market data and generate trading signal
     /// </summary>
-    Task<TradingSignal> AnalyzeAsync(string symbol, List<Candle> candles, CancellationToken cancellationToken = default);
-    
+    Task<TradingSignal> AnalyzeAsync(string symbol, List<Candle> candles,
+        CancellationToken cancellationToken = default);
+
     /// <summary>
     /// Validate strategy parameters
     /// </summary>
@@ -35,7 +36,7 @@ public abstract class BaseStrategy : IStrategy
 {
     public abstract string Name { get; }
     public abstract string Description { get; }
-    
+
     protected readonly ILogger _logger;
 
     protected BaseStrategy(ILogger logger)
@@ -43,8 +44,9 @@ public abstract class BaseStrategy : IStrategy
         _logger = logger;
     }
 
-    public abstract Task<TradingSignal> AnalyzeAsync(string symbol, List<Candle> candles, CancellationToken cancellationToken = default);
-    
+    public abstract Task<TradingSignal> AnalyzeAsync(string symbol, List<Candle> candles,
+        CancellationToken cancellationToken = default);
+
     public virtual bool ValidateParameters(Dictionary<string, object> parameters)
     {
         return true;
@@ -114,9 +116,9 @@ public abstract class BaseStrategy : IStrategy
     /// Calculate MACD (Moving Average Convergence Divergence)
     /// </summary>
     protected (decimal macd, decimal signal, decimal histogram) CalculateMACD(
-        List<Candle> candles, 
-        int fastPeriod = 12, 
-        int slowPeriod = 26, 
+        List<Candle> candles,
+        int fastPeriod = 12,
+        int slowPeriod = 26,
         int signalPeriod = 9)
     {
         if (candles.Count < slowPeriod)
@@ -139,8 +141,8 @@ public abstract class BaseStrategy : IStrategy
     /// Calculate Bollinger Bands
     /// </summary>
     protected (decimal upper, decimal middle, decimal lower) CalculateBollingerBands(
-        List<Candle> candles, 
-        int period = 20, 
+        List<Candle> candles,
+        int period = 20,
         decimal stdDevMultiplier = 2)
     {
         if (candles.Count < period)
@@ -148,7 +150,7 @@ public abstract class BaseStrategy : IStrategy
 
         var closes = candles.TakeLast(period).Select(c => c.Close).ToList();
         var sma = closes.Average();
-        
+
         var sumOfSquares = closes.Sum(c => (c - sma) * (c - sma));
         var stdDev = (decimal)Math.Sqrt((double)(sumOfSquares / period));
 

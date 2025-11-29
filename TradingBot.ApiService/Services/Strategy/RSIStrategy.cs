@@ -28,8 +28,8 @@ public class RSIStrategy : BaseStrategy
     }
 
     public override async Task<TradingSignal> AnalyzeAsync(
-        string symbol, 
-        List<Candle> candles, 
+        string symbol,
+        List<Candle> candles,
         CancellationToken cancellationToken = default)
     {
         await Task.CompletedTask;
@@ -55,11 +55,7 @@ public class RSIStrategy : BaseStrategy
                 Confidence = 0.90m,
                 Strategy = Name,
                 Reason = $"Extremely oversold: RSI = {rsi:F2}",
-                Indicators = new Dictionary<string, object>
-                {
-                    ["RSI"] = rsi,
-                    ["Period"] = _period
-                }
+                Indicators = new Dictionary<string, object> { ["RSI"] = rsi, ["Period"] = _period }
             };
         }
 
@@ -74,11 +70,7 @@ public class RSIStrategy : BaseStrategy
                 Confidence = 0.75m,
                 Strategy = Name,
                 Reason = $"Oversold: RSI = {rsi:F2}",
-                Indicators = new Dictionary<string, object>
-                {
-                    ["RSI"] = rsi,
-                    ["Period"] = _period
-                }
+                Indicators = new Dictionary<string, object> { ["RSI"] = rsi, ["Period"] = _period }
             };
         }
 
@@ -93,11 +85,7 @@ public class RSIStrategy : BaseStrategy
                 Confidence = 0.90m,
                 Strategy = Name,
                 Reason = $"Extremely overbought: RSI = {rsi:F2}",
-                Indicators = new Dictionary<string, object>
-                {
-                    ["RSI"] = rsi,
-                    ["Period"] = _period
-                }
+                Indicators = new Dictionary<string, object> { ["RSI"] = rsi, ["Period"] = _period }
             };
         }
 
@@ -112,29 +100,21 @@ public class RSIStrategy : BaseStrategy
                 Confidence = 0.75m,
                 Strategy = Name,
                 Reason = $"Overbought: RSI = {rsi:F2}",
-                Indicators = new Dictionary<string, object>
-                {
-                    ["RSI"] = rsi,
-                    ["Period"] = _period
-                }
+                Indicators = new Dictionary<string, object> { ["RSI"] = rsi, ["Period"] = _period }
             };
         }
 
         // Neutral - Hold
         return CreateHoldSignal(
-            symbol, 
-            currentPrice, 
+            symbol,
+            currentPrice,
             $"Neutral: RSI = {rsi:F2}",
-            new Dictionary<string, object>
-            {
-                ["RSI"] = rsi,
-                ["Period"] = _period
-            });
+            new Dictionary<string, object> { ["RSI"] = rsi, ["Period"] = _period });
     }
 
     private TradingSignal CreateHoldSignal(
-        string symbol, 
-        decimal price, 
+        string symbol,
+        decimal price,
         string reason,
         Dictionary<string, object>? indicators = null)
     {

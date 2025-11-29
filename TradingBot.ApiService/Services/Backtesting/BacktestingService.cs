@@ -58,7 +58,7 @@ public class BacktestingService : IBacktestingService
         // Run backtest simulation
         var trades = new List<Trade>();
         var equityCurve = new List<EquityCurvePoint>();
-        
+
         decimal capital = initialCapital;
         decimal? position = null; // null = no position, value = entry price
         DateTime? entryTime = null;
@@ -105,7 +105,7 @@ public class BacktestingService : IBacktestingService
                 // Enter long position
                 position = currentCandle.Close;
                 entryTime = currentCandle.CloseTime;
-                
+
                 _logger.LogDebug(
                     "Entering long at {Price} on {Time}. Signal: {Signal}",
                     position, entryTime, signal.Reason);
@@ -170,7 +170,7 @@ public class BacktestingService : IBacktestingService
         var winningTrades = trades.Count(t => t.Profit > 0);
         var losingTrades = trades.Count(t => t.Profit < 0);
         var winRate = trades.Count > 0 ? (decimal)winningTrades / trades.Count * 100 : 0;
-        
+
         var totalProfit = trades.Where(t => t.Profit > 0).Sum(t => t.Profit);
         var totalLoss = Math.Abs(trades.Where(t => t.Profit < 0).Sum(t => t.Profit));
         var profitFactor = totalLoss > 0 ? totalProfit / totalLoss : totalProfit;
@@ -224,7 +224,6 @@ public class BacktestingService : IBacktestingService
             "ma crossover" => _serviceProvider.GetService<MovingAverageCrossoverStrategy>(),
             "rsi" => _serviceProvider.GetService<RSIStrategy>(),
             "macd" => _serviceProvider.GetService<MACDStrategy>(),
-            "combined multi-indicator" => _serviceProvider.GetService<CombinedStrategy>(),
             _ => null
         };
     }

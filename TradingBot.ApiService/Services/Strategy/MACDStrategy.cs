@@ -40,10 +40,11 @@ public class MACDStrategy : BaseStrategy
         }
 
         var (macd, signal, histogram) = CalculateMACD(candles, _fastPeriod, _slowPeriod, _signalPeriod);
-        
+
         // Calculate previous values to detect crossover
         var previousCandles = candles.SkipLast(1).ToList();
-        var (prevMacd, prevSignal, prevHistogram) = CalculateMACD(previousCandles, _fastPeriod, _slowPeriod, _signalPeriod);
+        var (prevMacd, prevSignal, prevHistogram) =
+            CalculateMACD(previousCandles, _fastPeriod, _slowPeriod, _signalPeriod);
 
         var currentPrice = candles.Last().Close;
 
@@ -65,10 +66,7 @@ public class MACDStrategy : BaseStrategy
                 Reason = $"Bullish MACD crossover: MACD ({macd:F4}) > Signal ({signal:F4})",
                 Indicators = new Dictionary<string, object>
                 {
-                    ["MACD"] = macd,
-                    ["Signal"] = signal,
-                    ["Histogram"] = histogram,
-                    ["Strength"] = strength
+                    ["MACD"] = macd, ["Signal"] = signal, ["Histogram"] = histogram, ["Strength"] = strength
                 }
             };
         }
@@ -87,10 +85,7 @@ public class MACDStrategy : BaseStrategy
                 Reason = $"Bearish MACD crossover: MACD ({macd:F4}) < Signal ({signal:F4})",
                 Indicators = new Dictionary<string, object>
                 {
-                    ["MACD"] = macd,
-                    ["Signal"] = signal,
-                    ["Histogram"] = histogram,
-                    ["Strength"] = strength
+                    ["MACD"] = macd, ["Signal"] = signal, ["Histogram"] = histogram, ["Strength"] = strength
                 }
             };
         }
@@ -103,10 +98,7 @@ public class MACDStrategy : BaseStrategy
             $"No crossover. Trend: {trend}, Histogram: {histogram:F4}",
             new Dictionary<string, object>
             {
-                ["MACD"] = macd,
-                ["Signal"] = signal,
-                ["Histogram"] = histogram,
-                ["Trend"] = trend
+                ["MACD"] = macd, ["Signal"] = signal, ["Histogram"] = histogram, ["Trend"] = trend
             });
     }
 

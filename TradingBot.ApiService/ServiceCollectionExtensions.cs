@@ -3,6 +3,9 @@ using Binance.Net.Clients;
 using Binance.Net.Interfaces.Clients;
 using CryptoExchange.Net.Authentication;
 using TradingBot.ApiService.Services;
+using TradingBot.ApiService.Services.Backtesting;
+using TradingBot.ApiService.Services.RealTimeTrading;
+using TradingBot.ApiService.Services.Strategy;
 
 namespace TradingBot.ApiService;
 
@@ -12,11 +15,11 @@ public static class ServiceCollectionExtensions
     {
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-        // Configure Binance API
         var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;
         var apiSecret = builder.Configuration["Binance:ApiSecret"] ?? string.Empty;
         var testMode = builder.Configuration.GetValue<bool>("Binance:TestMode");
 
+        builder.Services.AddSingleton<IRealTimeTradingService, RealTimeTradingService>();
         builder.Services.AddSingleton<IBinanceRestClient>(_ =>
         {
             if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
@@ -31,20 +34,25 @@ public static class ServiceCollectionExtensions
             return new BinanceRestClient();
         });
 
+        builder.Services.AddSingleton<IBinanceSocketClient>(_ =>
+        {
+            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
+            {
+                return new BinanceSocketClient(opts =>
+                {
+                    opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
+                    opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+                });
+            }
+
+            return new BinanceSocketClient();
+        });
+
         builder.Services.AddScoped<IBinanceService, BinanceService>();
-
-        // Register trading services
-        builder.Services
-            .AddScoped<IHistoricalDataService,
-                HistoricalDataService>();
-        builder.Services
-            .AddScoped<Services.Backtesting.IBacktestingService,
-                Services.Backtesting.BacktestingService>();
-
-        // Register trading strategies
-        builder.Services.AddScoped<Services.Strategy.MovingAverageCrossoverStrategy>();
-        builder.Services.AddScoped<Services.Strategy.RSIStrategy>();
-        builder.Services.AddScoped<Services.Strategy.MACDStrategy>();
-        builder.Services.AddScoped<Services.Strategy.CombinedStrategy>();
+        builder.Services.AddScoped<IHistoricalDataService, HistoricalDataService>();
+        builder.Services.AddScoped<IBacktestingService, BacktestingService>();
+        builder.Services.AddScoped<MovingAverageCrossoverStrategy>();
+        builder.Services.AddScoped<RSIStrategy>();
+        builder.Services.AddScoped<MACDStrategy>();
     }
 }
