@@ -1,6 +1,8 @@
 using Binance.Net.Enums;
 using Binance.Net.Interfaces.Clients;
 using CryptoExchange.Net.Objects.Sockets;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using TradingBot.ApiService.Models;
 using TradingBot.ApiService.Services.Strategy;
 
@@ -19,7 +21,7 @@ public class RealTimeTradingService : IRealTimeTradingService
     private readonly Dictionary<string, UpdateSubscription> _subscriptions = new();
     private readonly Dictionary<string, List<Candle>> _candleBuffers = new();
     private readonly Dictionary<string, TradingSignal> _latestSignals = new();
-    private readonly object _lock = new();
+    private readonly Lock _lock = new();
 
     public RealTimeTradingService(
         IBinanceSocketClient socketClient,
@@ -36,7 +38,7 @@ public class RealTimeTradingService : IRealTimeTradingService
     {
         try
         {
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 if (_activeSessions.ContainsKey(symbol))
                 {
@@ -83,7 +85,7 @@ public class RealTimeTradingService : IRealTimeTradingService
                 return false;
             }
 
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _activeSessions[symbol] = session;
                 _subscriptions[symbol] = subscription.Data;
@@ -107,7 +109,7 @@ public class RealTimeTradingService : IRealTimeTradingService
         {
             UpdateSubscription? subscription = null;
 
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 if (!_activeSessions.ContainsKey(symbol))
                 {
@@ -143,15 +145,15 @@ public class RealTimeTradingService : IRealTimeTradingService
 
     public List<MonitoringSession> GetActiveMonitoringSessions()
     {
-        lock (_lock)
+        using (_lock.EnterScope())
         {
-            return _activeSessions.Values.ToList();
+            return [.. _activeSessions.Values];
         }
     }
 
     public Dictionary<string, TradingSignal> GetLatestSignals()
     {
-        lock (_lock)
+        using (_lock.EnterScope())
         {
             return new Dictionary<string, TradingSignal>(_latestSignals);
         }
@@ -173,7 +175,7 @@ public class RealTimeTradingService : IRealTimeTradingService
 
             var candles = await historicalService.GetHistoricalDataAsync(symbol, interval, startTime, endTime);
 
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _candleBuffers[symbol] = candles.TakeLast(100).ToList();
             }
@@ -184,7 +186,7 @@ public class RealTimeTradingService : IRealTimeTradingService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error initializing candle buffer for {Symbol}", symbol);
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _candleBuffers[symbol] = new List<Candle>();
             }
@@ -201,6 +203,7 @@ public class RealTimeTradingService : IRealTimeTradingService
             // Only process closed candles for strategy analysis
             if (!klineData.Final)
             {
+                _logger.LogDebug("Ignoring incomplete candle for {Symbol}", symbol);
                 return; // Wait for candle to close
             }
 
@@ -216,7 +219,7 @@ public class RealTimeTradingService : IRealTimeTradingService
             };
 
             // Update candle buffer
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 if (!_candleBuffers.ContainsKey(symbol))
                 {
@@ -249,7 +252,7 @@ public class RealTimeTradingService : IRealTimeTradingService
         try
         {
             List<Candle> candles;
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 if (!_candleBuffers.ContainsKey(symbol) || _candleBuffers[symbol].Count == 0)
                 {
@@ -267,7 +270,7 @@ public class RealTimeTradingService : IRealTimeTradingService
             var signal = await strategy.AnalyzeAsync(symbol, candles);
 
             // Update session
-            lock (_lock)
+            using (_lock.EnterScope())
             {
                 _latestSignals[symbol] = signal;
 

@@ -111,34 +111,6 @@ public static class RealTimeTradingEndpoints
             })
             .WithName("GetLatestSignals")
             .WithSummary("Get latest trading signals for all monitored symbols");
-
-        // Quick start with defaults (Combined strategy, 15m interval)
-        group.MapPost("/monitor/quick-start/{symbol}", async (
-                string symbol,
-                [FromQuery] bool autoTrade,
-                [FromServices] IRealTimeTradingService tradingService) =>
-            {
-                var success = await tradingService.StartMonitoringAsync(
-                    symbol,
-                    "15m",
-                    "combined",
-                    autoTrade);
-
-                return success
-                    ? Results.Ok(new
-                    {
-                        success = true,
-                        message = $"Started monitoring {symbol} with Combined strategy (15m interval)",
-                        symbol,
-                        interval = "15m",
-                        strategy = "Combined Multi-Indicator",
-                        autoTrade
-                    })
-                    : Results.BadRequest(new { success = false, message = $"Failed to start monitoring {symbol}" });
-            })
-            .WithName("QuickStartMonitoring")
-            .WithSummary("Quick start monitoring with default settings")
-            .WithDescription("Starts monitoring with Combined strategy and 15-minute interval.");
     }
 }
 
@@ -146,7 +118,7 @@ public record StartMonitoringRequest
 {
     public string Symbol { get; init; } = "BTCUSDT";
     public string Interval { get; init; } = "15m";
-    public string Strategy { get; init; } = "combined";
+    public string Strategy { get; init; } = "RSI";
     public bool AutoTrade { get; init; } = false;
 }
 

@@ -1,14 +1,8 @@
 ### Real-Time Trading API Tests
 ### Make sure the application is running before executing these requests
 
-@host = http://localhost:5000
+@host = http://localhost:5459
 @host_https = https://localhost:5001
-
-### Quick Start - Monitor BTCUSDT with default settings (15m, Combined strategy)
-POST {{host}}/realtime/monitor/quick-start/BTCUSDT?autoTrade=false
-
-### Quick Start - Monitor ETHUSDT 
-POST {{host}}/realtime/monitor/quick-start/ETHUSDT?autoTrade=false
 
 ### Start Custom Monitoring - BTC with 1h interval
 POST {{host}}/realtime/monitor/start
@@ -16,42 +10,9 @@ Content-Type: application/json
 
 {
   "symbol": "BTCUSDT",
-  "interval": "1h",
-  "strategy": "combined",
+  "interval": "1m",
+  "strategy": "RSI",
   "autoTrade": false
-}
-
-### Start Monitoring - ETH with RSI strategy on 15m
-POST {{host}}/realtime/monitor/start
-Content-Type: application/json
-
-{
-  "symbol": "ETHUSDT",
-  "interval": "15m",
-  "strategy": "rsi",
-  "autoTrade": false
-}
-
-### Start Monitoring - BNB with MACD strategy on 4h
-POST {{host}}/realtime/monitor/start
-Content-Type: application/json
-
-{
-  "symbol": "BNBUSDT",
-  "interval": "4h",
-  "strategy": "macd",
-  "autoTrade": false
-}
-
-### Start Monitoring with AUTO-TRADING (Use with caution!)
-POST {{host}}/realtime/monitor/start
-Content-Type: application/json
-
-{
-  "symbol": "BTCUSDT",
-  "interval": "15m",
-  "strategy": "combined",
-  "autoTrade": true
 }
 
 ### Get All Active Monitoring Sessions
@@ -62,42 +23,3 @@ GET {{host}}/realtime/signals
 
 ### Stop Monitoring - BTCUSDT
 POST {{host}}/realtime/monitor/stop/BTCUSDT
-
-### Stop Monitoring - ETHUSDT
-POST {{host}}/realtime/monitor/stop/ETHUSDT
-
-### Stop Monitoring - BNBUSDT
-POST {{host}}/realtime/monitor/stop/BNBUSDT
-
-###
-### Example Workflow: Monitor multiple pairs and check signals
-###
-
-### Step 1: Start monitoring BTC, ETH, and BNB
-POST {{host}}/realtime/monitor/quick-start/BTCUSDT?autoTrade=false
-
-###
-POST {{host}}/realtime/monitor/quick-start/ETHUSDT?autoTrade=false
-
-###
-POST {{host}}/realtime/monitor/quick-start/BNBUSDT?autoTrade=false
-
-### Step 2: Check active sessions
-GET {{host}}/realtime/monitor/active
-
-### Step 3: Wait for signals (15 minutes for 15m interval)
-### Then check latest signals
-GET {{host}}/realtime/signals
-
-### Step 4: If you see a good signal, you can manually place an order
-### (See TradingBot.ApiService.http for order placement examples)
-
-### Step 5: Stop monitoring when done
-POST {{host}}/realtime/monitor/stop/BTCUSDT
-
-###
-POST {{host}}/realtime/monitor/stop/ETHUSDT
-
-###
-POST {{host}}/realtime/monitor/stop/BNBUSDT
-
