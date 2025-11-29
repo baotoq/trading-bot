@@ -1,6 +1,9 @@
 <Solution>
+  <Folder Name="/SolutionItems/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+  </Folder>
   <Project Path="TradingBot.ApiService/TradingBot.ApiService.csproj" />
   <Project Path="TradingBot.AppHost/TradingBot.AppHost.csproj" />
   <Project Path="TradingBot.ServiceDefaults/TradingBot.ServiceDefaults.csproj" />
-  <Project Path="TradingBot.Web/TradingBot.Web.csproj" />
 </Solution>
