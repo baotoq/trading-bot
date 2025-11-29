@@ -19,7 +19,7 @@ public class BinanceService : IBinanceService
         try
         {
             var result = await _restClient.SpotApi.ExchangeData.GetTickerAsync(symbol, cancellationToken);
-            
+
             if (!result.Success)
             {
                 _logger.LogError("Failed to get ticker for {Symbol}: {Error}", symbol, result.Error?.Message);
@@ -51,7 +51,7 @@ public class BinanceService : IBinanceService
         try
         {
             var result = await _restClient.SpotApi.ExchangeData.GetTickersAsync(ct: cancellationToken);
-            
+
             if (!result.Success)
             {
                 _logger.LogError("Failed to get all tickers: {Error}", result.Error?.Message);
@@ -77,12 +77,13 @@ public class BinanceService : IBinanceService
         }
     }
 
-    public async Task<BinanceOrderBookData?> GetOrderBookAsync(string symbol, int limit = 20, CancellationToken cancellationToken = default)
+    public async Task<BinanceOrderBookData?> GetOrderBookAsync(string symbol, int limit = 20,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             var result = await _restClient.SpotApi.ExchangeData.GetOrderBookAsync(symbol, limit, cancellationToken);
-            
+
             if (!result.Success)
             {
                 _logger.LogError("Failed to get order book for {Symbol}: {Error}", symbol, result.Error?.Message);
@@ -93,8 +94,11 @@ public class BinanceService : IBinanceService
             return new BinanceOrderBookData
             {
                 Symbol = symbol,
-                Bids = orderBook.Bids.Select(b => new OrderBookEntry { Price = b.Price, Quantity = b.Quantity }).ToList(),
-                Asks = orderBook.Asks.Select(a => new OrderBookEntry { Price = a.Price, Quantity = a.Quantity }).ToList(),
+                Bids =
+                    orderBook.Bids.Select(b => new OrderBookEntry { Price = b.Price, Quantity = b.Quantity })
+                        .ToList(),
+                Asks = orderBook.Asks.Select(a => new OrderBookEntry { Price = a.Price, Quantity = a.Quantity })
+                    .ToList(),
                 Timestamp = DateTime.UtcNow
             };
         }
@@ -110,7 +114,7 @@ public class BinanceService : IBinanceService
         try
         {
             var result = await _restClient.SpotApi.Account.GetAccountInfoAsync(ct: cancellationToken);
-            
+
             if (!result.Success)
             {
                 _logger.LogError("Failed to get account info: {Error}", result.Error?.Message);
@@ -122,12 +126,7 @@ public class BinanceService : IBinanceService
             {
                 Balances = account.Balances
                     .Where(b => b.Total > 0)
-                    .Select(b => new BinanceBalance
-                    {
-                        Asset = b.Asset,
-                        Free = b.Available,
-                        Locked = b.Locked
-                    })
+                    .Select(b => new BinanceBalance { Asset = b.Asset, Free = b.Available, Locked = b.Locked })
                     .ToList(),
                 CanTrade = account.CanTrade,
                 CanWithdraw = account.CanWithdraw,
@@ -167,8 +166,8 @@ public class BinanceService : IBinanceService
     {
         try
         {
-            var binanceSide = side == OrderSide.Buy 
-                ? Binance.Net.Enums.OrderSide.Buy 
+            var binanceSide = side == OrderSide.Buy
+                ? Binance.Net.Enums.OrderSide.Buy
                 : Binance.Net.Enums.OrderSide.Sell;
 
             var binanceType = type switch

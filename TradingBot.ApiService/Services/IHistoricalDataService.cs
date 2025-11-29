@@ -19,3 +19,4 @@ public interface IHistoricalDataService
         CancellationToken cancellationToken = default);
 }
 
+

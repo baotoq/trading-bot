@@ -69,3 +69,4 @@ public record EquityCurvePoint
     public decimal DrawdownPercentage { get; init; }
 }
 
+
