@@ -9,7 +9,7 @@ public interface IIntegrationEvent : INotification
 public record IntegrationEvent : IIntegrationEvent
 {
     public Guid Id { get; init; }
-    public DateTimeOffset OccurredOn { get; init; }
+    public DateTimeOffset OccurredOn { get; }
 
     public IntegrationEvent()
     {

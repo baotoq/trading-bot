@@ -1,6 +1,7 @@
 using TradingBot.ApiService.Application.IntegrationEvents;
-using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
+using TradingBot.ApiService.Infrastructure.BackgroundServices;
 
 namespace TradingBot.ApiService.Infrastructure;
 
@@ -11,15 +12,16 @@ public static class ServiceCollectionExtensions
         public void AddPersistentServices()
         {
             builder.AddNpgsqlDbContext<ApplicationDbContext>("tradingbotdb");
-            builder.Services.AddHostedService<EfCoreMigrationHostedService>();
-            builder.Services.AddHostedService<SyncHistoricalHostedService>();
+            builder.Services.AddHostedService<OutboxMessageDeliverBackgroundService>();
+            builder.Services.AddHostedService<SyncHistoricalBackgroundService>();
         }
 
         public void AddPubSubServices()
         {
-            var registry = builder.Services.AddPubSub();
+            builder.Services.AddPubSub()
+                .Subscribe<HistoricalDataSyncRequestedIntegrationEvent>();
 
-            registry.Subscribe<HistoricalDataSyncRequestedIntegrationEvent>();
+            builder.Services.AddOutboxEfCore<ApplicationDbContext>();
         }
     }
 }

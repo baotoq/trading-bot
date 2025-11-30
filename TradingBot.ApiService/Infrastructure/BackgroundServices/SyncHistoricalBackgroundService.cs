@@ -1,55 +1,29 @@
-using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
-using TradingBot.ApiService.Application;
 using TradingBot.ApiService.Application.IntegrationEvents;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub;
 using TradingBot.ApiService.Domain;
 
-namespace TradingBot.ApiService.Infrastructure;
+namespace TradingBot.ApiService.Infrastructure.BackgroundServices;
 
 /// <summary>
 /// Background service that syncs historical candlestick data to the database every 5 minutes
 /// This reduces the need to repeatedly fetch from the Binance API
 /// </summary>
-public class SyncHistoricalHostedService(
+public class SyncHistoricalBackgroundService(
     IServiceProvider services,
-    ILogger<SyncHistoricalHostedService> logger
-) : BackgroundService
+    ILogger<SyncHistoricalBackgroundService> logger
+) : TimeBackgroundService(logger)
 {
     private readonly string[] _intervals = ["1m", "5m", "15m", "4h"];
     private const string Symbol = "BTCUSDT";
     private readonly Lock _lock = new();
     private DateTime _lastSyncTime = DateTime.MinValue;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        logger.LogInformation("Starting Historical Data Sync Service for {Symbol}", Symbol);
+    protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(3);
 
-        // Wait for the database to be ready (after migration)
-        await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-
-        // Initial sync on startup
-        await SyncHistoricalDataAsync(stoppingToken);
-
-        // Periodic sync every 5 minutes
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
-
-        try
-        {
-            while (await timer.WaitForNextTickAsync(stoppingToken))
-            {
-                await SyncHistoricalDataAsync(stoppingToken);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            logger.LogInformation("Historical Data Sync Service is stopping");
-        }
-    }
-
-    private async Task SyncHistoricalDataAsync(CancellationToken cancellationToken)
+    protected override async Task ProcessAsync(CancellationToken cancellationToken)
     {
         using (_lock.EnterScope())
         {
@@ -69,12 +43,15 @@ public class SyncHistoricalHostedService(
                 Symbol, DateTime.UtcNow);
 
             await using var scope = services.CreateAsyncScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var bus = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
 
             var syncTasks = _intervals.Select(interval =>
                 bus.PublishAsync(new HistoricalDataSyncRequestedIntegrationEvent(Symbol, interval), cancellationToken));
 
             await Task.WhenAll(syncTasks);
+
+            await context.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Completed historical data sync for {Symbol}", Symbol);
         }

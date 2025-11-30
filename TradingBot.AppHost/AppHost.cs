@@ -29,7 +29,7 @@ try
     var postgresdb = postgres.AddDatabase("tradingbotdb");
 
 
-    var redis = builder.AddRedis("redis").WithRedisInsight();
+    var redis = builder.AddRedis("redis").WithDataVolume().WithRedisInsight();
     var redisHost= redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host);
     var redisPort = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port);
 
