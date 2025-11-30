@@ -1,10 +1,14 @@
 using TradingBot.ApiService;
-using TradingBot.ApiService.Endpoints;
 using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
-using TradingBot.ApiService.Persistent;
+using TradingBot.ApiService.Api;
+using TradingBot.ApiService.Application;
+using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.Infrastructure;
+using TradingBot.ServiceDefaults;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -32,6 +36,7 @@ try
     builder.AddServiceDefaults();
 
     builder.AddApplicationServices();
+    builder.AddPubSubServices();
     builder.AddPersistentServices();
 
     var app = builder.Build();
@@ -47,9 +52,12 @@ try
     app.MapGet("/", () => "Trading Bot API service is running. Visit /binance, /trading, or /realtime endpoints.");
     app.MapDefaultEndpoints();
 
+    app.MapPubSub();
+
     app.MapBinanceEndpoints();
     app.MapTradingEndpoints();
     app.MapRealTimeTradingEndpoints();
+    app.MapHistoricalDataEndpoints();
 
     await app.RunAsync();
 

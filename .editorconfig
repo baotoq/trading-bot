@@ -11,6 +11,7 @@ trim_trailing_whitespace = true
 
 # C# files
 [*.cs]
+max_line_length = 120
 
 #### Core EditorConfig Options ####
 

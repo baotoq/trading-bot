@@ -22,16 +22,33 @@ try
             "[{@t:HH:mm:ss} {@l:u3}{#if @tr is not null} ({substring(@tr,0,4)}:{substring(@sp,0,4)}){#end}] {@m}\n{@x}",
             theme: TemplateTheme.Code)));
 
-    var cache = builder.AddRedis("cache");
-
     var postgres = builder
         .AddPostgres("postgres")
         .WithDataVolume()
         .WithPgAdmin();;
     var postgresdb = postgres.AddDatabase("tradingbotdb");
 
+
+    var redis = builder.AddRedis("redis").WithRedisInsight();
+    var redisHost= redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host);
+    var redisPort = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port);
+
+    var pubSub = builder
+        .AddDaprPubSub("pubsub")
+        .WithMetadata("redisHost", ReferenceExpression.Create($"{redisHost}:{redisPort}"))
+        .WaitFor(redis);
+    if (redis.Resource.PasswordParameter is not null)
+    {
+        pubSub.WithMetadata("redisPassword", redis.Resource.PasswordParameter);
+    }
+
     var apiService = builder.AddProject<Projects.TradingBot_ApiService>("apiservice")
         .WithReference(postgresdb)
+        .WithReference(redis)
+        .WithDaprSidecar(sidecar =>
+        {
+            sidecar.WithReference(pubSub);
+        })
         .WithHttpHealthCheck("/health");
 
     builder.Build().Run();
