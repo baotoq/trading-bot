@@ -16,8 +16,6 @@ public static class ServiceCollectionExtensions
     {
         public void AddApplicationServices()
         {
-            builder.AddNpgsqlDbContext<ApplicationDbContext>("tradingbotdb");
-
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;

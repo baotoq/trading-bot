@@ -4,6 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
+using TradingBot.ApiService.Persistent;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -12,7 +13,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    Log.Information("Starting web application");
+    Log.Information("Starting application");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -30,9 +31,8 @@ try
     builder.Services.AddOpenApi();
     builder.AddServiceDefaults();
 
-
-
     builder.AddApplicationServices();
+    builder.AddPersistentServices();
 
     var app = builder.Build();
 
