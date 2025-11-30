@@ -1,34 +1,68 @@
 using TradingBot.ApiService;
 using TradingBot.ApiService.Endpoints;
+using Serilog;
+using Serilog.Events;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 
-var builder = WebApplication.CreateBuilder(args);
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
 
-// Add service defaults & Aspire client integrations.
-builder.AddServiceDefaults();
-
-// Add services to the container.
-builder.Services.AddProblemDetails();
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-
-builder.AddApplicationServices();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-app.UseExceptionHandler();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Log.Information("Starting web application");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddSerilog((services, lc) => lc
+        .ReadFrom.Configuration(builder.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.Console(new ExpressionTemplate(
+            // Include trace and span ids when present.
+            "[{@t:HH:mm:ss} {@l:u3}{#if @tr is not null} ({substring(@tr,0,4)}:{substring(@sp,0,4)}){#end}] {@m}\n{@x}",
+            theme: TemplateTheme.Code)));
+
+    builder.Services.AddSerilog();
+    builder.Services.AddProblemDetails();
+    builder.Services.AddOpenApi();
+    builder.AddServiceDefaults();
+
+
+
+    builder.AddApplicationServices();
+
+    var app = builder.Build();
+
+    app.UseSerilogRequestLogging();
+    app.UseExceptionHandler();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.MapOpenApi();
+    }
+
+    app.MapGet("/", () => "Trading Bot API service is running. Visit /binance, /trading, or /realtime endpoints.");
+    app.MapDefaultEndpoints();
+
+    app.MapBinanceEndpoints();
+    app.MapTradingEndpoints();
+    app.MapRealTimeTradingEndpoints();
+
+    await app.RunAsync();
+
+    Log.Information("Stopped cleanly");
+
+    return 0;
 }
-
-app.MapGet("/", () => "Trading Bot API service is running. Visit /binance, /trading, or /realtime endpoints.");
-app.MapDefaultEndpoints();
-
-app.MapBinanceEndpoints();
-app.MapTradingEndpoints();
-app.MapRealTimeTradingEndpoints();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "An unhandled exception occurred during bootstrapping");
+    return 1;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

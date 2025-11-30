@@ -9,11 +9,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\TradingBot.ApiService\TradingBot.ApiService.csproj"/>
+        <ProjectReference Include="..\TradingBot.ApiService\TradingBot.ApiService.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.1"/>
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.0.1" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.1" />
     </ItemGroup>
 
 </Project>
