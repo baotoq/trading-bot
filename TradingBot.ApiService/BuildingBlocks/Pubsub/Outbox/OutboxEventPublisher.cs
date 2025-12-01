@@ -1,19 +1,18 @@
-using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
-using TradingBot.ApiService.Infrastructure;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 
-public class OutboxEventDispatcher(DbContext context) : IEventDispatcher
+public class OutboxEventPublisher(IOutboxStore outboxStore) : IEventPublisher
 {
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IntegrationEvent
     {
-        await context.Set<OutboxMessage>().AddAsync(new OutboxMessage
+        await outboxStore.AddAsync(new OutboxMessage
         {
             EventName = typeof(T).Name,
-            Data = JsonSerializer.Serialize(@event),
+            Payload = JsonSerializer.Serialize(@event),
             ProcessingStatus = ProcessingStatus.Pending
         }, cancellationToken);
     }

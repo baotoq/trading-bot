@@ -3,6 +3,8 @@ using TradingBot.ApiService.Application.IntegrationEvents;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Infrastructure.BackgroundServices;
@@ -44,7 +46,7 @@ public class SyncHistoricalBackgroundService(
 
             await using var scope = services.CreateAsyncScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var bus = scope.ServiceProvider.GetRequiredService<IEventDispatcher>();
+            var bus = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
 
             var syncTasks = _intervals.Select(interval =>
                 bus.PublishAsync(new HistoricalDataSyncRequestedIntegrationEvent(Symbol, interval), cancellationToken));

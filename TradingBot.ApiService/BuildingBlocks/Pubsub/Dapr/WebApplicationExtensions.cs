@@ -2,6 +2,8 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 

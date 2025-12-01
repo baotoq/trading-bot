@@ -1,4 +1,6 @@
 using TradingBot.ApiService.BuildingBlocks.Pubsub;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
 namespace TradingBot.ApiService.Application.IntegrationEvents;
 

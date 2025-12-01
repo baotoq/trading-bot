@@ -31,8 +31,8 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<OutboxMessage>(entity =>
         {
-            entity.ToTable("OutboxMessages");
-            entity.Property(e => e.Data).HasColumnType("jsonb");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ProcessingStatus);
         });
     }
 }

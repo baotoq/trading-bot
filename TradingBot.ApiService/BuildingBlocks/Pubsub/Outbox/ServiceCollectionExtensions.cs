@@ -1,23 +1,45 @@
 using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.EfCore;
 
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
+
+public record OutboxProcessorOptions
+{
+}
 
 public static class ServiceCollectionExtensions
 {
     extension(IServiceCollection services)
     {
-        public IServiceCollection AddOutboxEfCore<T>() where T : DbContext
+        public IServiceCollection AddOutboxPublishingWithEfCore<TDbContext>(
+            Action<OutboxProcessorOptions>? configureOptions = null)
+            where TDbContext : DbContext
         {
-            services.AddHostedService(p => new OutboxMessageDeliverBackgroundService(
-                typeof(T),
-                p.GetRequiredService<IServiceProvider>(),
-                p.GetRequiredService<ILogger<OutboxMessageDeliverBackgroundService>>())
-            );
-            services.AddScoped<IEventDispatcher>(p => new OutboxEventDispatcher(p.GetRequiredService(typeof(T)) as DbContext));
-            services.AddScoped<IOutboxMessageProcessorService, OutboxMessageProcessorService>();
+            services.AddHostedService<OutboxMessageBackgroundService>();
+
+            services.AddScoped<IOutboxStore>(sp => new EfCoreOutboxStore(sp.GetRequiredService<TDbContext>()));
+            services.AddScoped<IEventPublisher, OutboxEventPublisher>();
+            services.AddScoped<IOutboxMessageProcessor, OutboxMessageProcessor>();
+
+            services.ConfigureOutboxOptions(configureOptions);
+
             return services;
+        }
+
+        private void ConfigureOutboxOptions(Action<OutboxProcessorOptions>? configureOptions)
+        {
+            if (configureOptions != null)
+            {
+                services.Configure(configureOptions);
+            }
+            else
+            {
+                services.Configure<OutboxProcessorOptions>(options => { });
+            }
         }
     }
 }

@@ -10,13 +10,20 @@ public class OutboxMessage : AuditedEntity
 {
     public Guid Id { get; init; }
     public required string EventName { get; init; }
-    public required string Data { get; init; }
+    public required string Payload { get; init; }
     public ProcessingStatus ProcessingStatus { get; set; } = ProcessingStatus.Pending;
-    public DateTimeOffset? PublishedAt { get; init; }
+    public DateTimeOffset? PublishedAt { get; set; }
+    public int RetryCount { get; set; } = 0;
 
     public OutboxMessage()
     {
         Id = Guid.CreateVersion7(CreatedAt);
+    }
+
+    public void MarkAsPublished()
+    {
+        ProcessingStatus = ProcessingStatus.Published;
+        PublishedAt = DateTimeOffset.UtcNow;
     }
 }
 

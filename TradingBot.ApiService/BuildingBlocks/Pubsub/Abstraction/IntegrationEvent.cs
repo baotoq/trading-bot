@@ -1,12 +1,16 @@
 using MediatR;
 
-namespace TradingBot.ApiService.BuildingBlocks.Pubsub;
+namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 
 public interface IIntegrationEvent : INotification
 {
 }
 
-public record IntegrationEvent : IIntegrationEvent
+public interface IIntegrationEventHandler<in TEvent> : INotificationHandler<TEvent> where TEvent : IntegrationEvent
+{
+}
+
+public abstract record IntegrationEvent : IIntegrationEvent
 {
     public Guid Id { get; init; }
     public DateTimeOffset OccurredOn { get; }
@@ -16,8 +20,4 @@ public record IntegrationEvent : IIntegrationEvent
         OccurredOn = DateTimeOffset.UtcNow;
         Id = Guid.CreateVersion7(OccurredOn);
     }
-}
-
-public interface IIntegrationEventHandler<in TEvent> : INotificationHandler<TEvent> where TEvent : IntegrationEvent
-{
 }
