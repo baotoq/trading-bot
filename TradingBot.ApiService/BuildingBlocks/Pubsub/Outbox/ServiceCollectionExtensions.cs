@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
                 p.GetRequiredService<ILogger<OutboxMessageDeliverBackgroundService>>())
             );
             services.AddScoped<IEventDispatcher>(p => new OutboxEventDispatcher(p.GetRequiredService(typeof(T)) as DbContext));
+            services.AddScoped<IOutboxMessageProcessorService, OutboxMessageProcessorService>();
             return services;
         }
     }
