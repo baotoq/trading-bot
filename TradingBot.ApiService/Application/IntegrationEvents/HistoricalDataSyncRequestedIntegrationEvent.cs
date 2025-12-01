@@ -10,8 +10,12 @@ namespace TradingBot.ApiService.Application.IntegrationEvents;
 
 public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 {
-    public string Symbol { get; init; }
-    public string Interval { get; init; }
+    public string Symbol { get; set; }
+    public string Interval { get; set; }
+
+    public HistoricalDataSyncRequestedIntegrationEvent()
+    {
+    }
 
     public HistoricalDataSyncRequestedIntegrationEvent(string symbol, string interval)
     {
@@ -70,6 +74,7 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
         // Convert to entities and upsert
         var entities = candles.Select(c => new Domain.Candle
         {
+            Id = Guid.CreateVersion7(c.OpenTime),
             Symbol = notification.Symbol,
             Interval = notification.Interval,
             OpenTime = c.OpenTime,
@@ -79,7 +84,6 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
             Close = c.Close,
             Volume = c.Volume,
             CloseTime = c.CloseTime,
-            UpdatedAt = DateTime.UtcNow
         }).ToList();
 
         // Upsert candles (update if exists, insert if not)

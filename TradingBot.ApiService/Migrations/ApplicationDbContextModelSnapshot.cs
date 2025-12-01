@@ -55,16 +55,14 @@ namespace TradingBot.ApiService.Migrations
 
                     b.HasIndex("ProcessingStatus");
 
-                    b.ToTable("Outbox");
+                    b.ToTable("OutboxMessages");
                 });
 
             modelBuilder.Entity("TradingBot.ApiService.Domain.Candle", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Close")
                         .HasColumnType("numeric");

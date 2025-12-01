@@ -33,6 +33,11 @@ public class PubSubRegistry
     public IReadOnlyList<PubSubSubscription> List() => _subscriptions;
 }
 
+public record DaprEvent
+{
+    public string Data { get; init; }
+}
+
 public static class WebApplicationExtensions
 {
     public static void MapPubSub(this WebApplication app)
@@ -50,7 +55,10 @@ public static class WebApplicationExtensions
 
         foreach (var sub in registry.List())
         {
-            app.MapPost(sub.Route, async(HttpContext context, [FromServices] IMediator mediator, [FromServices] ILoggerFactory loggerFactory) =>
+            app.MapPost(sub.Route, async (HttpContext context,
+                [FromServices] IMediator mediator,
+                [FromServices] JsonSerializerOptions jsonOptions,
+                [FromServices] ILoggerFactory loggerFactory) =>
             {
                 var logger = loggerFactory.CreateLogger(sub.EventType);
 
@@ -60,9 +68,15 @@ public static class WebApplicationExtensions
                 });
 
                 using var doc = await JsonDocument.ParseAsync(context.Request.Body);
-                var json = doc.RootElement;
 
-                if (json.Deserialize(sub.EventType) is not IntegrationEvent message)
+                var daprEvent = doc.RootElement.Deserialize<DaprEvent>(jsonOptions);
+                if (daprEvent == null)
+                {
+                    logger.LogInformation("Received null Dapr event");
+                    return Results.BadRequest();
+                }
+
+                if (JsonSerializer.Deserialize(daprEvent.Data, sub.EventType, jsonOptions) is not IntegrationEvent message)
                 {
                     logger.LogInformation("Received null or invalid message for event type {EventType}", sub.EventType.Name);
                     return Results.BadRequest();

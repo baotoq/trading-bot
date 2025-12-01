@@ -1,5 +1,6 @@
 using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
@@ -24,6 +25,11 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IOutboxStore>(sp => new EfCoreOutboxStore(sp.GetRequiredService<TDbContext>()));
             services.AddScoped<IEventPublisher, OutboxEventPublisher>();
             services.AddScoped<IOutboxMessageProcessor, OutboxMessageProcessor>();
+
+            services.AddSingleton(new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            });
 
             services.ConfigureOutboxOptions(configureOptions);
 

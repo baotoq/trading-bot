@@ -7,7 +7,7 @@ namespace TradingBot.ApiService.Infrastructure;
 public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<Candle> Candles => Set<Candle>();
-    public DbSet<OutboxMessage> Outbox => Set<OutboxMessage>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

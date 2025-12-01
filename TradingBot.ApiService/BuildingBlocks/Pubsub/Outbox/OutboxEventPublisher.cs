@@ -5,14 +5,14 @@ using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 
-public class OutboxEventPublisher(IOutboxStore outboxStore) : IEventPublisher
+public class OutboxEventPublisher(IOutboxStore outboxStore, JsonSerializerOptions jsonSerializerOptions) : IEventPublisher
 {
     public async Task PublishAsync<T>(T @event, CancellationToken cancellationToken = default) where T : IntegrationEvent
     {
         await outboxStore.AddAsync(new OutboxMessage
         {
             EventName = typeof(T).Name,
-            Payload = JsonSerializer.Serialize(@event),
+            Payload = JsonSerializer.Serialize(@event, jsonSerializerOptions),
             ProcessingStatus = ProcessingStatus.Pending
         }, cancellationToken);
     }

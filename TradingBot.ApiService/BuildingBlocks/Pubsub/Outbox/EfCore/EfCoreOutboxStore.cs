@@ -33,14 +33,14 @@ public class EfCoreOutboxStore(DbContext dbContext) : IOutboxStore
         }
     }
 
-    public async Task MarkAsFailAsync(Guid messageId, CancellationToken cancellationToken = default)
+    public async Task MarkAsAsync(Guid messageId, ProcessingStatus status, CancellationToken cancellationToken = default)
     {
         var message = await dbContext.Set<OutboxMessage>()
             .FindAsync([messageId], cancellationToken);
 
         if (message != null)
         {
-            message.ProcessingStatus = ProcessingStatus.Failed;
+            message.ProcessingStatus = status;
             await dbContext.SaveChangesAsync(cancellationToken);
         }
     }

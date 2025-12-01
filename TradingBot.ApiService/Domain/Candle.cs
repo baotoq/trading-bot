@@ -5,9 +5,8 @@ using TradingBot.ApiService.BuildingBlocks;
 
 namespace TradingBot.ApiService.Domain;
 
-public class Candle : AuditedEntity
+public class Candle : BaseEntity
 {
-    public long Id { get; set; }
     public required string Symbol { get; set; }
     public required string Interval { get; set; }
     public required DateTimeOffset OpenTime { get; set; }

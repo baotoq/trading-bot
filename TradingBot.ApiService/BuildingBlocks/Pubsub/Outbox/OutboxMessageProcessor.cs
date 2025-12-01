@@ -16,12 +16,13 @@ public class OutboxMessageProcessor(
             if (message.RetryCount >= 3)
             {
                 logger.LogWarning("Message {MessageId} exceeded max retry count, skipping", message.Id);
-                await outboxStore.MarkAsFailAsync(message.Id, cancellationToken);
+                await outboxStore.MarkAsAsync(message.Id, ProcessingStatus.Failed, cancellationToken);
                 return;
             }
 
             logger.LogInformation("Processing outbox message {EventName} {MessageId}", message.EventName, message.Id);
 
+            await outboxStore.MarkAsAsync(message.Id, ProcessingStatus.Processing, cancellationToken);
             await messageBroker.PublishAsync(message.EventName.ToLower(), message.Payload, cancellationToken);
             await outboxStore.MarkAsProcessedAsync(message.Id, cancellationToken);
 

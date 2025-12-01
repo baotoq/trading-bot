@@ -24,13 +24,18 @@ try
 
     var postgres = builder
         .AddPostgres("postgres")
+        .WithLifetime(ContainerLifetime.Persistent)
         .WithDataVolume()
-        .WithPgAdmin();;
+        .WithPgAdmin(c => c.WithLifetime(ContainerLifetime.Persistent).WithHostPort(5050));
+
     var postgresdb = postgres.AddDatabase("tradingbotdb");
 
+    var redis = builder.AddRedis("redis")
+        .WithLifetime(ContainerLifetime.Persistent)
+        .WithDataVolume()
+        .WithRedisInsight(c => c.WithLifetime(ContainerLifetime.Persistent).WithHostPort(5051));
 
-    var redis = builder.AddRedis("redis").WithDataVolume().WithRedisInsight();
-    var redisHost= redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host);
+    var redisHost = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Host);
     var redisPort = redis.Resource.PrimaryEndpoint.Property(EndpointProperty.Port);
 
     var pubSub = builder

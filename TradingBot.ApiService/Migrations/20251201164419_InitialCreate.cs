@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -16,8 +15,7 @@ namespace TradingBot.ApiService.Migrations
                 name: "Candles",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Symbol = table.Column<string>(type: "text", nullable: false),
                     Interval = table.Column<string>(type: "text", nullable: false),
                     OpenTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -36,7 +34,7 @@ namespace TradingBot.ApiService.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Outbox",
+                name: "OutboxMessages",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -50,7 +48,7 @@ namespace TradingBot.ApiService.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Outbox", x => x.Id);
+                    table.PrimaryKey("PK_OutboxMessages", x => x.Id);
                 });
 
             migrationBuilder.CreateIndex(
@@ -60,8 +58,8 @@ namespace TradingBot.ApiService.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Outbox_ProcessingStatus",
-                table: "Outbox",
+                name: "IX_OutboxMessages_ProcessingStatus",
+                table: "OutboxMessages",
                 column: "ProcessingStatus");
         }
 
@@ -72,7 +70,7 @@ namespace TradingBot.ApiService.Migrations
                 name: "Candles");
 
             migrationBuilder.DropTable(
-                name: "Outbox");
+                name: "OutboxMessages");
         }
     }
 }

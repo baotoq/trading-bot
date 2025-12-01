@@ -24,6 +24,7 @@ public class OutboxMessage : AuditedEntity
 public enum ProcessingStatus
 {
     Pending = 0,
-    Published = 1,
-    Failed = 2
+    Processing = 1,
+    Published = 2,
+    Failed = 3
 }

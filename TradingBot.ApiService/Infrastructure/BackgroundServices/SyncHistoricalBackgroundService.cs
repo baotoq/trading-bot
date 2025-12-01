@@ -18,7 +18,7 @@ public class SyncHistoricalBackgroundService(
     ILogger<SyncHistoricalBackgroundService> logger
 ) : TimeBackgroundService(logger)
 {
-    private readonly string[] _intervals = ["1m", "5m", "15m", "4h"];
+    private readonly string[] _intervals = ["1m", "5m", "15m", "1h", "4h"];
     private const string Symbol = "BTCUSDT";
     private readonly Lock _lock = new();
     private DateTime _lastSyncTime = DateTime.MinValue;
