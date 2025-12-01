@@ -1,37 +1,36 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.ComponentModel.DataAnnotations;
+using TradingBot.ApiService.BuildingBlocks;
 
 namespace TradingBot.ApiService.Domain;
 
-/// <summary>
-/// Entity for storing historical candlestick data in the database
-/// </summary>
-[Index(nameof(Symbol), nameof(Interval), nameof(OpenTime), IsUnique = true)]
-[Index(nameof(Symbol), nameof(Interval), nameof(OpenTime))]
-public class Candle
+public class Candle : AuditedEntity
 {
-    [Key] public long Id { get; set; }
-
-    [Required] [MaxLength(20)] public string Symbol { get; set; } = string.Empty;
-
-    [Required] [MaxLength(10)] public string Interval { get; set; } = string.Empty;
-
-    public DateTimeOffset OpenTime { get; set; }
-
+    public long Id { get; set; }
+    public required string Symbol { get; set; }
+    public required string Interval { get; set; }
+    public required DateTimeOffset OpenTime { get; set; }
     public decimal Open { get; set; }
-
     public decimal High { get; set; }
-
     public decimal Low { get; set; }
-
     public decimal Close { get; set; }
-
     public decimal Volume { get; set; }
-
     public DateTimeOffset CloseTime { get; set; }
-
-    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
-
-    public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;
 }
 
+public static class CandleModelBuilderExtensions
+{
+    extension(ModelBuilder modelBuilder)
+    {
+        public void AddCandleEntity(Action<EntityTypeBuilder<Candle>>? callback = null)
+        {
+            EntityTypeBuilder<Candle> outbox = modelBuilder.Entity<Candle>();
+
+            outbox.HasKey(p => p.Id);
+            outbox.HasIndex(p => new { p.Symbol, p.Interval, p.OpenTime }).IsUnique();
+
+            callback?.Invoke(outbox);
+        }
+    }
+}

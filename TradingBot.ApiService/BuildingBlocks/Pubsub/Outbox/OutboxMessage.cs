@@ -1,11 +1,5 @@
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 
-public class AuditedEntity
-{
-    public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
-    public DateTimeOffset? UpdatedAt { get; set; }
-}
-
 public class OutboxMessage : AuditedEntity
 {
     public Guid Id { get; init; }

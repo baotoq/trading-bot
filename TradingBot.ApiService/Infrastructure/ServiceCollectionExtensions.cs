@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
         public void AddPersistentServices()
         {
             builder.AddNpgsqlDbContext<ApplicationDbContext>("tradingbotdb");
-            builder.Services.AddHostedService<OutboxMessageBackgroundService>();
+            builder.Services.AddHostedService<DatabaseMigrationBackgroundService>();
             builder.Services.AddHostedService<SyncHistoricalBackgroundService>();
         }
 

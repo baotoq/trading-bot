@@ -7,7 +7,7 @@ public class OutboxMessageBackgroundService(
         ILogger<OutboxMessageBackgroundService> logger
     ) : TimeBackgroundService(logger)
 {
-    protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(1);
+    protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(5);
 
     protected override async Task ProcessAsync(CancellationToken cancellationToken)
     {

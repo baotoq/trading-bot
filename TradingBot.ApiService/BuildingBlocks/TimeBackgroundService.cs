@@ -20,7 +20,7 @@ public abstract class TimeBackgroundService(
             ["Interval"] = Interval
         });
 
-        logger.LogInformation("{BackgroundService} is starting with {Interval}", GetType().FullName, Interval);
+        logger.LogInformation("{BackgroundService} is starting with {Interval}", GetType().Name, Interval);
         using var timer = new PeriodicTimer(Interval);
 
         try
@@ -29,27 +29,27 @@ public abstract class TimeBackgroundService(
             {
                 try
                 {
-                    logger.LogDebug("{BackgroundService} started iteration", GetType().FullName);
+                    logger.LogInformation("{BackgroundService} started iteration", GetType().Name);
                     await ProcessAsync(stoppingToken);
-                    logger.LogDebug("{BackgroundService} completed iteration successfully", GetType().FullName);
+                    logger.LogInformation("{BackgroundService} completed iteration successfully", GetType().Name);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "{BackgroundService} error while processing", GetType().FullName);
+                    logger.LogError(ex, "{BackgroundService} error while processing", GetType().Name);
                 }
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("{BackgroundService} is stopping", GetType().FullName);
+            logger.LogInformation("{BackgroundService} is stopping", GetType().Name);
         }
         catch(Exception ex)
         {
-            logger.LogError(ex, "{BackgroundService} error occured", GetType().FullName);
+            logger.LogError(ex, "{BackgroundService} error occurred", GetType().Name);
         }
         finally
         {
-            logger.LogInformation("{BackgroundService} stopped", GetType().FullName);
+            logger.LogInformation("{BackgroundService} stopped", GetType().Name);
         }
     }
 }
