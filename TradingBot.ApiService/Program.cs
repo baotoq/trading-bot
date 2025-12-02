@@ -1,3 +1,4 @@
+using MediatR;
 using TradingBot.ApiService;
 using Serilog;
 using Serilog.Events;
@@ -48,10 +49,16 @@ try
         app.MapOpenApi();
     }
 
-    app.MapGet("/", () => "Trading Bot API service is running. Visit /binance, /trading, or /realtime endpoints.");
+    app.MapGet("/", () => "Trading Bot API service is running...");
+    app.MapPubSub();
+
     app.MapDefaultEndpoints();
 
-    app.MapPubSub();
+    app.MapGet("/backtest-ema-crossover", async (IMediator mediator) =>
+    {
+        var result = await mediator.Send(new RunEmaCrossoverStrategyCommand());
+        return Results.Ok(result);
+    });
 
     await app.RunAsync();
 

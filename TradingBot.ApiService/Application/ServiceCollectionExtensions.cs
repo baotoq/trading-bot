@@ -2,8 +2,6 @@ using Binance.Net;
 using Binance.Net.Clients;
 using Binance.Net.Interfaces.Clients;
 using CryptoExchange.Net.Authentication;
-using TradingBot.ApiService.Application.Services;
-using TradingBot.ApiService.Application.Services.Strategy;
 
 namespace TradingBot.ApiService.Application;
 
@@ -46,12 +44,6 @@ public static class ServiceCollectionExtensions
 
                 return new BinanceSocketClient();
             });
-
-            builder.Services.AddScoped<IBinanceService, BinanceService>();
-
-            builder.Services.AddScoped<MovingAverageCrossoverStrategy>();
-            builder.Services.AddScoped<RSIStrategy>();
-            builder.Services.AddScoped<MACDStrategy>();
         }
     }
 }

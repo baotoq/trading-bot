@@ -1,8 +1,6 @@
 using Binance.Net.Enums;
 using Binance.Net.Interfaces.Clients;
 using Microsoft.EntityFrameworkCore;
-using TradingBot.ApiService.Application.Models;
-using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks.Pubsub;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
