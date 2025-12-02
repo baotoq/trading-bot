@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
+
+namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.EfCore;
 
 public static class EfCoreOutboxMessageModelBuilderExtensions
 {

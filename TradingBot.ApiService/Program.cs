@@ -3,7 +3,6 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
-using TradingBot.ApiService.Api;
 using TradingBot.ApiService.Application;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
@@ -53,11 +52,6 @@ try
     app.MapDefaultEndpoints();
 
     app.MapPubSub();
-
-    app.MapBinanceEndpoints();
-    app.MapTradingEndpoints();
-    app.MapRealTimeTradingEndpoints();
-    app.MapHistoricalDataEndpoints();
 
     await app.RunAsync();
 

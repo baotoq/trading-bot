@@ -1,33 +1,26 @@
+using Binance.Net.Enums;
+using Binance.Net.Interfaces.Clients;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Models;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks.Pubsub;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
+using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
 
 namespace TradingBot.ApiService.Application.IntegrationEvents;
 
 public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 {
-    public string Symbol { get; set; }
-    public string Interval { get; set; }
-
-    public HistoricalDataSyncRequestedIntegrationEvent()
-    {
-    }
-
-    public HistoricalDataSyncRequestedIntegrationEvent(string symbol, string interval)
-    {
-        Symbol = symbol;
-        Interval = interval;
-    }
+    public string Symbol { get; init; }
+    public CandleInterval Interval { get; init; }
 }
 
 public class HistoricalDataSyncRequestedIntegrationEventHandler(
         ILogger<HistoricalDataSyncRequestedIntegrationEventHandler> logger,
         ApplicationDbContext context,
-        IHistoricalDataService historicalService
+        IBinanceRestClient binanceClient
     ) : IIntegrationEventHandler<HistoricalDataSyncRequestedIntegrationEvent>
 {
     public async Task Handle(HistoricalDataSyncRequestedIntegrationEvent notification, CancellationToken cancellationToken)
@@ -38,50 +31,39 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
             .OrderByDescending(c => c.OpenTime)
             .FirstOrDefaultAsync(cancellationToken);
 
-        DateTimeOffset startTime;
+        DateTimeOffset startTime = DateTimeOffset.Parse("2025-01-01T00:00:00Z");
         if (lastCandle != null)
         {
             // Fetch from the last candle we have (with 1-minute overlap to ensure no gaps)
             startTime = lastCandle.OpenTime.AddMinutes(-1);
-            logger.LogDebug("Last candle for {Symbol} {Interval}: {Time}",
+            logger.LogInformation("Last candle for {Symbol} {Interval}: {Time}",
                 notification.Symbol, notification.Interval, lastCandle.OpenTime);
         }
-        else
-        {
-            // Initial sync - get last 1000 candles (Binance API limit)
-            startTime = GetStartTimeForInterval(notification.Interval);
-            logger.LogInformation("Initial sync for {Symbol} {Interval} from {StartTime}",
-                notification.Symbol, notification.Interval, startTime);
-        }
 
-        var endTime = DateTime.UtcNow;
-
-        // Fetch historical data from Binance
-        var candles = await historicalService.GetHistoricalDataAsync(
+        var result = await binanceClient.SpotApi.ExchangeData.GetKlinesAsync(
             notification.Symbol,
-            notification.Interval,
-            startTime,
-            endTime,
-            limit: 1000,
-            cancellationToken: cancellationToken);
+            notification.Interval.ToKlineInterval(),
+            startTime.DateTime,
+            null,
+            1000,
+            cancellationToken);
 
-        if (candles.Count == 0)
+        if (!result.Success)
         {
-            logger.LogDebug("No new candles fetched for {Symbol} {Interval}", notification.Symbol, notification.Interval);
+            logger.LogError("Failed to fetch historical data: {Error}", result.Error?.Message);
             return;
         }
 
         // Convert to entities and upsert
-        var entities = candles.Select(c => new Domain.Candle
+        var entities = result.Data.Select(c => new Domain.Candle
         {
-            Id = Guid.CreateVersion7(c.OpenTime),
             Symbol = notification.Symbol,
             Interval = notification.Interval,
             OpenTime = c.OpenTime,
-            Open = c.Open,
-            High = c.High,
-            Low = c.Low,
-            Close = c.Close,
+            OpenPrice = c.OpenPrice,
+            HighPrice = c.HighPrice,
+            LowPrice = c.LowPrice,
+            ClosePrice = c.ClosePrice,
             Volume = c.Volume,
             CloseTime = c.CloseTime,
         }).ToList();
@@ -99,10 +81,10 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
             if (existing != null)
             {
                 // Update existing candle (in case it was incomplete/updated)
-                existing.Open = entity.Open;
-                existing.High = entity.High;
-                existing.Low = entity.Low;
-                existing.Close = entity.Close;
+                existing.OpenPrice = entity.OpenPrice;
+                existing.HighPrice = entity.HighPrice;
+                existing.LowPrice = entity.LowPrice;
+                existing.ClosePrice = entity.ClosePrice;
                 existing.Volume = entity.Volume;
                 existing.CloseTime = entity.CloseTime;
                 existing.UpdatedAt = DateTime.UtcNow;
@@ -118,19 +100,6 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
 
         logger.LogInformation(
             "Synced {Count} candles for {Symbol} {Interval} (saved {SavedCount} changes)",
-            candles.Count, notification.Symbol, notification.Interval, savedCount);
-    }
-
-    private static DateTime GetStartTimeForInterval(string interval)
-    {
-        // Calculate appropriate start time based on interval to get ~1000 candles
-        return interval switch
-        {
-            "1m" => DateTime.UtcNow.AddHours(-17), // ~1000 minutes
-            "5m" => DateTime.UtcNow.AddDays(-3.5), // ~1000 * 5 minutes
-            "15m" => DateTime.UtcNow.AddDays(-10), // ~1000 * 15 minutes
-            "4h" => DateTime.UtcNow.AddDays(-166), // ~1000 * 4 hours
-            _ => DateTime.UtcNow.AddDays(-30)
-        };
+            entities.Count, notification.Symbol, notification.Interval, savedCount);
     }
 }

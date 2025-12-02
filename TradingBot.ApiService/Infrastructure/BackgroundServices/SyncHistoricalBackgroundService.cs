@@ -18,7 +18,7 @@ public class SyncHistoricalBackgroundService(
     ILogger<SyncHistoricalBackgroundService> logger
 ) : TimeBackgroundService(logger)
 {
-    private readonly string[] _intervals = ["1m", "5m", "15m", "1h", "4h"];
+    private readonly CandleInterval[] _intervals = ["4h"];
     private const string Symbol = "BTCUSDT";
     private readonly Lock _lock = new();
     private DateTime _lastSyncTime = DateTime.MinValue;
@@ -41,15 +41,18 @@ public class SyncHistoricalBackgroundService(
 
         try
         {
-            logger.LogInformation("Starting historical data sync for {Symbol} at {Time}",
-                Symbol, DateTime.UtcNow);
+            logger.LogInformation("Starting historical data sync for {Symbol} at {Time}", Symbol, DateTime.UtcNow);
 
             await using var scope = services.CreateAsyncScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var bus = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
 
             var syncTasks = _intervals.Select(interval =>
-                bus.PublishAsync(new HistoricalDataSyncRequestedIntegrationEvent(Symbol, interval), cancellationToken));
+                bus.PublishAsync(new HistoricalDataSyncRequestedIntegrationEvent
+                {
+                    Symbol = Symbol,
+                    Interval = interval
+                }, cancellationToken));
 
             await Task.WhenAll(syncTasks);
 

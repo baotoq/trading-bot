@@ -12,10 +12,12 @@ public interface IIntegrationEventHandler<in TEvent> : INotificationHandler<TEve
 
 public abstract record IntegrationEvent : IIntegrationEvent
 {
-    public Guid Id { get; set; }
-    public DateTimeOffset OccurredOn { get; set; }
+    public Guid Id { get; init; }
+    public DateTimeOffset OccurredOn { get; init; }
 
     public IntegrationEvent()
     {
+        OccurredOn = DateTimeOffset.UtcNow;
+        Id = Guid.CreateVersion7(OccurredOn);
     }
 }

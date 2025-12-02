@@ -12,7 +12,7 @@ using TradingBot.ApiService.Infrastructure;
 namespace TradingBot.ApiService.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251201164419_InitialCreate")]
+    [Migration("20251202152942_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -63,11 +63,18 @@ namespace TradingBot.ApiService.Migrations
 
             modelBuilder.Entity("TradingBot.ApiService.Domain.Candle", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                    b.Property<string>("Symbol")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
-                    b.Property<decimal>("Close")
+                    b.Property<string>("Interval")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTimeOffset>("OpenTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("ClosePrice")
                         .HasColumnType("numeric");
 
                     b.Property<DateTimeOffset>("CloseTime")
@@ -76,25 +83,14 @@ namespace TradingBot.ApiService.Migrations
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<decimal>("High")
+                    b.Property<decimal>("HighPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("Interval")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<decimal>("Low")
+                    b.Property<decimal>("LowPrice")
                         .HasColumnType("numeric");
 
-                    b.Property<decimal>("Open")
+                    b.Property<decimal>("OpenPrice")
                         .HasColumnType("numeric");
-
-                    b.Property<DateTimeOffset>("OpenTime")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Symbol")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -102,10 +98,7 @@ namespace TradingBot.ApiService.Migrations
                     b.Property<decimal>("Volume")
                         .HasColumnType("numeric");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("Symbol", "Interval", "OpenTime")
-                        .IsUnique();
+                    b.HasKey("Symbol", "Interval", "OpenTime");
 
                     b.ToTable("Candles");
                 });

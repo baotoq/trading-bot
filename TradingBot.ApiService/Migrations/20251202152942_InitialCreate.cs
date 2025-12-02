@@ -15,22 +15,21 @@ namespace TradingBot.ApiService.Migrations
                 name: "Candles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Symbol = table.Column<string>(type: "text", nullable: false),
-                    Interval = table.Column<string>(type: "text", nullable: false),
+                    Symbol = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Interval = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     OpenTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Open = table.Column<decimal>(type: "numeric", nullable: false),
-                    High = table.Column<decimal>(type: "numeric", nullable: false),
-                    Low = table.Column<decimal>(type: "numeric", nullable: false),
-                    Close = table.Column<decimal>(type: "numeric", nullable: false),
-                    Volume = table.Column<decimal>(type: "numeric", nullable: false),
                     CloseTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    OpenPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    ClosePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    HighPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    LowPrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    Volume = table.Column<decimal>(type: "numeric", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Candles", x => x.Id);
+                    table.PrimaryKey("PK_Candles", x => new { x.Symbol, x.Interval, x.OpenTime });
                 });
 
             migrationBuilder.CreateTable(
@@ -50,12 +49,6 @@ namespace TradingBot.ApiService.Migrations
                 {
                     table.PrimaryKey("PK_OutboxMessages", x => x.Id);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Candles_Symbol_Interval_OpenTime",
-                table: "Candles",
-                columns: new[] { "Symbol", "Interval", "OpenTime" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OutboxMessages_ProcessingStatus",
