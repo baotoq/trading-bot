@@ -1,12 +1,11 @@
-using MediatR;
 using TradingBot.ApiService;
 using Serilog;
-using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using TradingBot.ApiService.Application;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.Endpoints;
 using TradingBot.ApiService.Infrastructure;
 using TradingBot.ServiceDefaults;
 
@@ -52,13 +51,12 @@ try
     app.MapGet("/", () => "Trading Bot API service is running...");
     app.MapPubSub();
 
-    app.MapDefaultEndpoints();
+    // Map all endpoints
+    app.MapTradingEndpoints();
+    app.MapMarketEndpoints();
+    app.MapBacktestEndpoints();
 
-    app.MapGet("/backtest-ema-crossover", async (IMediator mediator) =>
-    {
-        var result = await mediator.Send(new RunEmaCrossoverStrategyCommand());
-        return Results.Ok(result);
-    });
+    app.MapDefaultEndpoints();
 
     await app.RunAsync();
 
