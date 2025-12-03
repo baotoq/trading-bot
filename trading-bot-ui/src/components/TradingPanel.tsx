@@ -73,83 +73,99 @@ export default function TradingPanel() {
         onFinish={handleExecuteTrade}
         initialValues={{ accountEquity: 10000, riskPercent: 1 }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Form.Item
-            label="Symbol"
-            name="symbol"
-            rules={[{ required: true, message: "Please enter a symbol" }]}
-          >
-            <Input placeholder="e.g., BTCUSDT" size="large" />
-          </Form.Item>
-          <Form.Item label=" ">
-            <Button
-              icon={<LineChartOutlined />}
-              onClick={() => handleAnalyze(form.getFieldValue("symbol"))}
-              loading={analyzing}
-              block
-              size="large"
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Form.Item
+              label="Symbol"
+              name="symbol"
+              rules={[{ required: true, message: "Please enter a symbol" }]}
             >
-              Analyze Signal
-            </Button>
-          </Form.Item>
+              <Input placeholder="e.g., BTCUSDT" size="large" />
+            </Form.Item>
+          </div>
+          <div className="flex-1">
+            <Form.Item label=" ">
+              <Button
+                icon={<LineChartOutlined />}
+                onClick={() => handleAnalyze(form.getFieldValue("symbol"))}
+                loading={analyzing}
+                block
+                size="large"
+              >
+                Analyze Signal
+              </Button>
+            </Form.Item>
+          </div>
         </div>
 
         {signal && (
           <Card className="mb-4 bg-gray-50" size="small">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Statistic
-                title="Signal"
-                value={signal.signal}
-                valueStyle={{ color: getSignalColor(signal.signal) === "green" ? "#3f8600" : getSignalColor(signal.signal) === "red" ? "#cf1322" : undefined }}
-              />
-              <Statistic
-                title="Confidence"
-                value={signal.confidence}
-                precision={2}
-                suffix="%"
-              />
-              <Statistic
-                title="Price"
-                value={signal.price}
-                precision={2}
-                prefix="$"
-              />
-              <Statistic
-                title="RSI"
-                value={signal.indicators.rsi || 0}
-                precision={2}
-              />
+            <div className="flex flex-wrap gap-4">
+              <div className="flex-1 min-w-[150px]">
+                <Statistic
+                  title="Signal"
+                  value={signal.signal}
+                  valueStyle={{ color: getSignalColor(signal.signal) === "green" ? "#3f8600" : getSignalColor(signal.signal) === "red" ? "#cf1322" : undefined }}
+                />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic
+                  title="Confidence"
+                  value={signal.confidence}
+                  precision={2}
+                  suffix="%"
+                />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic
+                  title="Price"
+                  value={signal.price}
+                  precision={2}
+                  prefix="$"
+                />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic
+                  title="RSI"
+                  value={signal.indicators.rsi || 0}
+                  precision={2}
+                />
+              </div>
             </div>
           </Card>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Form.Item
-            label="Account Equity"
-            name="accountEquity"
-            rules={[{ required: true, message: "Please enter account equity" }]}
-          >
-            <InputNumber
-              prefix="$"
-              min={0}
-              className="w-full"
-              size="large"
-              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Risk Percent"
-            name="riskPercent"
-            rules={[{ required: true, message: "Please enter risk percent" }]}
-          >
-            <InputNumber
-              min={0.1}
-              max={10}
-              suffix="%"
-              className="w-full"
-              size="large"
-            />
-          </Form.Item>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <Form.Item
+              label="Account Equity"
+              name="accountEquity"
+              rules={[{ required: true, message: "Please enter account equity" }]}
+            >
+              <InputNumber
+                prefix="$"
+                min={0}
+                className="w-full"
+                size="large"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              />
+            </Form.Item>
+          </div>
+          <div className="flex-1">
+            <Form.Item
+              label="Risk Percent"
+              name="riskPercent"
+              rules={[{ required: true, message: "Please enter risk percent" }]}
+            >
+              <InputNumber
+                min={0.1}
+                max={10}
+                suffix="%"
+                className="w-full"
+                size="large"
+              />
+            </Form.Item>
+          </div>
         </div>
 
         <Form.Item>
@@ -171,11 +187,19 @@ export default function TradingPanel() {
         >
           <p>{tradeResult.message}</p>
           {tradeResult.trade && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3">
-              <Statistic title="Side" value={tradeResult.trade.side} />
-              <Statistic title="Quantity" value={tradeResult.trade.quantity} precision={4} />
-              <Statistic title="Price" value={tradeResult.trade.price} precision={2} prefix="$" />
-              <Statistic title="Symbol" value={tradeResult.trade.symbol} />
+            <div className="flex flex-wrap gap-4 mt-3">
+              <div className="flex-1 min-w-[150px]">
+                <Statistic title="Side" value={tradeResult.trade.side} />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic title="Quantity" value={tradeResult.trade.quantity} precision={4} />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic title="Price" value={tradeResult.trade.price} precision={2} prefix="$" />
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <Statistic title="Symbol" value={tradeResult.trade.symbol} />
+              </div>
             </div>
           )}
         </Card>
