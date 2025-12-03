@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Input, Button, message, Statistic, Row, Col, Tag } from "antd";
+import { Card, Input, Button, message, Statistic } from "antd";
 import { FundOutlined, SearchOutlined } from "@ant-design/icons";
 import { tradingApi } from "@/lib/api";
 import type { MarketCondition } from "@/types";
@@ -66,43 +66,37 @@ export default function MarketAnalysis() {
 
       {condition && (
         <div className="space-y-4">
-          <Row gutter={16}>
-            <Col xs={24} md={8}>
-              <Card className="text-center">
-                <Statistic
-                  title="Market Condition"
-                  value={condition.condition}
-                  valueStyle={{
-                    color:
-                      getConditionColor(condition.condition) === "green"
-                        ? "#3f8600"
-                        : getConditionColor(condition.condition) === "red"
-                        ? "#cf1322"
-                        : "#fa8c16",
-                  }}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card className="text-center">
-                <Statistic
-                  title="Trading Status"
-                  value={condition.allowTrading ? "ALLOWED" : "RESTRICTED"}
-                  valueStyle={{ color: condition.allowTrading ? "#3f8600" : "#cf1322" }}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card className="text-center">
-                <Statistic
-                  title="Volatility"
-                  value={condition.volatility}
-                  precision={2}
-                  suffix="%"
-                />
-              </Card>
-            </Col>
-          </Row>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="text-center">
+              <Statistic
+                title="Market Condition"
+                value={condition.condition}
+                valueStyle={{
+                  color:
+                    getConditionColor(condition.condition) === "green"
+                      ? "#3f8600"
+                      : getConditionColor(condition.condition) === "red"
+                      ? "#cf1322"
+                      : "#fa8c16",
+                }}
+              />
+            </Card>
+            <Card className="text-center">
+              <Statistic
+                title="Trading Status"
+                value={condition.allowTrading ? "ALLOWED" : "RESTRICTED"}
+                valueStyle={{ color: condition.allowTrading ? "#3f8600" : "#cf1322" }}
+              />
+            </Card>
+            <Card className="text-center">
+              <Statistic
+                title="Volatility"
+                value={condition.volatility}
+                precision={2}
+                suffix="%"
+              />
+            </Card>
+          </div>
 
           <Card size="small" className="bg-gray-50">
             <p className="mb-2">
