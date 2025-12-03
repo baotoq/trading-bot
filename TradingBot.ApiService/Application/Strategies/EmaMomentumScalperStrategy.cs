@@ -1,4 +1,6 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.Application.Queries;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
@@ -9,7 +11,7 @@ public class EmaMomentumScalperStrategy : IStrategy
 {
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
-    private readonly IMarketAnalysisService _marketAnalysisService;
+    private readonly IMediator _mediator;
     private readonly ILogger<EmaMomentumScalperStrategy> _logger;
 
     public string Name => "EMA Momentum Scalper";
@@ -17,12 +19,12 @@ public class EmaMomentumScalperStrategy : IStrategy
     public EmaMomentumScalperStrategy(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
-        IMarketAnalysisService marketAnalysisService,
+        IMediator mediator,
         ILogger<EmaMomentumScalperStrategy> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
-        _marketAnalysisService = marketAnalysisService;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -41,8 +43,8 @@ public class EmaMomentumScalperStrategy : IStrategy
         try
         {
             // PHASE 1: Check trend filter on 15m chart
-            var trendAlignedLong = await _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, cancellationToken);
-            var trendAlignedShort = await _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Short, cancellationToken);
+            var trendAlignedLong = await _mediator.Send(new CheckTrendAlignmentQuery(symbol, TradeSide.Long), cancellationToken);
+            var trendAlignedShort = await _mediator.Send(new CheckTrendAlignmentQuery(symbol, TradeSide.Short), cancellationToken);
 
             if (!trendAlignedLong && !trendAlignedShort)
             {

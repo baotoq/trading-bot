@@ -9,7 +9,6 @@ public class RsiDivergenceStrategy : IStrategy
 {
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
-    private readonly IMarketAnalysisService _marketAnalysisService;
     private readonly ILogger<RsiDivergenceStrategy> _logger;
 
     public string Name => "RSI Divergence";
@@ -17,12 +16,10 @@ public class RsiDivergenceStrategy : IStrategy
     public RsiDivergenceStrategy(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
-        IMarketAnalysisService marketAnalysisService,
         ILogger<RsiDivergenceStrategy> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
-        _marketAnalysisService = marketAnalysisService;
         _logger = logger;
     }
 

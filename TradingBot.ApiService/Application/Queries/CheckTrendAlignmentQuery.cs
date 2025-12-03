@@ -1,27 +1,34 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
 
-namespace TradingBot.ApiService.Application.Services;
+namespace TradingBot.ApiService.Application.Queries;
 
-public class MarketAnalysisService : IMarketAnalysisService
+public record CheckTrendAlignmentQuery(Symbol Symbol, TradeSide Side) : IRequest<bool>;
+
+public class CheckTrendAlignmentQueryHandler : IRequestHandler<CheckTrendAlignmentQuery, bool>
 {
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
-    private readonly ILogger<MarketAnalysisService> _logger;
+    private readonly ILogger<CheckTrendAlignmentQueryHandler> _logger;
 
-    public MarketAnalysisService(
+    public CheckTrendAlignmentQueryHandler(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
-        ILogger<MarketAnalysisService> logger)
+        ILogger<CheckTrendAlignmentQueryHandler> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
         _logger = logger;
     }
 
-    public async Task<bool> CheckTrendAlignmentAsync(Symbol symbol, TradeSide side, CancellationToken cancellationToken = default)
+    public async Task<bool> Handle(CheckTrendAlignmentQuery request, CancellationToken cancellationToken)
     {
+        var symbol = request.Symbol;
+        var side = request.Side;
+
         _logger.LogInformation("Checking trend alignment for {Symbol} on {Side} side", symbol, side);
 
         try

@@ -2,6 +2,7 @@ using Binance.Net;
 using Binance.Net.Clients;
 using Binance.Net.Interfaces.Clients;
 using CryptoExchange.Net.Authentication;
+using TradingBot.ApiService.Application.Options;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
 
@@ -14,9 +15,10 @@ public static class ServiceCollectionExtensions
         // Add MediatR for commands and queries
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
+        builder.AddApplicationOptions();
+
         // Register trading services
         builder.Services.AddScoped<ITechnicalIndicatorService, TechnicalIndicatorService>();
-        builder.Services.AddScoped<IMarketAnalysisService, MarketAnalysisService>();
         builder.Services.AddScoped<IPositionCalculatorService, PositionCalculatorService>();
         builder.Services.AddScoped<IRiskManagementService, RiskManagementService>();
         builder.Services.AddScoped<IBinanceService, BinanceService>();

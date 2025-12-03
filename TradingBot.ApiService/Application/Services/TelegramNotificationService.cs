@@ -1,8 +1,18 @@
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
+using TradingBot.ApiService.Application.Options;
 using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Application.Services;
+
+public interface ITelegramNotificationService
+{
+    Task SendSignalNotificationAsync(TradingSignal signal, CancellationToken cancellationToken = default);
+    Task SendTradeExecutionNotificationAsync(string message, CancellationToken cancellationToken = default);
+    Task SendErrorNotificationAsync(string error, CancellationToken cancellationToken = default);
+    Task SendMessageAsync(string message, CancellationToken cancellationToken = default);
+}
 
 public class TelegramNotificationService : ITelegramNotificationService
 {
@@ -11,16 +21,16 @@ public class TelegramNotificationService : ITelegramNotificationService
     private readonly ILogger<TelegramNotificationService> _logger;
     private readonly bool _isEnabled;
 
-    public TelegramNotificationService(IConfiguration configuration, ILogger<TelegramNotificationService> logger)
+    public TelegramNotificationService(
+        IOptions<TelegramOptions> options,
+        ILogger<TelegramNotificationService> logger)
     {
         _logger = logger;
+        var telegramOptions = options.Value;
 
-        var botToken = configuration["Telegram:BotToken"];
-        var chatIdStr = configuration["Telegram:ChatId"];
-
-        if (!string.IsNullOrEmpty(botToken) && !string.IsNullOrEmpty(chatIdStr) && long.TryParse(chatIdStr, out var chatId))
+        if (telegramOptions.IsEnabled && long.TryParse(telegramOptions.ChatId, out var chatId))
         {
-            _botClient = new TelegramBotClient(botToken);
+            _botClient = new TelegramBotClient(telegramOptions.BotToken);
             _chatId = chatId;
             _isEnabled = true;
             _logger.LogInformation("Telegram notification service initialized successfully");

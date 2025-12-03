@@ -9,7 +9,6 @@ public class BollingerSqueezeStrategy : IStrategy
 {
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
-    private readonly IMarketAnalysisService _marketAnalysisService;
     private readonly ILogger<BollingerSqueezeStrategy> _logger;
 
     public string Name => "Bollinger Squeeze";
@@ -17,12 +16,10 @@ public class BollingerSqueezeStrategy : IStrategy
     public BollingerSqueezeStrategy(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
-        IMarketAnalysisService marketAnalysisService,
         ILogger<BollingerSqueezeStrategy> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
-        _marketAnalysisService = marketAnalysisService;
         _logger = logger;
     }
 

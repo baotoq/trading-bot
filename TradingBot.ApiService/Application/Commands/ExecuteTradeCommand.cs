@@ -29,7 +29,6 @@ public class ExecuteTradeResult
 public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, ExecuteTradeResult>
 {
     private readonly IMediator _mediator;
-    private readonly IMarketAnalysisService _marketAnalysisService;
     private readonly IStrategy _strategy;
     private readonly IPositionCalculatorService _positionCalculatorService;
     private readonly IRiskManagementService _riskManagementService;
@@ -39,7 +38,6 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
 
     public ExecuteTradeCommandHandler(
         IMediator mediator,
-        IMarketAnalysisService marketAnalysisService,
         EmaMomentumScalperStrategy strategy,
         IPositionCalculatorService positionCalculatorService,
         IRiskManagementService riskManagementService,
@@ -48,7 +46,6 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
         ILogger<ExecuteTradeCommandHandler> logger)
     {
         _mediator = mediator;
-        _marketAnalysisService = marketAnalysisService;
         _strategy = strategy;
         _positionCalculatorService = positionCalculatorService;
         _riskManagementService = riskManagementService;
