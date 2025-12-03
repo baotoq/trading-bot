@@ -185,9 +185,10 @@ Confidence: 95.0%
 🛡️ Risk Management:
   • Entry: $45,250.00
   • Stop Loss: $44,800.00
-  • TP1: $45,800.00
-  • TP2: $46,400.00
-  • TP3: $47,000.00
+  • Risk: $450.00 (0.99%)
+  • TP1: $45,925.00 (1.5R)
+  • TP2: $46,375.00 (2.5R)
+  • TP3: $47,050.00 (4.0R)
 
 📝 Reason:
 ✓ Bullish EMA crossover | ✓ MACD bullish | ✓ RSI momentum confirmed (65.42) | ✓ High volume (1.85x avg) | ✓ Breakout above swing high ($45,100.00) | ✓ Price above Bollinger middle band
@@ -270,6 +271,35 @@ Currently available strategies:
   - Volume and Bollinger Bands for additional confirmation
 
 More strategies can be added by implementing the `IStrategy` interface.
+
+## Risk Management
+
+All signals include comprehensive risk management levels:
+
+### Stop Loss Calculation
+- **Long Positions**: Placed below the swing low or 2% below entry (whichever is closer to current price)
+- **Short Positions**: Placed above recent swing or 2% above entry (whichever is closer to current price)
+
+### Take Profit Levels
+Three take profit targets are calculated using risk:reward ratios:
+- **TP1**: 1.5R (1.5x the risk amount)
+- **TP2**: 2.5R (2.5x the risk amount)
+- **TP3**: 4.0R (4.0x the risk amount)
+
+### Example
+If entry is $45,250 and stop loss is $44,800:
+- Risk = $450 (0.99%)
+- TP1 = $45,250 + ($450 × 1.5) = $45,925 (1.5R)
+- TP2 = $45,250 + ($450 × 2.5) = $46,375 (2.5R)
+- TP3 = $45,250 + ($450 × 4.0) = $47,050 (4.0R)
+
+### Position Sizing Recommendation
+While the signal provides entry, SL, and TP levels, you should calculate your position size based on:
+- Your account equity
+- Maximum risk per trade (typically 1-2% of account)
+- Distance from entry to stop loss
+
+**Formula**: Position Size = (Account Equity × Risk %) / (Entry Price - Stop Loss)
 
 ## Troubleshooting
 
