@@ -33,6 +33,12 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<EmaMomentumScalperStrategy>();
         builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
 
+        builder.Services.AddScoped<BtcSpotDcaStrategy>();
+        builder.Services.AddScoped<IStrategy, BtcSpotDcaStrategy>();
+
+        builder.Services.AddScoped<BtcSpotTrendStrategy>();
+        builder.Services.AddScoped<IStrategy, BtcSpotTrendStrategy>();
+
         // Configure Binance API clients
         var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;
         var apiSecret = builder.Configuration["Binance:ApiSecret"] ?? string.Empty;
