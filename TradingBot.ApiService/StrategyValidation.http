@@ -1,0 +1,472 @@
+### Strategy Validation & Backtesting Examples
+### Use this file to test and validate your BTC spot trading strategies
+### Before running: Ensure you have 4h candle data in database for BTCUSDT
+
+@host = http://localhost:5000
+
+###########################################################
+# 1. BACKTEST: BTC Spot DCA Strategy
+###########################################################
+
+### 1.1 DCA Strategy - Recent 6 Months (Recommended Starting Point)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### 1.2 DCA Strategy - Full Year 2024
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.5
+}
+
+### 1.3 DCA Strategy - Bull Market Test (Q4 2023 - Q1 2024)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2023-10-01T00:00:00Z",
+  "endDate": "2024-03-31T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### 1.4 DCA Strategy - Bear Market Test (2022)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2022-05-01T00:00:00Z",
+  "endDate": "2022-12-31T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+###########################################################
+# 2. BACKTEST: BTC Spot Trend Strategy
+###########################################################
+
+### 2.1 Trend Strategy - Recent 6 Months
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### 2.2 Trend Strategy - Full Year 2024
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.5
+}
+
+### 2.3 Trend Strategy - Higher Risk Test (3%)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 3.0
+}
+
+### 2.4 Trend Strategy - Conservative Test (1.5%)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 1.5
+}
+
+###########################################################
+# 3. STRATEGY COMPARISON
+###########################################################
+
+### 3.1 Compare All Strategies - Recent 6 Months
+POST {{host}}/api/backtest/compare
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategies": [
+    "BTC Spot DCA",
+    "BTC Spot Trend",
+    "EMA Momentum Scalper"
+  ],
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### 3.2 Compare DCA vs Trend - Full Year
+POST {{host}}/api/backtest/compare
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategies": [
+    "BTC Spot DCA",
+    "BTC Spot Trend"
+  ],
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### 3.3 Compare Strategies - Bear Market (2022)
+POST {{host}}/api/backtest/compare
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategies": [
+    "BTC Spot DCA",
+    "BTC Spot Trend"
+  ],
+  "startDate": "2022-05-01T00:00:00Z",
+  "endDate": "2022-12-31T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+###########################################################
+# 4. LIVE SIGNAL TESTING (No Execution)
+###########################################################
+
+### 4.1 Get Current DCA Signal
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA"
+}
+
+### 4.2 Get Current Trend Signal
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend"
+}
+
+### 4.3 Compare All Strategy Signals Right Now
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA"
+}
+
+###
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend"
+}
+
+###########################################################
+# 5. PAPER TRADING SETUP (Real-time Monitoring)
+###########################################################
+
+### 5.1 Start Paper Trading - DCA Strategy
+### Set autoTrade: false for paper trading!
+POST {{host}}/realtime/monitor/start
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "interval": "4h",
+  "strategy": "BTC Spot DCA",
+  "autoTrade": false
+}
+
+### 5.2 Start Paper Trading - Trend Strategy
+POST {{host}}/realtime/monitor/start
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "interval": "4h",
+  "strategy": "BTC Spot Trend",
+  "autoTrade": false
+}
+
+### 5.3 Check Monitoring Status
+GET {{host}}/realtime/monitor/status?symbol=BTCUSDT
+
+### 5.4 Stop Paper Trading
+POST {{host}}/realtime/monitor/stop
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT"
+}
+
+###########################################################
+# 6. MARKET ANALYSIS
+###########################################################
+
+### 6.1 Check Current Market Conditions
+GET {{host}}/api/market/conditions?symbol=BTCUSDT&interval=4h
+
+### 6.2 Get Historical Data (4h candles)
+GET {{host}}/historical-data/cached?symbol=BTCUSDT&interval=4h&limit=200
+
+### 6.3 Check if we're in Bull/Bear Market
+### (Look for price vs 200 EMA in the response)
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA"
+}
+
+###########################################################
+# 7. TELEGRAM NOTIFICATIONS SETUP
+###########################################################
+
+### 7.1 Start Telegram Bot (for notifications)
+POST {{host}}/realtime/telegram/start
+
+### 7.2 Configure Telegram for Strategy Alerts
+POST {{host}}/realtime/telegram/subscribe
+Content-Type: application/json
+
+{
+  "chatId": "YOUR_TELEGRAM_CHAT_ID",
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA"
+}
+
+###########################################################
+# 8. VALIDATION CHECKLIST
+###########################################################
+
+### Step 1: Run backtest for recent 6 months (section 1.1 or 2.1)
+### Step 2: Verify metrics meet targets (see STRATEGY_VALIDATION_GUIDE.md)
+###         - Profit Factor > 1.5
+###         - Max Drawdown < 25%
+###         - Sharpe Ratio > 1.0
+### Step 3: Run comparison across multiple time periods (section 3)
+### Step 4: Test in bear market (1.4 or 2.4)
+### Step 5: Start paper trading (section 5.1 or 5.2)
+### Step 6: Monitor for 2-4 weeks before going live
+### Step 7: Start with small capital ($100-500)
+
+###########################################################
+# 9. ADVANCED: PARAMETER TESTING
+###########################################################
+
+### 9.1 Test Different Risk Levels - DCA
+### Conservative (1.5% risk)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 1.5
+}
+
+### Moderate (2.5% risk)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.5
+}
+
+### Aggressive (3.5% risk)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 3.5
+}
+
+### 9.2 Test Different Capital Sizes
+### Small Account ($1,000)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 1000,
+  "riskPercent": 2.0
+}
+
+### Large Account ($50,000)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-01-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 50000,
+  "riskPercent": 2.0
+}
+
+###########################################################
+# 10. TROUBLESHOOTING
+###########################################################
+
+### 10.1 Check if 4h data exists
+GET {{host}}/historical-data/cached?symbol=BTCUSDT&interval=4h&limit=10
+
+### Expected: Should return 10 candles with 4h interval
+### If empty: Run sync service or manually fetch historical data
+
+### 10.2 Verify Strategy Registration
+### Should see strategies in logs when starting the API
+
+### 10.3 Test with Small Date Range First
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-11-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+###########################################################
+# 11. QUICK START: RECOMMENDED FIRST TESTS
+###########################################################
+
+### ⭐ TEST 1: DCA Strategy - Recent 6 Months (START HERE!)
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA",
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### ⭐ TEST 2: Trend Strategy - Recent 6 Months
+POST {{host}}/api/backtest/run
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot Trend",
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### ⭐ TEST 3: Compare Both Strategies
+POST {{host}}/api/backtest/compare
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategies": [
+    "BTC Spot DCA",
+    "BTC Spot Trend"
+  ],
+  "startDate": "2024-06-01T00:00:00Z",
+  "endDate": "2024-11-30T00:00:00Z",
+  "initialCapital": 10000,
+  "riskPercent": 2.0
+}
+
+### ⭐ TEST 4: Get Current Signal (See what strategy would do RIGHT NOW)
+POST {{host}}/api/trade/analyze
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "strategy": "BTC Spot DCA"
+}
+
+### ⭐ TEST 5: Start Paper Trading (Monitor real-time, don't execute)
+POST {{host}}/realtime/monitor/start
+Content-Type: application/json
+
+{
+  "symbol": "BTCUSDT",
+  "interval": "4h",
+  "strategy": "BTC Spot DCA",
+  "autoTrade": false
+}
+
+###########################################################
+# NOTES:
+# - Always start with backtesting before live trading
+# - Paper trade (autoTrade: false) for at least 2-4 weeks
+# - Compare strategies to find what works best for you
+# - Check STRATEGY_VALIDATION_GUIDE.md for full details
+# - Start with small capital when going live
+###########################################################
