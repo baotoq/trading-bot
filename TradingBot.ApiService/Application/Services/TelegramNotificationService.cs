@@ -87,18 +87,34 @@ public class TelegramNotificationService : ITelegramNotificationService
                 message += $"\n  • MACD: {macd:F4}";
             }
 
-            if (signal.StopLoss.HasValue)
+            if (signal.StopLoss.HasValue && signal.EntryPrice.HasValue)
             {
+                var riskAmount = Math.Abs(signal.EntryPrice.Value - signal.StopLoss.Value);
+                var riskPercent = (riskAmount / signal.EntryPrice.Value) * 100;
+
                 message += $"\n\n<b>🛡️ Risk Management:</b>";
                 message += $"\n  • Entry: ${signal.EntryPrice:F2}";
                 message += $"\n  • Stop Loss: ${signal.StopLoss:F2}";
+                message += $"\n  • Risk: ${riskAmount:F2} ({riskPercent:F2}%)";
 
                 if (signal.TakeProfit1.HasValue)
-                    message += $"\n  • TP1: ${signal.TakeProfit1:F2}";
+                {
+                    var tp1Profit = Math.Abs(signal.TakeProfit1.Value - signal.EntryPrice.Value);
+                    var tp1RR = tp1Profit / riskAmount;
+                    message += $"\n  • TP1: ${signal.TakeProfit1:F2} ({tp1RR:F1}R)";
+                }
                 if (signal.TakeProfit2.HasValue)
-                    message += $"\n  • TP2: ${signal.TakeProfit2:F2}";
+                {
+                    var tp2Profit = Math.Abs(signal.TakeProfit2.Value - signal.EntryPrice.Value);
+                    var tp2RR = tp2Profit / riskAmount;
+                    message += $"\n  • TP2: ${signal.TakeProfit2:F2} ({tp2RR:F1}R)";
+                }
                 if (signal.TakeProfit3.HasValue)
-                    message += $"\n  • TP3: ${signal.TakeProfit3:F2}";
+                {
+                    var tp3Profit = Math.Abs(signal.TakeProfit3.Value - signal.EntryPrice.Value);
+                    var tp3RR = tp3Profit / riskAmount;
+                    message += $"\n  • TP3: ${signal.TakeProfit3:F2} ({tp3RR:F1}R)";
+                }
             }
 
             message += $"\n\n<b>📝 Reason:</b>\n{signal.Reason}";

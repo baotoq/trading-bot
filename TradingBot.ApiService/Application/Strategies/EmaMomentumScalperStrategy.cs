@@ -269,6 +269,21 @@ public class EmaMomentumScalperStrategy : IStrategy
         };
         signal.Reason = string.Join(" | ", reasons);
 
+        // Calculate entry, stop loss, and take profit levels for LONG
+        signal.EntryPrice = currentPrice;
+
+        // Stop loss: Below swing low or 2% below entry (whichever is closer)
+        var swingLowStop = swingLow * 0.998m; // Slightly below swing low
+        var percentageStop = currentPrice * 0.98m; // 2% below entry
+        signal.StopLoss = Math.Max(swingLowStop, percentageStop);
+
+        var riskAmount = signal.EntryPrice.Value - signal.StopLoss.Value;
+
+        // Take profit levels using risk:reward ratios
+        signal.TakeProfit1 = signal.EntryPrice.Value + (riskAmount * 1.5m); // 1.5R
+        signal.TakeProfit2 = signal.EntryPrice.Value + (riskAmount * 2.5m); // 2.5R
+        signal.TakeProfit3 = signal.EntryPrice.Value + (riskAmount * 4.0m); // 4R
+
         return signal;
     }
 
@@ -399,6 +414,21 @@ public class EmaMomentumScalperStrategy : IStrategy
             _ => 0.5m
         };
         signal.Reason = string.Join(" | ", reasons);
+
+        // Calculate entry, stop loss, and take profit levels for SHORT
+        signal.EntryPrice = currentPrice;
+
+        // Stop loss: Above recent swing or 2% above entry (whichever is closer)
+        var swingBasedStop = swingLow * 1.002m; // Slightly above swing low (acts as resistance)
+        var percentageStop = currentPrice * 1.02m; // 2% above entry
+        signal.StopLoss = Math.Min(swingBasedStop, percentageStop);
+
+        var riskAmount = signal.StopLoss.Value - signal.EntryPrice.Value;
+
+        // Take profit levels using risk:reward ratios
+        signal.TakeProfit1 = signal.EntryPrice.Value - (riskAmount * 1.5m); // 1.5R
+        signal.TakeProfit2 = signal.EntryPrice.Value - (riskAmount * 2.5m); // 2.5R
+        signal.TakeProfit3 = signal.EntryPrice.Value - (riskAmount * 4.0m); // 4R
 
         return signal;
     }
