@@ -34,8 +34,9 @@ public static class RealtimeEndpoints
         [FromBody] MonitoringRequest request,
         IRealtimeCandleService candleService,
         ISignalGeneratorService signalGenerator,
-        ILogger<RealtimeEndpoints> logger)
+        ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger("RealtimeEndpoints");
         try
         {
             // Start real-time candle monitoring
@@ -72,8 +73,9 @@ public static class RealtimeEndpoints
         [FromBody] StopMonitoringRequest request,
         IRealtimeCandleService candleService,
         ISignalGeneratorService signalGenerator,
-        ILogger<RealtimeEndpoints> logger)
+        ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger("RealtimeEndpoints");
         try
         {
             // Stop candle monitoring
@@ -128,8 +130,9 @@ public static class RealtimeEndpoints
 
     private static async Task<IResult> TestTelegramNotification(
         ITelegramNotificationService telegramService,
-        ILogger<RealtimeEndpoints> logger)
+        ILoggerFactory loggerFactory)
     {
+        var logger = loggerFactory.CreateLogger("RealtimeEndpoints");
         try
         {
             await telegramService.SendMessageAsync(

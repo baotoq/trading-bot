@@ -2,6 +2,7 @@ using Binance.Net.Clients;
 using Binance.Net.Enums;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net.Sockets;
+using CryptoExchange.Net.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
