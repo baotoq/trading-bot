@@ -1,4 +1,5 @@
 using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Endpoints;
 
@@ -17,7 +18,7 @@ public static class MarketEndpoints
     }
 
     private static async Task<IResult> GetMarketCondition(
-        string symbol,
+        Symbol symbol,
         IMarketAnalysisService marketAnalysis)
     {
         var condition = await marketAnalysis.AnalyzeMarketConditionAsync(symbol);

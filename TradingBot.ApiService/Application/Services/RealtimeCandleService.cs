@@ -25,7 +25,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         _socketClient = new BinanceSocketClient();
     }
 
-    public async Task StartMonitoringAsync(string symbol, string interval, CancellationToken cancellationToken = default)
+    public async Task StartMonitoringAsync(Symbol symbol, string interval, CancellationToken cancellationToken = default)
     {
         var key = GetKey(symbol, interval);
 
@@ -43,7 +43,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
             _logger.LogInformation("Starting real-time monitoring for {Symbol} on {Interval}", symbol, interval);
 
             var result = await _socketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(
-                symbol,
+                symbol.Value,
                 klineInterval,
                 async data => await OnCandleUpdateAsync(data.Data, cancellationToken),
                 cancellationToken);
@@ -65,7 +65,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    public async Task StopMonitoringAsync(string symbol, string interval)
+    public async Task StopMonitoringAsync(Symbol symbol, string interval)
     {
         var key = GetKey(symbol, interval);
 
@@ -85,19 +85,19 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    public bool IsMonitoring(string symbol, string interval)
+    public bool IsMonitoring(Symbol symbol, string interval)
     {
         var key = GetKey(symbol, interval);
         return _subscriptions.ContainsKey(key);
     }
 
-    public IReadOnlyList<(string Symbol, string Interval)> GetActiveMonitors()
+    public IReadOnlyList<(Symbol Symbol, string Interval)> GetActiveMonitors()
     {
         return _subscriptions.Keys
             .Select(k =>
             {
                 var parts = k.Split('_');
-                return (parts[0], parts[1]);
+                return ((Symbol)parts[0], parts[1]);
             })
             .ToList();
     }
@@ -179,7 +179,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    private static string GetKey(string symbol, string interval) => $"{symbol}_{interval}";
+    private static string GetKey(Symbol symbol, string interval) => $"{symbol.Value}_{interval}";
 
     private static KlineInterval ParseInterval(string interval)
     {

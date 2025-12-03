@@ -20,7 +20,7 @@ public class MarketAnalysisService : IMarketAnalysisService
         _logger = logger;
     }
 
-    public async Task<MarketCondition> AnalyzeMarketConditionAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<MarketCondition> AnalyzeMarketConditionAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Analyzing market condition for {Symbol}", symbol);
 
@@ -148,7 +148,7 @@ public class MarketAnalysisService : IMarketAnalysisService
         }
     }
 
-    public async Task<bool> CheckTrendAlignmentAsync(string symbol, TradeSide side, CancellationToken cancellationToken = default)
+    public async Task<bool> CheckTrendAlignmentAsync(Symbol symbol, TradeSide side, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Checking trend alignment for {Symbol} on {Side} side", symbol, side);
 

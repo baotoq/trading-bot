@@ -26,7 +26,7 @@ public class EmaMomentumScalperStrategy : IStrategy
         _logger = logger;
     }
 
-    public async Task<TradingSignal> AnalyzeAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<TradingSignal> AnalyzeAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Analyzing {Symbol} with {Strategy}", symbol, Name);
 

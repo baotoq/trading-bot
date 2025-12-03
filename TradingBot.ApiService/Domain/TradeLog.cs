@@ -6,7 +6,7 @@ public class TradeLog : AuditedEntity
 {
     public Guid Id { get; set; }
     public Guid PositionId { get; set; }
-    public string Symbol { get; set; } = string.Empty;
+    public required Symbol Symbol { get; set; }
     public TradeSide Side { get; set; }
 
     // Entry details

@@ -30,7 +30,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         // Act
         await service.GenerateSignalAsync(symbol);
@@ -46,7 +46,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var strategy = "EmaMomentumScalper";
 
         // Act
@@ -61,7 +61,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var strategy = "EmaMomentumScalper";
 
         await service.EnableSignalNotificationsAsync(symbol, strategy);
@@ -96,7 +96,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _mockStrategy.AnalyzeAsync(symbol, Arg.Any<CancellationToken>())
             .Returns(new TradingSignal
@@ -126,7 +126,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         var expectedSignal = new TradingSignal
         {
@@ -158,7 +158,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         var signal = new TradingSignal
         {
@@ -191,7 +191,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         var buySignal = new TradingSignal
         {
@@ -235,7 +235,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _mockStrategy.AnalyzeAsync(symbol, Arg.Any<CancellationToken>())
             .ThrowsAsync(new Exception("Test exception"));
@@ -251,7 +251,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var cts = new CancellationTokenSource();
 
         var signal = new TradingSignal
@@ -282,7 +282,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         var signal = new TradingSignal
         {
@@ -334,7 +334,7 @@ public class SignalGeneratorServiceTests
     {
         // Arrange
         var service = new SignalGeneratorService(_serviceProvider, _telegramService, _logger);
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         // Act
         await service.EnableSignalNotificationsAsync(symbol, strategy);

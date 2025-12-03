@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using TradingBot.ApiService.Application.Requests;
 using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Endpoints;
 
 namespace TradingBot.ApiService.Tests.Endpoints;
@@ -248,7 +249,7 @@ public class RealtimeEndpointsTests
     [InlineData("ETHUSDT", "5m", "MACD")]
     [InlineData("BNBUSDT", "15m", "RSI")]
     public async Task StartMonitoring_WithDifferentSymbolsAndIntervals_CallsServicesCorrectly(
-        string symbol, string interval, string strategy)
+        Symbol symbol, string interval, string strategy)
     {
         // Arrange
         var request = new MonitoringRequest
@@ -271,7 +272,7 @@ public class RealtimeEndpointsTests
     [InlineData("ETHUSDT", "5m")]
     [InlineData("BNBUSDT", "15m")]
     public async Task StopMonitoring_WithDifferentSymbolsAndIntervals_CallsServicesCorrectly(
-        string symbol, string interval)
+        Symbol symbol, string interval)
     {
         // Arrange
         var request = new StopMonitoringRequest

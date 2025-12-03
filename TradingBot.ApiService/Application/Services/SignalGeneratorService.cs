@@ -8,9 +8,9 @@ public class SignalGeneratorService : ISignalGeneratorService
     private readonly IServiceProvider _serviceProvider;
     private readonly ITelegramNotificationService _telegramService;
     private readonly ILogger<SignalGeneratorService> _logger;
-    private readonly Dictionary<string, string> _enabledNotifications = new(); // symbol -> strategy name
-    private readonly Dictionary<string, DateTime> _lastSignalTime = new(); // symbol -> last signal time
-    private readonly Dictionary<string, SignalType> _lastSignalType = new(); // symbol -> last signal type
+    private readonly Dictionary<Symbol, string> _enabledNotifications = new(); // symbol -> strategy name
+    private readonly Dictionary<Symbol, DateTime> _lastSignalTime = new(); // symbol -> last signal time
+    private readonly Dictionary<Symbol, SignalType> _lastSignalType = new(); // symbol -> last signal type
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly TimeSpan _cooldownPeriod = TimeSpan.FromMinutes(5); // Don't spam same signal within 5 minutes
 
@@ -24,7 +24,7 @@ public class SignalGeneratorService : ISignalGeneratorService
         _logger = logger;
     }
 
-    public async Task GenerateSignalAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task GenerateSignalAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         await _semaphore.WaitAsync(cancellationToken);
         try
@@ -92,14 +92,14 @@ public class SignalGeneratorService : ISignalGeneratorService
         }
     }
 
-    public Task EnableSignalNotificationsAsync(string symbol, string strategy)
+    public Task EnableSignalNotificationsAsync(Symbol symbol, string strategy)
     {
         _enabledNotifications[symbol] = strategy;
         _logger.LogInformation("Enabled signal notifications for {Symbol} with strategy {Strategy}", symbol, strategy);
         return Task.CompletedTask;
     }
 
-    public Task DisableSignalNotificationsAsync(string symbol)
+    public Task DisableSignalNotificationsAsync(Symbol symbol)
     {
         if (_enabledNotifications.Remove(symbol))
         {
@@ -110,17 +110,17 @@ public class SignalGeneratorService : ISignalGeneratorService
         return Task.CompletedTask;
     }
 
-    public bool IsNotificationEnabled(string symbol)
+    public bool IsNotificationEnabled(Symbol symbol)
     {
         return _enabledNotifications.ContainsKey(symbol);
     }
 
-    public IReadOnlyDictionary<string, string> GetEnabledNotifications()
+    public IReadOnlyDictionary<Symbol, string> GetEnabledNotifications()
     {
         return _enabledNotifications;
     }
 
-    private bool ShouldSkipSignal(string symbol, TradingSignal signal)
+    private bool ShouldSkipSignal(Symbol symbol, TradingSignal signal)
     {
         // Check if we've sent a signal for this symbol recently
         if (!_lastSignalTime.TryGetValue(symbol, out var lastTime))

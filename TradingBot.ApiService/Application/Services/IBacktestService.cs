@@ -5,7 +5,7 @@ namespace TradingBot.ApiService.Application.Services;
 public interface IBacktestService
 {
     Task<BacktestResult> RunBacktestAsync(
-        string symbol,
+        Symbol symbol,
         string strategyName,
         DateTime startDate,
         DateTime endDate,
@@ -14,7 +14,7 @@ public interface IBacktestService
         CancellationToken cancellationToken = default);
 
     Task<ComparisonResult> CompareStrategiesAsync(
-        string symbol,
+        Symbol symbol,
         List<string> strategies,
         DateTime startDate,
         DateTime endDate,
@@ -26,7 +26,7 @@ public interface IBacktestService
 public class BacktestResult
 {
     public string StrategyName { get; set; } = string.Empty;
-    public string Symbol { get; set; } = string.Empty;
+    public Symbol Symbol { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public decimal InitialCapital { get; set; }
@@ -77,7 +77,7 @@ public class BacktestTrade
 
 public class ComparisonResult
 {
-    public string Symbol { get; set; } = string.Empty;
+    public Symbol Symbol { get; set; } = string.Empty;
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public List<BacktestResult> Results { get; set; } = new();
