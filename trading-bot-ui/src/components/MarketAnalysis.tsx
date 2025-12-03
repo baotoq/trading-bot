@@ -66,36 +66,42 @@ export default function MarketAnalysis() {
 
       {condition && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="text-center">
-              <Statistic
-                title="Market Condition"
-                value={condition.condition}
-                valueStyle={{
-                  color:
-                    getConditionColor(condition.condition) === "green"
-                      ? "#3f8600"
-                      : getConditionColor(condition.condition) === "red"
-                      ? "#cf1322"
-                      : "#fa8c16",
-                }}
-              />
-            </Card>
-            <Card className="text-center">
-              <Statistic
-                title="Trading Status"
-                value={condition.allowTrading ? "ALLOWED" : "RESTRICTED"}
-                valueStyle={{ color: condition.allowTrading ? "#3f8600" : "#cf1322" }}
-              />
-            </Card>
-            <Card className="text-center">
-              <Statistic
-                title="Volatility"
-                value={condition.volatility}
-                precision={2}
-                suffix="%"
-              />
-            </Card>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Card className="text-center">
+                <Statistic
+                  title="Market Condition"
+                  value={condition.condition}
+                  valueStyle={{
+                    color:
+                      getConditionColor(condition.condition) === "green"
+                        ? "#3f8600"
+                        : getConditionColor(condition.condition) === "red"
+                        ? "#cf1322"
+                        : "#fa8c16",
+                  }}
+                />
+              </Card>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Card className="text-center">
+                <Statistic
+                  title="Trading Status"
+                  value={condition.allowTrading ? "ALLOWED" : "RESTRICTED"}
+                  valueStyle={{ color: condition.allowTrading ? "#3f8600" : "#cf1322" }}
+                />
+              </Card>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <Card className="text-center">
+                <Statistic
+                  title="Volatility"
+                  value={condition.volatility}
+                  precision={2}
+                  suffix="%"
+                />
+              </Card>
+            </div>
           </div>
 
           <Card size="small" className="bg-gray-50">
