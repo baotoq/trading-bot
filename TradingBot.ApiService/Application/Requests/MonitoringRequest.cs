@@ -1,12 +1,14 @@
+using TradingBot.ApiService.Domain;
+
 namespace TradingBot.ApiService.Application.Requests;
 
 public record MonitoringRequest(
-    string Symbol,
+    Symbol Symbol,
     string Interval = "5m",
     string Strategy = "EmaMomentumScalper"
 );
 
 public record StopMonitoringRequest(
-    string Symbol,
+    Symbol Symbol,
     string Interval = "5m"
 );

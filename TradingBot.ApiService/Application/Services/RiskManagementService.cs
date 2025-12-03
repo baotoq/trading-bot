@@ -178,7 +178,7 @@ public class RiskManagementService : IRiskManagementService
         }
     }
 
-    public async Task<bool> CanOpenNewPositionAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<bool> CanOpenNewPositionAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         try
         {

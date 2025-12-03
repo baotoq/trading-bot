@@ -25,7 +25,7 @@ public class BacktestService : IBacktestService
     }
 
     public async Task<BacktestResult> RunBacktestAsync(
-        string symbol,
+        Symbol symbol,
         string strategyName,
         DateTime startDate,
         DateTime endDate,
@@ -258,7 +258,7 @@ public class BacktestService : IBacktestService
     }
 
     public async Task<ComparisonResult> CompareStrategiesAsync(
-        string symbol,
+        Symbol symbol,
         List<string> strategies,
         DateTime startDate,
         DateTime endDate,
@@ -310,7 +310,7 @@ public class BacktestService : IBacktestService
 
     private async Task<TradingSignal> GenerateSignal(
         IStrategy strategy,
-        string symbol,
+        Symbol symbol,
         List<Candle> candles,
         CancellationToken cancellationToken)
     {

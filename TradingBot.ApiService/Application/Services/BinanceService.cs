@@ -1,6 +1,7 @@
 using Binance.Net.Clients;
 using Binance.Net.Enums;
 using CryptoExchange.Net.Authentication;
+using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -28,7 +29,7 @@ public class BinanceService : IBinanceService
     }
 
     public async Task<BinanceOrderResult> PlaceFuturesOrderAsync(
-        string symbol,
+        Symbol symbol,
         OrderSide side,
         FuturesOrderType orderType,
         decimal quantity,
@@ -44,7 +45,7 @@ public class BinanceService : IBinanceService
         try
         {
             var result = await _client.UsdFuturesApi.Trading.PlaceOrderAsync(
-                symbol: symbol,
+                symbol: symbol.Value,
                 side: side,
                 type: orderType,
                 quantity: quantity,
@@ -95,14 +96,14 @@ public class BinanceService : IBinanceService
         }
     }
 
-    public async Task<bool> CancelFuturesOrderAsync(string symbol, long orderId, CancellationToken cancellationToken = default)
+    public async Task<bool> CancelFuturesOrderAsync(Symbol symbol, long orderId, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Canceling futures order: {Symbol} OrderId={OrderId}", symbol, orderId);
 
         try
         {
             var result = await _client.UsdFuturesApi.Trading.CancelOrderAsync(
-                symbol: symbol,
+                symbol: symbol.Value,
                 orderId: orderId,
                 ct: cancellationToken);
 
@@ -158,14 +159,14 @@ public class BinanceService : IBinanceService
         }
     }
 
-    public async Task<decimal> GetFundingRateAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<decimal> GetFundingRateAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching funding rate for {Symbol}", symbol);
 
         try
         {
             var result = await _client.UsdFuturesApi.ExchangeData.GetFundingRatesAsync(
-                symbol: symbol,
+                symbol: symbol.Value,
                 limit: 1,
                 ct: cancellationToken);
 
@@ -186,14 +187,14 @@ public class BinanceService : IBinanceService
         }
     }
 
-    public async Task<bool> SetLeverageAsync(string symbol, int leverage, CancellationToken cancellationToken = default)
+    public async Task<bool> SetLeverageAsync(Symbol symbol, int leverage, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Setting leverage for {Symbol} to {Leverage}x", symbol, leverage);
 
         try
         {
             var result = await _client.UsdFuturesApi.Account.ChangeInitialLeverageAsync(
-                symbol: symbol,
+                symbol: symbol.Value,
                 leverage: leverage,
                 ct: cancellationToken);
 
@@ -215,19 +216,19 @@ public class BinanceService : IBinanceService
         }
     }
 
-    public async Task<BinancePositionInfo?> GetPositionAsync(string symbol, CancellationToken cancellationToken = default)
+    public async Task<BinancePositionInfo?> GetPositionAsync(Symbol symbol, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("Fetching position info for {Symbol}", symbol);
 
         try
         {
             var result = await _client.UsdFuturesApi.Account.GetPositionInformationAsync(
-                symbol: symbol,
+                symbol: symbol.Value,
                 ct: cancellationToken);
 
             if (result.Success && result.Data != null)
             {
-                var position = result.Data.FirstOrDefault(p => p.Symbol == symbol);
+                var position = result.Data.FirstOrDefault(p => p.Symbol == symbol.Value);
 
                 if (position != null && position.Quantity != 0)
                 {

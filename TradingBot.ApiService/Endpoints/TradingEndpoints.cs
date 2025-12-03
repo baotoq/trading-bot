@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TradingBot.ApiService.Application.Requests;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
+using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Endpoints;
 
@@ -39,7 +40,7 @@ public static class TradingEndpoints
     }
 
     private static async Task<IResult> AnalyzeSymbol(
-        string symbol,
+        Symbol symbol,
         EmaMomentumScalperStrategy strategy)
     {
         var signal = await strategy.AnalyzeAsync(symbol);

@@ -2,7 +2,7 @@ namespace TradingBot.ApiService.Domain;
 
 public class TradingSignal
 {
-    public string Symbol { get; set; } = string.Empty;
+    public required Symbol Symbol { get; set; }
     public SignalType Type { get; set; }
     public decimal Price { get; set; }
     public decimal Confidence { get; set; }

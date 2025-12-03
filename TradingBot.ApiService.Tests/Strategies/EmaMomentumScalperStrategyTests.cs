@@ -51,7 +51,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
             .Returns(false);
@@ -77,7 +77,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
             .Returns(true);
@@ -106,7 +106,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
             .Returns(true);
@@ -138,7 +138,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var currentPrice = 50000m;
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
@@ -188,7 +188,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var currentPrice = 50000m;
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
@@ -238,7 +238,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var currentPrice = 50000m;
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
@@ -294,7 +294,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
         var currentPrice = 50000m;
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, TradeSide.Long, Arg.Any<CancellationToken>())
@@ -350,7 +350,7 @@ public class EmaMomentumScalperStrategyTests
             _marketAnalysisService,
             _logger);
 
-        var symbol = "BTCUSDT";
+        Symbol symbol = "BTCUSDT";
 
         _marketAnalysisService.CheckTrendAlignmentAsync(symbol, Arg.Any<TradeSide>(), Arg.Any<CancellationToken>())
             .ThrowsAsync(new Exception("Test exception"));
@@ -364,7 +364,7 @@ public class EmaMomentumScalperStrategyTests
         signal.Reason.Should().Contain("Error");
     }
 
-    private List<Candle> GenerateCandles(string symbol, string interval, int count, decimal basePrice)
+    private List<Candle> GenerateCandles(Symbol symbol, string interval, int count, decimal basePrice)
     {
         var candles = new List<Candle>();
         var startTime = DateTime.UtcNow.AddMinutes(-count * 5);

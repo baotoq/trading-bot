@@ -1,11 +1,12 @@
 using Binance.Net.Enums;
+using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Application.Services;
 
 public interface IBinanceService
 {
     Task<BinanceOrderResult> PlaceFuturesOrderAsync(
-        string symbol,
+        Symbol symbol,
         OrderSide side,
         FuturesOrderType orderType,
         decimal quantity,
@@ -14,21 +15,21 @@ public interface IBinanceService
         TimeInForce? timeInForce = null,
         CancellationToken cancellationToken = default);
 
-    Task<bool> CancelFuturesOrderAsync(string symbol, long orderId, CancellationToken cancellationToken = default);
+    Task<bool> CancelFuturesOrderAsync(Symbol symbol, long orderId, CancellationToken cancellationToken = default);
 
     Task<BinanceAccountBalance> GetFuturesAccountBalanceAsync(CancellationToken cancellationToken = default);
 
-    Task<decimal> GetFundingRateAsync(string symbol, CancellationToken cancellationToken = default);
+    Task<decimal> GetFundingRateAsync(Symbol symbol, CancellationToken cancellationToken = default);
 
-    Task<bool> SetLeverageAsync(string symbol, int leverage, CancellationToken cancellationToken = default);
+    Task<bool> SetLeverageAsync(Symbol symbol, int leverage, CancellationToken cancellationToken = default);
 
-    Task<BinancePositionInfo?> GetPositionAsync(string symbol, CancellationToken cancellationToken = default);
+    Task<BinancePositionInfo?> GetPositionAsync(Symbol symbol, CancellationToken cancellationToken = default);
 }
 
 public class BinanceOrderResult
 {
     public long OrderId { get; set; }
-    public string Symbol { get; set; } = string.Empty;
+    public Symbol Symbol { get; set; } = string.Empty;
     public OrderSide Side { get; set; }
     public FuturesOrderType Type { get; set; }
     public decimal Quantity { get; set; }
@@ -49,7 +50,7 @@ public class BinanceAccountBalance
 
 public class BinancePositionInfo
 {
-    public string Symbol { get; set; } = string.Empty;
+    public Symbol Symbol { get; set; } = string.Empty;
     public decimal PositionAmount { get; set; }
     public decimal EntryPrice { get; set; }
     public decimal UnrealizedProfit { get; set; }

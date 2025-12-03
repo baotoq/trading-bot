@@ -1,3 +1,5 @@
+using TradingBot.ApiService.Domain;
+
 namespace TradingBot.ApiService.Application.Requests;
 
 /// <summary>
@@ -7,7 +9,7 @@ namespace TradingBot.ApiService.Application.Requests;
 /// <param name="AccountEquity">Total account equity in USDT</param>
 /// <param name="RiskPercent">Risk per trade as percentage (2% to 4% max, default 2.5%)</param>
 public record ExecuteTradeRequest(
-    string Symbol,
+    Symbol Symbol,
     decimal AccountEquity,
     decimal RiskPercent = 2.5m)
 {

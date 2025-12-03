@@ -9,7 +9,7 @@ public interface IRiskManagementService
         PositionParameters parameters,
         CancellationToken cancellationToken = default);
 
-    Task<bool> CanOpenNewPositionAsync(string symbol, CancellationToken cancellationToken = default);
+    Task<bool> CanOpenNewPositionAsync(Symbol symbol, CancellationToken cancellationToken = default);
 }
 
 public class RiskCheckResult

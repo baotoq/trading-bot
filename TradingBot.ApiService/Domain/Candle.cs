@@ -8,7 +8,7 @@ namespace TradingBot.ApiService.Domain;
 
 public class Candle : AuditedEntity
 {
-    public required string Symbol { get; set; }
+    public required Symbol Symbol { get; set; }
     public required CandleInterval Interval { get; set; }
     public required DateTimeOffset OpenTime { get; set; }
     public DateTimeOffset CloseTime { get; set; }
@@ -31,7 +31,11 @@ public static class CandleModelBuilderExtensions
 
             candle
                 .Property(e => e.Symbol)
-                .HasMaxLength(50);
+                .HasMaxLength(50)
+                .HasConversion(new ValueConverter<Symbol, string>(
+                    v => v.Value,
+                    v => new Symbol(v)
+                ));
             candle
                 .Property(e => e.Interval)
                 .HasMaxLength(100)
