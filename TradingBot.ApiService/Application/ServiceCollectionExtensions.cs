@@ -9,7 +9,7 @@ namespace TradingBot.ApiService.Application;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddApplicationServices(this IHostApplicationBuilder builder)
+    public static IHostApplicationBuilder AddApplicationServices(this IHostApplicationBuilder builder)
     {
         // Add MediatR for commands and queries
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
@@ -31,38 +31,39 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<EmaMomentumScalperStrategy>();
         builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
 
-            // Configure Binance API clients
-            var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;
-            var apiSecret = builder.Configuration["Binance:ApiSecret"] ?? string.Empty;
-            var testMode = builder.Configuration.GetValue<bool>("Binance:TestMode");
+        // Configure Binance API clients
+        var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;
+        var apiSecret = builder.Configuration["Binance:ApiSecret"] ?? string.Empty;
+        var testMode = builder.Configuration.GetValue<bool>("Binance:TestMode");
 
-            builder.Services.AddSingleton<IBinanceRestClient>(_ =>
+        builder.Services.AddSingleton<IBinanceRestClient>(_ =>
+        {
+            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
             {
-                if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
+                return new BinanceRestClient(opts =>
                 {
-                    return new BinanceRestClient(opts =>
-                    {
-                        opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
-                        opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
-                    });
-                }
+                    opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
+                    opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+                });
+            }
 
-                return new BinanceRestClient();
-            });
+            return new BinanceRestClient();
+        });
 
-            builder.Services.AddSingleton<IBinanceSocketClient>(_ =>
+        builder.Services.AddSingleton<IBinanceSocketClient>(_ =>
+        {
+            if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
             {
-                if (!string.IsNullOrEmpty(apiKey) && !string.IsNullOrEmpty(apiSecret))
+                return new BinanceSocketClient(opts =>
                 {
-                    return new BinanceSocketClient(opts =>
-                    {
-                        opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
-                        opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
-                    });
-                }
+                    opts.ApiCredentials = new ApiCredentials(apiKey, apiSecret);
+                    opts.Environment = testMode ? BinanceEnvironment.Testnet : BinanceEnvironment.Live;
+                });
+            }
 
-                return new BinanceSocketClient();
-            });
-        }
+            return new BinanceSocketClient();
+        });
+
+        return builder;
     }
 }
