@@ -1,0 +1,143 @@
+using TradingBot.ApiService.Application.Strategies;
+using TradingBot.ApiService.Domain;
+
+namespace TradingBot.ApiService.Application.Services;
+
+public class SignalGeneratorService : ISignalGeneratorService
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ITelegramNotificationService _telegramService;
+    private readonly ILogger<SignalGeneratorService> _logger;
+    private readonly Dictionary<string, string> _enabledNotifications = new(); // symbol -> strategy name
+    private readonly Dictionary<string, DateTime> _lastSignalTime = new(); // symbol -> last signal time
+    private readonly Dictionary<string, SignalType> _lastSignalType = new(); // symbol -> last signal type
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
+    private readonly TimeSpan _cooldownPeriod = TimeSpan.FromMinutes(5); // Don't spam same signal within 5 minutes
+
+    public SignalGeneratorService(
+        IServiceProvider serviceProvider,
+        ITelegramNotificationService telegramService,
+        ILogger<SignalGeneratorService> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _telegramService = telegramService;
+        _logger = logger;
+    }
+
+    public async Task GenerateSignalAsync(string symbol, CancellationToken cancellationToken = default)
+    {
+        await _semaphore.WaitAsync(cancellationToken);
+        try
+        {
+            // Check if notifications are enabled for this symbol
+            if (!_enabledNotifications.TryGetValue(symbol, out var strategyName))
+            {
+                _logger.LogDebug("Signal notifications not enabled for {Symbol}", symbol);
+                return;
+            }
+
+            _logger.LogInformation("Generating signal for {Symbol} using {Strategy}", symbol, strategyName);
+
+            // Create a scope to get scoped services
+            using var scope = _serviceProvider.CreateScope();
+
+            // Get the strategy based on the strategy name
+            IStrategy? strategy = strategyName.ToLower() switch
+            {
+                "emamomentumsca lper" or "ema" => scope.ServiceProvider.GetRequiredService<EmaMomentumScalperStrategy>(),
+                _ => scope.ServiceProvider.GetRequiredService<EmaMomentumScalperStrategy>() // Default strategy
+            };
+
+            if (strategy == null)
+            {
+                _logger.LogWarning("Strategy {Strategy} not found for {Symbol}", strategyName, symbol);
+                return;
+            }
+
+            // Analyze and generate signal
+            var signal = await strategy.AnalyzeAsync(symbol, cancellationToken);
+
+            // Check if signal is actionable (not HOLD)
+            if (signal.Type == SignalType.Hold)
+            {
+                _logger.LogDebug("Signal for {Symbol} is HOLD, not sending notification", symbol);
+                return;
+            }
+
+            // Check cooldown period to avoid spamming same signals
+            if (ShouldSkipSignal(symbol, signal))
+            {
+                _logger.LogDebug("Skipping duplicate signal for {Symbol} (cooldown period)", symbol);
+                return;
+            }
+
+            // Update last signal tracking
+            _lastSignalTime[symbol] = DateTime.UtcNow;
+            _lastSignalType[symbol] = signal.Type;
+
+            // Send notification to Telegram
+            await _telegramService.SendSignalNotificationAsync(signal, cancellationToken);
+
+            _logger.LogInformation(
+                "Signal notification sent for {Symbol}: {Type} (Confidence: {Confidence}%)",
+                symbol, signal.Type, signal.Confidence * 100);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating signal for {Symbol}", symbol);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
+
+    public Task EnableSignalNotificationsAsync(string symbol, string strategy)
+    {
+        _enabledNotifications[symbol] = strategy;
+        _logger.LogInformation("Enabled signal notifications for {Symbol} with strategy {Strategy}", symbol, strategy);
+        return Task.CompletedTask;
+    }
+
+    public Task DisableSignalNotificationsAsync(string symbol)
+    {
+        if (_enabledNotifications.Remove(symbol))
+        {
+            _lastSignalTime.Remove(symbol);
+            _lastSignalType.Remove(symbol);
+            _logger.LogInformation("Disabled signal notifications for {Symbol}", symbol);
+        }
+        return Task.CompletedTask;
+    }
+
+    public bool IsNotificationEnabled(string symbol)
+    {
+        return _enabledNotifications.ContainsKey(symbol);
+    }
+
+    public IReadOnlyDictionary<string, string> GetEnabledNotifications()
+    {
+        return _enabledNotifications;
+    }
+
+    private bool ShouldSkipSignal(string symbol, TradingSignal signal)
+    {
+        // Check if we've sent a signal for this symbol recently
+        if (!_lastSignalTime.TryGetValue(symbol, out var lastTime))
+        {
+            return false; // No previous signal, don't skip
+        }
+
+        // Check if we're still in cooldown period
+        if (DateTime.UtcNow - lastTime < _cooldownPeriod)
+        {
+            // Only skip if it's the same signal type
+            if (_lastSignalType.TryGetValue(symbol, out var lastType) && lastType == signal.Type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
