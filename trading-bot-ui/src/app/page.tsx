@@ -1,10 +1,11 @@
 "use client";
 
 import { Layout, Typography, Tabs, Space } from "antd";
-import { DashboardOutlined, RocketOutlined, ExperimentOutlined, FundOutlined } from "@ant-design/icons";
+import { DashboardOutlined, RocketOutlined, ExperimentOutlined, FundOutlined, ApiOutlined } from "@ant-design/icons";
 import TradingPanel from "@/components/TradingPanel";
 import MarketAnalysis from "@/components/MarketAnalysis";
 import BacktestPanel from "@/components/BacktestPanel";
+import RealtimeMonitor from "@/components/RealtimeMonitor";
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -40,6 +41,16 @@ export default function Home() {
         </span>
       ),
       children: <BacktestPanel />,
+    },
+    {
+      key: "realtime",
+      label: (
+        <span>
+          <ApiOutlined />
+          Real-time Monitor
+        </span>
+      ),
+      children: <RealtimeMonitor />,
     },
   ];
 

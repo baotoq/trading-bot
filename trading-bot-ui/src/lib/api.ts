@@ -9,6 +9,12 @@ import type {
   CompareRequest,
   CompareResult,
 } from "@/types";
+import type {
+  MonitoringRequest,
+  StopMonitoringRequest,
+  MonitoringStatusResponse,
+  ApiResponse,
+} from "@/types/realtime";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -61,6 +67,42 @@ export const tradingApi = {
     const response = await apiClient.post<CompareResult>(
       "/api/backtest/compare",
       request
+    );
+    return response.data;
+  },
+};
+
+export const realtimeApi = {
+  // Start real-time monitoring
+  startMonitoring: async (request: MonitoringRequest): Promise<ApiResponse> => {
+    const response = await apiClient.post<ApiResponse>(
+      "/api/realtime/start",
+      request
+    );
+    return response.data;
+  },
+
+  // Stop real-time monitoring
+  stopMonitoring: async (request: StopMonitoringRequest): Promise<ApiResponse> => {
+    const response = await apiClient.post<ApiResponse>(
+      "/api/realtime/stop",
+      request
+    );
+    return response.data;
+  },
+
+  // Get monitoring status
+  getStatus: async (): Promise<MonitoringStatusResponse> => {
+    const response = await apiClient.get<MonitoringStatusResponse>(
+      "/api/realtime/status"
+    );
+    return response.data;
+  },
+
+  // Test Telegram notification
+  testTelegram: async (): Promise<ApiResponse> => {
+    const response = await apiClient.post<ApiResponse>(
+      "/api/realtime/test-telegram"
     );
     return response.data;
   },
