@@ -9,24 +9,27 @@ namespace TradingBot.ApiService.Application;
 
 public static class ServiceCollectionExtensions
 {
-    extension(IHostApplicationBuilder builder)
+    public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
-        public void AddApplicationServices()
-        {
-            // Add MediatR for commands and queries
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        // Add MediatR for commands and queries
+        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-            // Register trading services
-            builder.Services.AddScoped<ITechnicalIndicatorService, TechnicalIndicatorService>();
-            builder.Services.AddScoped<IMarketAnalysisService, MarketAnalysisService>();
-            builder.Services.AddScoped<IPositionCalculatorService, PositionCalculatorService>();
-            builder.Services.AddScoped<IRiskManagementService, RiskManagementService>();
-            builder.Services.AddScoped<IBinanceService, BinanceService>();
-            builder.Services.AddScoped<IBacktestService, BacktestService>();
+        // Register trading services
+        builder.Services.AddScoped<ITechnicalIndicatorService, TechnicalIndicatorService>();
+        builder.Services.AddScoped<IMarketAnalysisService, MarketAnalysisService>();
+        builder.Services.AddScoped<IPositionCalculatorService, PositionCalculatorService>();
+        builder.Services.AddScoped<IRiskManagementService, RiskManagementService>();
+        builder.Services.AddScoped<IBinanceService, BinanceService>();
+        builder.Services.AddScoped<IBacktestService, BacktestService>();
 
-            // Register strategies
-            builder.Services.AddScoped<EmaMomentumScalperStrategy>();
-            builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
+        // Register real-time services
+        builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();
+        builder.Services.AddSingleton<IRealtimeCandleService, RealtimeCandleService>();
+        builder.Services.AddSingleton<ISignalGeneratorService, SignalGeneratorService>();
+
+        // Register strategies
+        builder.Services.AddScoped<EmaMomentumScalperStrategy>();
+        builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
 
             // Configure Binance API clients
             var apiKey = builder.Configuration["Binance:ApiKey"] ?? string.Empty;

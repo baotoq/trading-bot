@@ -55,6 +55,7 @@ try
     app.MapTradingEndpoints();
     app.MapMarketEndpoints();
     app.MapBacktestEndpoints();
+    app.MapRealtimeEndpoints();
 
     app.MapDefaultEndpoints();
 
