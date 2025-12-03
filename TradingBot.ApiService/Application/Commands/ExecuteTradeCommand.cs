@@ -1,5 +1,6 @@
 using Binance.Net.Enums;
 using MediatR;
+using TradingBot.ApiService.Application.Queries;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
 using TradingBot.ApiService.Domain;
@@ -27,6 +28,7 @@ public class ExecuteTradeResult
 
 public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, ExecuteTradeResult>
 {
+    private readonly IMediator _mediator;
     private readonly IMarketAnalysisService _marketAnalysisService;
     private readonly IStrategy _strategy;
     private readonly IPositionCalculatorService _positionCalculatorService;
@@ -36,6 +38,7 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
     private readonly ILogger<ExecuteTradeCommandHandler> _logger;
 
     public ExecuteTradeCommandHandler(
+        IMediator mediator,
         IMarketAnalysisService marketAnalysisService,
         EmaMomentumScalperStrategy strategy,
         IPositionCalculatorService positionCalculatorService,
@@ -44,6 +47,7 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
         ApplicationDbContext context,
         ILogger<ExecuteTradeCommandHandler> logger)
     {
+        _mediator = mediator;
         _marketAnalysisService = marketAnalysisService;
         _strategy = strategy;
         _positionCalculatorService = positionCalculatorService;
@@ -73,8 +77,8 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
 
             // PHASE 1: Pre-Market Analysis
             _logger.LogInformation("Phase 1: Analyzing market conditions");
-            var marketCondition = await _marketAnalysisService.AnalyzeMarketConditionAsync(
-                request.Symbol, cancellationToken);
+            var query = new AnalyzeMarketConditionQuery(request.Symbol);
+            var marketCondition = await _mediator.Send(query, cancellationToken);
 
             if (!marketCondition.CanTrade)
             {

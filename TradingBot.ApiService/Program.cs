@@ -34,6 +34,17 @@ try
     builder.Services.AddOpenApi();
     builder.AddServiceDefaults();
 
+    // Add CORS
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll", policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+    });
+
     builder.AddApplicationServices();
     builder.AddPubSubServices();
     builder.AddPersistentServices();
@@ -42,6 +53,9 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
+
+    // Enable CORS
+    app.UseCors("AllowAll");
 
     if (app.Environment.IsDevelopment())
     {

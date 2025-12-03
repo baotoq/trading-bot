@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TradingBot.ApiService.Domain;
 
 /// <summary>
 /// Represents a trading symbol with validation
 /// </summary>
-public record Symbol
+public record Symbol : IParsable<Symbol>
 {
     public string Value { get; }
 
@@ -74,5 +76,31 @@ public record Symbol
 
         // If no common quote currency found, return last 3-4 characters as a fallback
         return Value.Length > 3 ? Value[^4..] : Value;
+    }
+
+    // IParsable<Symbol> implementation
+    public static Symbol Parse(string s, IFormatProvider? provider)
+    {
+        return new Symbol(s);
+    }
+
+    public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out Symbol result)
+    {
+        if (string.IsNullOrWhiteSpace(s))
+        {
+            result = null;
+            return false;
+        }
+
+        try
+        {
+            result = new Symbol(s);
+            return true;
+        }
+        catch
+        {
+            result = null;
+            return false;
+        }
     }
 }

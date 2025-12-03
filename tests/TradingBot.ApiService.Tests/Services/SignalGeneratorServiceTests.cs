@@ -238,7 +238,7 @@ public class SignalGeneratorServiceTests
         Symbol symbol = "BTCUSDT";
 
         _mockStrategy.AnalyzeAsync(symbol, Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("Test exception"));
+            .Returns<TradingSignal>(x => throw new Exception("Test exception"));
 
         await service.EnableSignalNotificationsAsync(symbol, "EmaMomentumScalper");
 

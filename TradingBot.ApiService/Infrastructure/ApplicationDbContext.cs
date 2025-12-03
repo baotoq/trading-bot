@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.EfCore;
 using TradingBot.ApiService.Domain;
@@ -23,7 +24,12 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<Position>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Symbol).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Symbol)
+                .HasConversion(new ValueConverter<Symbol, string>(
+                    v => v.Value,
+                    v => new Symbol(v)
+                ))
+                .HasMaxLength(50).IsRequired();
             entity.Property(e => e.EntryPrice).HasPrecision(18, 8);
             entity.Property(e => e.Quantity).HasPrecision(18, 8);
             entity.Property(e => e.StopLoss).HasPrecision(18, 8);
@@ -46,7 +52,13 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<TradeLog>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Symbol).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Symbol)
+                .HasMaxLength(50)
+                .HasConversion(new ValueConverter<Symbol, string>(
+                    v => v.Value,
+                    v => new Symbol(v)
+                ))
+                .IsRequired();
             entity.Property(e => e.EntryPrice).HasPrecision(18, 8);
             entity.Property(e => e.ExitPrice).HasPrecision(18, 8);
             entity.Property(e => e.Quantity).HasPrecision(18, 8);

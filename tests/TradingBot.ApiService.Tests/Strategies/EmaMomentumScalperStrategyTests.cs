@@ -172,10 +172,10 @@ public class EmaMomentumScalperStrategyTests
         signal.Type.Should().BeOneOf(SignalType.Buy, SignalType.StrongBuy);
         signal.Confidence.Should().BeGreaterThan(0);
         signal.EntryPrice.Should().Be(currentPrice);
-        signal.StopLoss.Should().BeLessThan(signal.EntryPrice);
-        signal.TakeProfit1.Should().BeGreaterThan(signal.EntryPrice);
-        signal.TakeProfit2.Should().BeGreaterThan(signal.TakeProfit1);
-        signal.TakeProfit3.Should().BeGreaterThan(signal.TakeProfit2);
+        signal.StopLoss.Should().BeLessThan(signal.EntryPrice.Value);
+        signal.TakeProfit1.Should().BeGreaterThan(signal.EntryPrice.Value);
+        signal.TakeProfit2.Should().BeGreaterThan(signal.TakeProfit1.Value);
+        signal.TakeProfit3.Should().BeGreaterThan(signal.TakeProfit2.Value);
     }
 
     [Fact]
@@ -222,10 +222,10 @@ public class EmaMomentumScalperStrategyTests
         signal.Type.Should().BeOneOf(SignalType.Sell, SignalType.StrongSell);
         signal.Confidence.Should().BeGreaterThan(0);
         signal.EntryPrice.Should().Be(currentPrice);
-        signal.StopLoss.Should().BeGreaterThan(signal.EntryPrice);
-        signal.TakeProfit1.Should().BeLessThan(signal.EntryPrice);
-        signal.TakeProfit2.Should().BeLessThan(signal.TakeProfit1);
-        signal.TakeProfit3.Should().BeLessThan(signal.TakeProfit2);
+        signal.StopLoss.Should().BeGreaterThan(signal.EntryPrice.Value);
+        signal.TakeProfit1.Should().BeLessThan(signal.EntryPrice.Value);
+        signal.TakeProfit2.Should().BeLessThan(signal.TakeProfit1.Value);
+        signal.TakeProfit3.Should().BeLessThan(signal.TakeProfit2.Value);
     }
 
     [Fact]
@@ -352,8 +352,9 @@ public class EmaMomentumScalperStrategyTests
 
         Symbol symbol = "BTCUSDT";
 
-        _marketAnalysisService.CheckTrendAlignmentAsync(symbol, Arg.Any<TradeSide>(), Arg.Any<CancellationToken>())
-            .ThrowsAsync(new Exception("Test exception"));
+        _marketAnalysisService
+            .CheckTrendAlignmentAsync(symbol, Arg.Any<TradeSide>(), Arg.Any<CancellationToken>())
+            .Returns<bool>(x => throw new Exception("Test exception"));
 
         // Act
         var signal = await strategy.AnalyzeAsync(symbol);
@@ -375,16 +376,14 @@ public class EmaMomentumScalperStrategyTests
             candles.Add(new Candle
             {
                 Symbol = symbol,
-                Interval = interval,
+                Interval = new CandleInterval(interval),
                 OpenTime = startTime.AddMinutes(i * 5),
                 CloseTime = startTime.AddMinutes((i + 1) * 5),
                 OpenPrice = price,
                 HighPrice = price + 50,
                 LowPrice = price - 50,
                 ClosePrice = price + (i % 2 == 0 ? 10 : -10),
-                Volume = 1000000 + (i * 10000),
-                QuoteVolume = (1000000 + (i * 10000)) * price,
-                NumberOfTrades = 1000 + i
+                Volume = 1000000 + (i * 10000)
             });
         }
 

@@ -111,7 +111,7 @@ public class EmaMomentumScalperStrategy : IStrategy
             {
                 signal = await CheckLongSignal(
                     signal, currentPrice, ema9, ema21, rsi, macd, macdSignal, histogram,
-                    currentVolume, avgVolume, swingHigh, middleBB, upperBB, cancellationToken);
+                    currentVolume, avgVolume, swingHigh, swingLow, middleBB, upperBB, cancellationToken);
             }
             // SHORT SIGNAL DETECTION
             else if (trendAlignedShort && bearishCrossover)
@@ -153,6 +153,7 @@ public class EmaMomentumScalperStrategy : IStrategy
         decimal currentVolume,
         decimal avgVolume,
         decimal swingHigh,
+        decimal swingLow,
         decimal middleBB,
         decimal upperBB,
         CancellationToken cancellationToken)
@@ -272,10 +273,10 @@ public class EmaMomentumScalperStrategy : IStrategy
         // Calculate entry, stop loss, and take profit levels for LONG
         signal.EntryPrice = currentPrice;
 
-        // Stop loss: Below swing low or 2% below entry (whichever is closer)
+        // Stop loss: Below swing low or 2% below entry (whichever is tighter)
         var swingLowStop = swingLow * 0.998m; // Slightly below swing low
         var percentageStop = currentPrice * 0.98m; // 2% below entry
-        signal.StopLoss = Math.Max(swingLowStop, percentageStop);
+        signal.StopLoss = Math.Min(swingLowStop, percentageStop);
 
         var riskAmount = signal.EntryPrice.Value - signal.StopLoss.Value;
 

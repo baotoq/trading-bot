@@ -1,8 +1,10 @@
 using Binance.Net.Clients;
 using Binance.Net.Enums;
+using Binance.Net.Interfaces;
 using Binance.Net.Objects.Models.Spot.Socket;
 using CryptoExchange.Net.Sockets;
 using CryptoExchange.Net.Interfaces;
+using CryptoExchange.Net.Objects.Sockets;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
@@ -14,7 +16,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
     private readonly BinanceSocketClient _socketClient;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<RealtimeCandleService> _logger;
-    private readonly Dictionary<string, UpdateSubscription> _subscriptions = new();
+    private readonly Dictionary<string, CryptoExchange.Net.Objects.Sockets.UpdateSubscription> _subscriptions = new();
     private readonly SemaphoreSlim _semaphore = new(1, 1);
 
     public RealtimeCandleService(
@@ -103,7 +105,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
             .ToList();
     }
 
-    private async Task OnCandleUpdateAsync(BinanceStreamKlineData klineData, CancellationToken cancellationToken)
+    private async Task OnCandleUpdateAsync(IBinanceStreamKlineData klineData, CancellationToken cancellationToken)
     {
         try
         {
@@ -123,10 +125,11 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             // Check if candle already exists
+            var interval = new CandleInterval(klineData.Data.Interval.ToString());
             var existingCandle = await context.Candles
                 .FirstOrDefaultAsync(c =>
                     c.Symbol == klineData.Symbol &&
-                    c.Interval == klineData.Data.Interval.ToString() &&
+                    c.Interval == interval &&
                     c.OpenTime == kline.OpenTime,
                     cancellationToken);
 
@@ -139,8 +142,6 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
                 existingCandle.ClosePrice = kline.ClosePrice;
                 existingCandle.Volume = kline.Volume;
                 existingCandle.CloseTime = kline.CloseTime;
-                existingCandle.QuoteAssetVolume = kline.QuoteVolume;
-                existingCandle.NumberOfTrades = (int)kline.TradeCount;
                 existingCandle.UpdatedAt = DateTime.UtcNow;
 
                 _logger.LogDebug("Updated existing candle for {Symbol} at {OpenTime}", klineData.Symbol, kline.OpenTime);
@@ -151,16 +152,14 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
                 var candle = new Candle
                 {
                     Symbol = klineData.Symbol,
-                    Interval = klineData.Data.Interval.ToString(),
+                    Interval = new CandleInterval(klineData.Data.Interval.ToString()),
                     OpenTime = kline.OpenTime,
                     OpenPrice = kline.OpenPrice,
                     HighPrice = kline.HighPrice,
                     LowPrice = kline.LowPrice,
                     ClosePrice = kline.ClosePrice,
                     Volume = kline.Volume,
-                    CloseTime = kline.CloseTime,
-                    QuoteAssetVolume = kline.QuoteVolume,
-                    NumberOfTrades = (int)kline.TradeCount
+                    CloseTime = kline.CloseTime
                 };
 
                 context.Candles.Add(candle);

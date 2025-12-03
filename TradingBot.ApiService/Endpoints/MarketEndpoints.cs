@@ -1,4 +1,5 @@
-using TradingBot.ApiService.Application.Services;
+using MediatR;
+using TradingBot.ApiService.Application.Queries;
 using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Endpoints;
@@ -19,9 +20,11 @@ public static class MarketEndpoints
 
     private static async Task<IResult> GetMarketCondition(
         Symbol symbol,
-        IMarketAnalysisService marketAnalysis)
+        IMediator mediator,
+        CancellationToken cancellationToken)
     {
-        var condition = await marketAnalysis.AnalyzeMarketConditionAsync(symbol);
+        var query = new AnalyzeMarketConditionQuery(symbol);
+        var condition = await mediator.Send(query, cancellationToken);
         return Results.Ok(condition);
     }
 }

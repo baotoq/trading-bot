@@ -3,6 +3,9 @@
     <File Path=".dockerignore" />
     <File Path=".editorconfig" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TradingBot.ApiService.Tests/TradingBot.ApiService.Tests.csproj" />
+  </Folder>
   <Project Path="TradingBot.ApiService/TradingBot.ApiService.csproj" />
   <Project Path="TradingBot.AppHost/TradingBot.AppHost.csproj" />
   <Project Path="TradingBot.ServiceDefaults/TradingBot.ServiceDefaults.csproj" />
