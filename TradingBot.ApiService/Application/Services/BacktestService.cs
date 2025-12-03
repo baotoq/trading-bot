@@ -134,28 +134,40 @@ public class BacktestService : IBacktestService
 
         try
         {
-            // Get historical 5m candles
+            // Determine timeframe based on strategy
+            var interval = strategyName.ToLowerInvariant() switch
+            {
+                var s when s.Contains("dca") || s.Contains("trend") || s.Contains("spot") => "4h",
+                _ => "5m"
+            };
+
+            // Get historical candles
             var candles = await _context.Candles
                 .Where(c => c.Symbol == symbol &&
-                           c.Interval == "5m" &&
+                           c.Interval == interval &&
                            c.OpenTime >= startDate &&
                            c.OpenTime <= endDate)
                 .OrderBy(c => c.OpenTime)
                 .ToListAsync(cancellationToken);
 
-            if (candles.Count < 100)
+            var minCandles = interval == "4h" ? 200 : 100;
+            if (candles.Count < minCandles)
             {
-                result.Warnings.Add($"Insufficient data: {candles.Count} candles (minimum 100 required)");
+                result.Warnings.Add($"Insufficient data: {candles.Count} candles (minimum {minCandles} required for {interval} timeframe)");
                 return result;
             }
 
-            _logger.LogInformation("Processing {Count} candles", candles.Count);
+            _logger.LogInformation("Processing {Count} candles on {Interval} timeframe", candles.Count, interval);
 
             // Get strategy instance
             var strategy = strategyName.ToLowerInvariant() switch
             {
-                "ema" or "emascalper" or "emamo mentumscalper" =>
+                "ema" or "emascalper" or "ema momentum scalper" =>
                     _serviceProvider.GetRequiredService<EmaMomentumScalperStrategy>(),
+                "btc spot dca" or "dca" or "btcspotdca" =>
+                    _serviceProvider.GetRequiredService<BtcSpotDcaStrategy>(),
+                "btc spot trend" or "trend" or "btcspottrend" =>
+                    _serviceProvider.GetRequiredService<BtcSpotTrendStrategy>(),
                 _ => throw new ArgumentException($"Unknown strategy: {strategyName}")
             };
 
@@ -165,8 +177,8 @@ public class BacktestService : IBacktestService
             var maxDrawdown = 0m;
             BacktestTrade? openTrade = null;
 
-            // Simulate trading on each candle
-            for (int i = 100; i < candles.Count; i++)
+            // Simulate trading on each candle (start after minimum required candles)
+            for (int i = minCandles; i < candles.Count; i++)
             {
                 var currentCandle = candles[i];
                 var historicalCandles = candles.Take(i + 1).ToList();
@@ -175,12 +187,17 @@ public class BacktestService : IBacktestService
                 if (openTrade != null)
                 {
                     // Check if stop-loss or take-profit hit
-                    var exitResult = CheckExit(openTrade, currentCandle);
-                    if (exitResult.ShouldExit)
+                    // For DCA strategy, we don't check exits here (handled by strategy signals)
+                    var isDcaStrategy = strategyName.ToLowerInvariant().Contains("dca");
+                    var exitResult = isDcaStrategy
+                        ? (false, 0m, string.Empty)
+                        : CheckExit(openTrade, currentCandle);
+
+                    if (exitResult.Item1)
                     {
                         openTrade.ExitTime = currentCandle.OpenTime.DateTime;
-                        openTrade.ExitPrice = exitResult.ExitPrice;
-                        openTrade.ExitReason = exitResult.Reason;
+                        openTrade.ExitPrice = exitResult.Item2;
+                        openTrade.ExitReason = exitResult.Item3;
 
                         // Calculate P&L
                         var profitLoss = openTrade.Side == TradeSide.Long
@@ -217,16 +234,19 @@ public class BacktestService : IBacktestService
                 {
                     try
                     {
-                        // Need to check trend alignment (requires 15m data)
-                        var has15mData = await _context.Candles
-                            .AnyAsync(c => c.Symbol == symbol &&
-                                          c.Interval == "15m" &&
-                                          c.OpenTime <= currentCandle.OpenTime,
-                                     cancellationToken);
-
-                        if (!has15mData)
+                        // For 5m strategies, need to check trend alignment (requires 15m data)
+                        if (interval == "5m")
                         {
-                            continue; // Skip if no 15m data for trend filter
+                            var has15mData = await _context.Candles
+                                .AnyAsync(c => c.Symbol == symbol &&
+                                              c.Interval == "15m" &&
+                                              c.OpenTime <= currentCandle.OpenTime,
+                                         cancellationToken);
+
+                            if (!has15mData)
+                            {
+                                continue; // Skip if no 15m data for trend filter
+                            }
                         }
 
                         var signal = await GenerateSignal(strategy, symbol, historicalCandles, cancellationToken);
@@ -235,22 +255,29 @@ public class BacktestService : IBacktestService
                         {
                             // Calculate position parameters
                             var isLong = signal.Type == SignalType.Buy || signal.Type == SignalType.StrongBuy;
-                            var atr = _indicatorService.CalculateATR(historicalCandles.TakeLast(50).ToList(), 14);
-                            var stopLossDistance = 1.5m * atr;
-
                             var entryPrice = signal.Price;
-                            var stopLoss = isLong
-                                ? entryPrice - stopLossDistance
-                                : entryPrice + stopLossDistance;
 
-                            var takeProfit = isLong
-                                ? entryPrice + (2 * stopLossDistance)
-                                : entryPrice - (2 * stopLossDistance);
+                            // Use strategy's stop loss if provided, otherwise calculate default
+                            decimal stopLoss;
+                            if (signal.StopLoss.HasValue && signal.StopLoss.Value > 0)
+                            {
+                                stopLoss = signal.StopLoss.Value;
+                            }
+                            else
+                            {
+                                // DCA strategy: no stop loss, use 15% for position sizing purposes only
+                                var atr = _indicatorService.CalculateATR(historicalCandles.TakeLast(50).ToList(), 14);
+                                var stopLossDistance = isDcaStrategy ? entryPrice * 0.15m : 1.5m * atr;
+                                stopLoss = isLong
+                                    ? entryPrice - stopLossDistance
+                                    : entryPrice + stopLossDistance;
+                            }
 
                             // Position sizing
                             var riskAmount = currentCapital * (riskPercent / 100);
-                            var stopLossPercent = (stopLossDistance / entryPrice) * 100;
-                            var positionSize = riskAmount / (stopLossPercent / 100);
+                            var stopLossDistance = Math.Abs(entryPrice - stopLoss);
+                            var stopLossPercent = (stopLossDistance / entryPrice);
+                            var positionSize = riskAmount / stopLossPercent;
                             var quantity = positionSize / entryPrice;
 
                             openTrade = new BacktestTrade
