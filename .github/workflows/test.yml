@@ -1,15 +1,5 @@
 name: Run Tests
 
-on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
-    branches:
-      - master
-      - main
-
 jobs:
   test:
     name: Build and Test
