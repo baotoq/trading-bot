@@ -23,6 +23,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<IRiskManagementService, RiskManagementService>();
         builder.Services.AddScoped<IBinanceService, BinanceService>();
         builder.Services.AddScoped<IBacktestService, BacktestService>();
+        builder.Services.AddScoped<ILockStore, LockStore>();
 
         // Register real-time services
         builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();

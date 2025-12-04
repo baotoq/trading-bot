@@ -160,7 +160,7 @@ public class BacktestService : IBacktestService
             _logger.LogInformation("Processing {Count} candles on {Interval} timeframe", candles.Count, interval);
 
             // Get strategy instance
-            var strategy = strategyName.ToLowerInvariant() switch
+            IStrategy strategy = strategyName.ToLowerInvariant() switch
             {
                 "ema" or "emascalper" or "ema momentum scalper" =>
                     _serviceProvider.GetRequiredService<EmaMomentumScalperStrategy>(),
@@ -182,13 +182,13 @@ public class BacktestService : IBacktestService
             {
                 var currentCandle = candles[i];
                 var historicalCandles = candles.Take(i + 1).ToList();
+                var isDcaStrategy = strategyName.ToLowerInvariant().Contains("dca");
 
                 // Skip if we have an open trade
                 if (openTrade != null)
                 {
                     // Check if stop-loss or take-profit hit
                     // For DCA strategy, we don't check exits here (handled by strategy signals)
-                    var isDcaStrategy = strategyName.ToLowerInvariant().Contains("dca");
                     var exitResult = isDcaStrategy
                         ? (false, 0m, string.Empty)
                         : CheckExit(openTrade, currentCandle);
@@ -267,10 +267,10 @@ public class BacktestService : IBacktestService
                             {
                                 // DCA strategy: no stop loss, use 15% for position sizing purposes only
                                 var atr = _indicatorService.CalculateATR(historicalCandles.TakeLast(50).ToList(), 14);
-                                var stopLossDistance = isDcaStrategy ? entryPrice * 0.15m : 1.5m * atr;
+                                var stopLossDistance2 = isDcaStrategy ? entryPrice * 0.15m : 1.5m * atr;
                                 stopLoss = isLong
-                                    ? entryPrice - stopLossDistance
-                                    : entryPrice + stopLossDistance;
+                                    ? entryPrice - stopLossDistance2
+                                    : entryPrice + stopLossDistance2;
                             }
 
                             // Position sizing

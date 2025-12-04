@@ -10,37 +10,56 @@ public class SyncHistoricalBackgroundService(
     ILogger<SyncHistoricalBackgroundService> logger
 ) : TimeBackgroundService(logger)
 {
-    private readonly CandleInterval[] _intervals = ["1h", "4h"];
-    private const string Symbol = "BTCUSDT";
+    private readonly Dictionary<CandleInterval, DateTimeOffset> _startTimes = new()
+    {
+        { "15m", DateTimeOffset.Parse("2025-12-01T00:00:00Z") },
+        { "4h", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
+        { "1d", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
+    };
+    private readonly Symbol[] _symbols = [
+        "BTCUSDT",
+    ];
 
-    protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(10);
+    protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(30);
 
     protected override async Task ProcessAsync(CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogInformation("Starting historical data sync for {Symbol} at {Time}", Symbol, DateTime.UtcNow);
+            logger.LogInformation("Starting historical data sync at {Time}", DateTime.UtcNow);
 
             await using var scope = services.CreateAsyncScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var bus = scope.ServiceProvider.GetRequiredService<IEventPublisher>();
 
-            var syncTasks = _intervals.Select(interval =>
-                bus.PublishAsync(new HistoricalDataSyncRequestedIntegrationEvent
+            List<Task> syncTasks = [];
+            foreach (var symbol in _symbols)
+            {
+                syncTasks.AddRange(_startTimes.Keys.Select(async interval =>
                 {
-                    Symbol = Symbol,
-                    Interval = interval
-                }, cancellationToken));
+                    var startTime = _startTimes[interval];
+
+                    var @event = new HistoricalDataSyncRequestedIntegrationEvent
+                    {
+                        Symbol = symbol,
+                        Interval = interval,
+                        StartTime = startTime,
+                    };
+
+                    return bus.PublishAsync(@event, cancellationToken);
+                }));
+
+                logger.LogInformation("Publishing historical data sync request for {Symbol}", symbol);
+            }
 
             await Task.WhenAll(syncTasks);
 
             await context.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("Completed historical data sync for {Symbol}", Symbol);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error syncing historical data for {Symbol}", Symbol);
+            logger.LogError(ex, "Error syncing historical data");
         }
     }
 }

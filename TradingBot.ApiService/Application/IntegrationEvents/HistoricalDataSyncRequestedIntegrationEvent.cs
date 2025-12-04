@@ -1,9 +1,8 @@
-using Binance.Net.Enums;
 using Binance.Net.Interfaces.Clients;
+using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
-using TradingBot.ApiService.BuildingBlocks.Pubsub;
+using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
 
@@ -11,25 +10,35 @@ namespace TradingBot.ApiService.Application.IntegrationEvents;
 
 public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 {
-    public string Symbol { get; init; }
+    public Symbol Symbol { get; init; }
     public CandleInterval Interval { get; init; }
+    public DateTimeOffset StartTime { get; init; } = DateTimeOffset.Parse("2025-01-01T00:00:00Z");
 }
 
 public class HistoricalDataSyncRequestedIntegrationEventHandler(
         ILogger<HistoricalDataSyncRequestedIntegrationEventHandler> logger,
         ApplicationDbContext context,
+        ILockStore lockStore,
         IBinanceRestClient binanceClient
     ) : IIntegrationEventHandler<HistoricalDataSyncRequestedIntegrationEvent>
 {
     public async Task Handle(HistoricalDataSyncRequestedIntegrationEvent notification, CancellationToken cancellationToken)
     {
+        await using var lockResponse = await lockStore.AcquireLockAsync(notification.Symbol + notification.Interval, TimeSpan.FromSeconds(60), cancellationToken);
+
+        if (!lockResponse.Success)
+        {
+            logger.LogWarning("Could not acquire lock for historical data sync of {Symbol}, another process may be handling it", notification.Symbol);
+            return;
+        }
+
         // Get the last candle we have in the database for this symbol/interval
         var lastCandle = await context.Candles
             .Where(c => c.Symbol == notification.Symbol && c.Interval == notification.Interval)
             .OrderByDescending(c => c.OpenTime)
             .FirstOrDefaultAsync(cancellationToken);
 
-        DateTimeOffset startTime = DateTimeOffset.Parse("2025-01-01T00:00:00Z");
+        DateTimeOffset startTime = notification.StartTime;
         if (lastCandle != null)
         {
             // Fetch from the last candle we have (with 1-minute overlap to ensure no gaps)

@@ -76,15 +76,23 @@ public static class WebApplicationExtensions
                     return Results.BadRequest();
                 }
 
-                if (JsonSerializer.Deserialize(daprEvent.Data, sub.EventType, jsonOptions) is not IntegrationEvent message)
+                try
                 {
-                    logger.LogInformation("Received null or invalid message for event type {EventType}", sub.EventType.Name);
-                    return Results.BadRequest();
-                }
+                    if (JsonSerializer.Deserialize(daprEvent.Data, sub.EventType, jsonOptions) is not IntegrationEvent message)
+                    {
+                        logger.LogInformation("Received null or invalid message for event type {EventType}", sub.EventType.Name);
+                        return Results.BadRequest();
+                    }
 
-                logger.LogInformation("Handling message {@Message}", message);
-                await mediator.Publish(message);
-                logger.LogInformation("Handled message successfully");
+                    logger.LogInformation("Handling message {@Message}", message);
+                    await mediator.Publish(message);
+                    logger.LogInformation("Handled message successfully");
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error handling message for event type {EventType}", sub.EventType.Name);
+                    return Results.Ok();
+                }
 
                 return Results.Ok();
             });
