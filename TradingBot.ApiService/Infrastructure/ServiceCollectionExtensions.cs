@@ -1,4 +1,4 @@
-using TradingBot.ApiService.Application.IntegrationEvents;
+using TradingBot.ApiService.Application.Candles.IntegrationEvents;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 using TradingBot.ApiService.Infrastructure.BackgroundServices;
@@ -14,6 +14,7 @@ public static class ServiceCollectionExtensions
             builder.AddNpgsqlDbContext<ApplicationDbContext>("tradingbotdb");
             builder.Services.AddHostedService<DatabaseMigrationBackgroundService>();
             builder.Services.AddHostedService<SyncHistoricalBackgroundService>();
+            builder.Services.AddHostedService<AutoMonitorBackgroundService>();
         }
 
         public void AddPubSubServices()

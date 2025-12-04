@@ -1,10 +1,8 @@
-using Dapr.Client;
-using Microsoft.EntityFrameworkCore;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
+using System.Diagnostics;
 
 namespace TradingBot.ApiService.BuildingBlocks;
 
+[DebuggerStepThrough]
 public abstract class TimeBackgroundService(
         ILogger<TimeBackgroundService> logger
     ) : BackgroundService

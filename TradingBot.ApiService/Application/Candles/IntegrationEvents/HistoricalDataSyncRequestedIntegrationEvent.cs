@@ -6,13 +6,13 @@ using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
 
-namespace TradingBot.ApiService.Application.IntegrationEvents;
+namespace TradingBot.ApiService.Application.Candles.IntegrationEvents;
 
 public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 {
-    public Symbol Symbol { get; init; }
-    public CandleInterval Interval { get; init; }
-    public DateTimeOffset StartTime { get; init; } = DateTimeOffset.Parse("2025-01-01T00:00:00Z");
+    public required Symbol Symbol { get; init; }
+    public required CandleInterval Interval { get; init; }
+    public DateTimeOffset StartTime { get; init; } = DateTimeOffset.Parse("2025-12-01T00:00:00Z");
 }
 
 public class HistoricalDataSyncRequestedIntegrationEventHandler(
@@ -22,34 +22,34 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
         IBinanceRestClient binanceClient
     ) : IIntegrationEventHandler<HistoricalDataSyncRequestedIntegrationEvent>
 {
-    public async Task Handle(HistoricalDataSyncRequestedIntegrationEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(HistoricalDataSyncRequestedIntegrationEvent @event, CancellationToken cancellationToken)
     {
-        await using var lockResponse = await lockStore.AcquireLockAsync(notification.Symbol + notification.Interval, TimeSpan.FromSeconds(60), cancellationToken);
+        await using var lockResponse = await lockStore.AcquireLockAsync(@event.Symbol + @event.Interval, TimeSpan.FromSeconds(60), cancellationToken);
 
         if (!lockResponse.Success)
         {
-            logger.LogWarning("Could not acquire lock for historical data sync of {Symbol}, another process may be handling it", notification.Symbol);
+            logger.LogWarning("Could not acquire lock for historical data sync of {Symbol}, another process may be handling it", @event.Symbol);
             return;
         }
 
         // Get the last candle we have in the database for this symbol/interval
         var lastCandle = await context.Candles
-            .Where(c => c.Symbol == notification.Symbol && c.Interval == notification.Interval)
+            .Where(c => c.Symbol == @event.Symbol && c.Interval == @event.Interval)
             .OrderByDescending(c => c.OpenTime)
             .FirstOrDefaultAsync(cancellationToken);
 
-        DateTimeOffset startTime = notification.StartTime;
+        DateTimeOffset startTime = @event.StartTime;
         if (lastCandle != null)
         {
             // Fetch from the last candle we have (with 1-minute overlap to ensure no gaps)
             startTime = lastCandle.OpenTime.AddMinutes(-1);
             logger.LogInformation("Last candle for {Symbol} {Interval}: {Time}",
-                notification.Symbol, notification.Interval, lastCandle.OpenTime);
+                @event.Symbol, @event.Interval, lastCandle.OpenTime);
         }
 
         var result = await binanceClient.SpotApi.ExchangeData.GetKlinesAsync(
-            notification.Symbol,
-            notification.Interval.ToKlineInterval(),
+            @event.Symbol,
+            @event.Interval.ToKlineInterval(),
             startTime.DateTime,
             null,
             1000,
@@ -64,8 +64,8 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
         // Convert to entities and upsert
         var entities = result.Data.Select(c => new Domain.Candle
         {
-            Symbol = notification.Symbol,
-            Interval = notification.Interval,
+            Symbol = @event.Symbol,
+            Interval = @event.Interval,
             OpenTime = c.OpenTime,
             OpenPrice = c.OpenPrice,
             HighPrice = c.HighPrice,
@@ -107,6 +107,6 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
 
         logger.LogInformation(
             "Synced {Count} candles for {Symbol} {Interval} (saved {SavedCount} changes)",
-            entities.Count, notification.Symbol, notification.Interval, savedCount);
+            entities.Count, @event.Symbol, @event.Interval, savedCount);
     }
 }

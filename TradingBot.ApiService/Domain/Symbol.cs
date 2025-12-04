@@ -1,10 +1,24 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TradingBot.ApiService.Domain;
 
-/// <summary>
-/// Represents a trading symbol with validation
-/// </summary>
+
+public class SymbolJsonConverter : JsonConverter<Symbol>
+{
+    public override Symbol Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var value = reader.GetString();
+        return new Symbol(value!);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Symbol value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.Value);
+    }
+}
+
 public record Symbol : IParsable<Symbol>
 {
     public string Value { get; }

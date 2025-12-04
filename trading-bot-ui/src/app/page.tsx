@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Layout, Typography, Tabs, Space } from "antd";
 import { DashboardOutlined, RocketOutlined, ExperimentOutlined, FundOutlined, ApiOutlined } from "@ant-design/icons";
 import TradingPanel from "@/components/TradingPanel";
@@ -11,6 +12,26 @@ const { Header, Content } = Layout;
 const { Title } = Typography;
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<string>("trading");
+
+  // Load saved active tab from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("dashboard_activeTab");
+      if (saved) {
+        setActiveTab(saved);
+      }
+    }
+  }, []);
+
+  // Save active tab to localStorage whenever it changes
+  const handleTabChange = (key: string) => {
+    setActiveTab(key);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dashboard_activeTab", key);
+    }
+  };
+
   const items = [
     {
       key: "trading",
@@ -67,7 +88,8 @@ export default function Home() {
       <Content className="p-6 bg-gray-100">
         <div className="max-w-7xl mx-auto">
           <Tabs
-            defaultActiveKey="trading"
+            activeKey={activeTab}
+            onChange={handleTabChange}
             items={items}
             size="large"
             className="bg-white p-4 rounded-lg shadow-sm"

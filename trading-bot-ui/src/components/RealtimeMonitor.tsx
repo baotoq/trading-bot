@@ -25,11 +25,29 @@ import {
 import { realtimeApi } from "@/lib/api";
 import type { MonitorStatus } from "@/types/realtime";
 
+const FUTURES_COINS = [
+  { symbol: "BTCUSDT", name: "BTC", color: "#F7931A" },
+  { symbol: "ETHUSDT", name: "ETH", color: "#627EEA" },
+  { symbol: "BNBUSDT", name: "BNB", color: "#F3BA2F" },
+  { symbol: "SOLUSDT", name: "SOL", color: "#14F195" },
+  { symbol: "XRPUSDT", name: "XRP", color: "#23292F" },
+];
+
+const SPOT_COINS = [
+  { symbol: "BTCUSDT", name: "BTC", color: "#F7931A" },
+  { symbol: "ETHUSDT", name: "ETH", color: "#627EEA" },
+  { symbol: "ADAUSDT", name: "ADA", color: "#0033AD" },
+  { symbol: "DOTUSDT", name: "DOT", color: "#E6007A" },
+  { symbol: "LINKUSDT", name: "LINK", color: "#2A5ADA" },
+];
+
 export default function RealtimeMonitor() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [monitors, setMonitors] = useState<MonitorStatus[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState<string>("");
+  const [coinType, setCoinType] = useState<"futures" | "spot">("futures");
 
   const fetchMonitors = async () => {
     setRefreshing(true);
@@ -56,7 +74,7 @@ export default function RealtimeMonitor() {
     try {
       const response = await realtimeApi.startMonitoring({
         symbol: values.symbol.toUpperCase(),
-        interval: values.interval,
+        interval: "1m", // Hardcoded to 1 minute
         strategy: values.strategy,
       });
       message.success(response.message);
@@ -133,17 +151,60 @@ export default function RealtimeMonitor() {
           layout="vertical"
           onFinish={handleStartMonitoring}
           initialValues={{
-            interval: "5m",
             strategy: "EmaMomentumScalper",
           }}
         >
+          {/* Top Coins Selector */}
+          <Form.Item label="Quick Select">
+            <div className="space-y-3">
+              {/* Coin Type Tabs */}
+              <div className="flex gap-2">
+                <Button
+                  type={coinType === "futures" ? "primary" : "default"}
+                  onClick={() => setCoinType("futures")}
+                >
+                  Futures Top 5
+                </Button>
+                <Button
+                  type={coinType === "spot" ? "primary" : "default"}
+                  onClick={() => setCoinType("spot")}
+                >
+                  Spot Top 5
+                </Button>
+              </div>
+
+              {/* Coin Buttons */}
+              <div className="flex flex-wrap gap-2">
+                {(coinType === "futures" ? FUTURES_COINS : SPOT_COINS).map((coin) => (
+                  <Button
+                    key={coin.symbol}
+                    size="large"
+                    type={selectedSymbol === coin.symbol ? "primary" : "default"}
+                    onClick={() => {
+                      setSelectedSymbol(coin.symbol);
+                      form.setFieldValue("symbol", coin.symbol);
+                    }}
+                    className="flex items-center gap-2"
+                    style={{
+                      borderColor: selectedSymbol === coin.symbol ? coin.color : undefined,
+                      backgroundColor: selectedSymbol === coin.symbol ? coin.color : undefined,
+                    }}
+                  >
+                    <span className="font-semibold">{coin.name}</span>
+                    <span className="text-xs opacity-75">{coin.symbol}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </Form.Item>
+
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Form.Item
-                label="Symbol"
+                label="Symbol (or type custom)"
                 name="symbol"
                 rules={[
-                  { required: true, message: "Please enter a symbol" },
+                  { required: true, message: "Please select or enter a symbol" },
                   {
                     pattern: /^[A-Z]+$/,
                     message: "Symbol must be uppercase letters only",
@@ -153,24 +214,12 @@ export default function RealtimeMonitor() {
                 <Input
                   placeholder="e.g., BTCUSDT"
                   size="large"
-                  onChange={(e) =>
-                    form.setFieldValue("symbol", e.target.value.toUpperCase())
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    form.setFieldValue("symbol", value);
+                    setSelectedSymbol(value);
+                  }}
                 />
-              </Form.Item>
-            </div>
-            <div className="flex-1">
-              <Form.Item label="Interval" name="interval">
-                <Select size="large">
-                  <Select.Option value="1m">1 Minute</Select.Option>
-                  <Select.Option value="3m">3 Minutes</Select.Option>
-                  <Select.Option value="5m">5 Minutes</Select.Option>
-                  <Select.Option value="15m">15 Minutes</Select.Option>
-                  <Select.Option value="30m">30 Minutes</Select.Option>
-                  <Select.Option value="1h">1 Hour</Select.Option>
-                  <Select.Option value="4h">4 Hours</Select.Option>
-                  <Select.Option value="1d">1 Day</Select.Option>
-                </Select>
               </Form.Item>
             </div>
             <div className="flex-1">
@@ -198,7 +247,7 @@ export default function RealtimeMonitor() {
                   loading={loading}
                   block
                 >
-                  Start Monitoring
+                  Start Monitoring (1m)
                 </Button>
               </Form.Item>
             </div>
@@ -206,7 +255,7 @@ export default function RealtimeMonitor() {
         </Form>
 
         <Alert
-          message="Note: Signals will be sent to your configured Telegram chat"
+          title="Note: Signals will be sent to your configured Telegram chat"
           type="info"
           showIcon
           className="mt-4"
@@ -307,7 +356,7 @@ export default function RealtimeMonitor() {
         </div>
         <Divider />
         <Alert
-          message="Make sure to configure your Telegram bot token and chat ID in the API settings"
+          title="Make sure to configure your Telegram bot token and chat ID in the API settings"
           type="warning"
           showIcon
         />

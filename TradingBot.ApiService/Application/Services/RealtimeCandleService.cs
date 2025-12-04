@@ -1,22 +1,17 @@
 using Binance.Net.Clients;
-using Binance.Net.Enums;
 using Binance.Net.Interfaces;
-using Binance.Net.Objects.Models.Spot.Socket;
-using CryptoExchange.Net.Sockets;
-using CryptoExchange.Net.Interfaces;
-using CryptoExchange.Net.Objects.Sockets;
-using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Domain;
-using TradingBot.ApiService.Infrastructure;
+using MediatR;
+using TradingBot.ApiService.Application.Candles.DomainEvents;
 
 namespace TradingBot.ApiService.Application.Services;
 
 public interface IRealtimeCandleService
 {
-    Task StartMonitoringAsync(Symbol symbol, string interval, CancellationToken cancellationToken = default);
-    Task StopMonitoringAsync(Symbol symbol, string interval);
-    bool IsMonitoring(Symbol symbol, string interval);
-    IReadOnlyList<(Symbol Symbol, string Interval)> GetActiveMonitors();
+    Task StartMonitoringAsync(Symbol symbol, CandleInterval interval, CancellationToken cancellationToken = default);
+    Task StopMonitoringAsync(Symbol symbol, CandleInterval interval);
+    bool IsMonitoring(Symbol symbol, CandleInterval interval);
+    IReadOnlyList<(Symbol Symbol, CandleInterval Interval)> GetActiveMonitors();
 }
 
 public class RealtimeCandleService : IRealtimeCandleService, IDisposable
@@ -36,7 +31,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         _socketClient = new BinanceSocketClient();
     }
 
-    public async Task StartMonitoringAsync(Symbol symbol, string interval, CancellationToken cancellationToken = default)
+    public async Task StartMonitoringAsync(Symbol symbol, CandleInterval interval, CancellationToken cancellationToken = default)
     {
         var key = GetKey(symbol, interval);
 
@@ -49,13 +44,11 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
                 return;
             }
 
-            var klineInterval = ParseInterval(interval);
-
             _logger.LogInformation("Starting real-time monitoring for {Symbol} on {Interval}", symbol, interval);
 
             var result = await _socketClient.SpotApi.ExchangeData.SubscribeToKlineUpdatesAsync(
                 symbol.Value,
-                klineInterval,
+                interval.ToKlineInterval(),
                 async data => await OnCandleUpdateAsync(data.Data, cancellationToken),
                 cancellationToken);
 
@@ -76,7 +69,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    public async Task StopMonitoringAsync(Symbol symbol, string interval)
+    public async Task StopMonitoringAsync(Symbol symbol, CandleInterval interval)
     {
         var key = GetKey(symbol, interval);
 
@@ -96,19 +89,19 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    public bool IsMonitoring(Symbol symbol, string interval)
+    public bool IsMonitoring(Symbol symbol, CandleInterval interval)
     {
         var key = GetKey(symbol, interval);
         return _subscriptions.ContainsKey(key);
     }
 
-    public IReadOnlyList<(Symbol Symbol, string Interval)> GetActiveMonitors()
+    public IReadOnlyList<(Symbol Symbol, CandleInterval Interval)> GetActiveMonitors()
     {
         return _subscriptions.Keys
             .Select(k =>
             {
                 var parts = k.Split('_');
-                return ((Symbol)parts[0], parts[1]);
+                return (new Symbol(parts[0]), new CandleInterval(parts[1]));
             })
             .ToList();
     }
@@ -128,58 +121,20 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
             _logger.LogDebug("Received completed candle for {Symbol}: Open={Open}, Close={Close}, Volume={Volume}",
                 klineData.Symbol, kline.OpenPrice, kline.ClosePrice, kline.Volume);
 
-            // Create a scope to get scoped services
-            using var scope = _serviceProvider.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await using var scope = _serviceProvider.CreateAsyncScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            // Check if candle already exists
-            var interval = new CandleInterval(klineData.Data.Interval.ToString());
-            var existingCandle = await context.Candles
-                .FirstOrDefaultAsync(c =>
-                    c.Symbol == klineData.Symbol &&
-                    c.Interval == interval &&
-                    c.OpenTime == kline.OpenTime,
-                    cancellationToken);
-
-            if (existingCandle != null)
-            {
-                // Update existing candle
-                existingCandle.OpenPrice = kline.OpenPrice;
-                existingCandle.HighPrice = kline.HighPrice;
-                existingCandle.LowPrice = kline.LowPrice;
-                existingCandle.ClosePrice = kline.ClosePrice;
-                existingCandle.Volume = kline.Volume;
-                existingCandle.CloseTime = kline.CloseTime;
-                existingCandle.UpdatedAt = DateTime.UtcNow;
-
-                _logger.LogDebug("Updated existing candle for {Symbol} at {OpenTime}", klineData.Symbol, kline.OpenTime);
-            }
-            else
-            {
-                // Insert new candle
-                var candle = new Candle
-                {
-                    Symbol = klineData.Symbol,
-                    Interval = new CandleInterval(klineData.Data.Interval.ToString()),
-                    OpenTime = kline.OpenTime,
-                    OpenPrice = kline.OpenPrice,
-                    HighPrice = kline.HighPrice,
-                    LowPrice = kline.LowPrice,
-                    ClosePrice = kline.ClosePrice,
-                    Volume = kline.Volume,
-                    CloseTime = kline.CloseTime
-                };
-
-                context.Candles.Add(candle);
-                _logger.LogInformation("New candle saved for {Symbol} {Interval}: Close=${Close}, Volume={Volume}",
-                    klineData.Symbol, klineData.Data.Interval, kline.ClosePrice, kline.Volume);
-            }
-
-            await context.SaveChangesAsync(cancellationToken);
-
-            // Trigger signal generation for this symbol
-            var signalGenerator = scope.ServiceProvider.GetRequiredService<ISignalGeneratorService>();
-            await signalGenerator.GenerateSignalAsync(klineData.Symbol, cancellationToken);
+            await mediator.Publish(new CandleClosedDomainEvent(
+                klineData.Symbol,
+                new CandleInterval(klineData.Data.Interval.ToString()),
+                kline.OpenTime,
+                kline.CloseTime,
+                kline.OpenPrice,
+                kline.ClosePrice,
+                kline.HighPrice,
+                kline.LowPrice,
+                kline.Volume
+            ));
         }
         catch (Exception ex)
         {
@@ -187,30 +142,7 @@ public class RealtimeCandleService : IRealtimeCandleService, IDisposable
         }
     }
 
-    private static string GetKey(Symbol symbol, string interval) => $"{symbol.Value}_{interval}";
-
-    private static KlineInterval ParseInterval(string interval)
-    {
-        return interval.ToLower() switch
-        {
-            "1m" => KlineInterval.OneMinute,
-            "3m" => KlineInterval.ThreeMinutes,
-            "5m" => KlineInterval.FiveMinutes,
-            "15m" => KlineInterval.FifteenMinutes,
-            "30m" => KlineInterval.ThirtyMinutes,
-            "1h" => KlineInterval.OneHour,
-            "2h" => KlineInterval.TwoHour,
-            "4h" => KlineInterval.FourHour,
-            "6h" => KlineInterval.SixHour,
-            "8h" => KlineInterval.EightHour,
-            "12h" => KlineInterval.TwelveHour,
-            "1d" => KlineInterval.OneDay,
-            "3d" => KlineInterval.ThreeDay,
-            "1w" => KlineInterval.OneWeek,
-            "1M" => KlineInterval.OneMonth,
-            _ => KlineInterval.FiveMinutes
-        };
-    }
+    private static string GetKey(Symbol symbol, CandleInterval interval) => $"{symbol.Value}_{interval}";
 
     public void Dispose()
     {

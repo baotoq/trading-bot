@@ -2,10 +2,12 @@ using Binance.Net;
 using Binance.Net.Clients;
 using Binance.Net.Interfaces.Clients;
 using CryptoExchange.Net.Authentication;
+using Microsoft.AspNetCore.Http.Json;
 using TradingBot.ApiService.Application.Options;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
 using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
+using TradingBot.ApiService.Domain;
 
 namespace TradingBot.ApiService.Application;
 
@@ -15,6 +17,12 @@ public static class ServiceCollectionExtensions
     {
         // Add MediatR for commands and queries
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
+        builder.Services.Configure<JsonOptions>(opts =>
+        {
+            opts.SerializerOptions.Converters.Add(new SymbolJsonConverter());
+            opts.SerializerOptions.Converters.Add(new CandleIntervalJsonConverter());
+        });
 
         // Register trading services
         builder.Services.AddScoped<ITechnicalIndicatorService, TechnicalIndicatorService>();

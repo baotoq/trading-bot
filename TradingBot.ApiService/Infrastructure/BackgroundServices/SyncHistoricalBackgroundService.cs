@@ -1,4 +1,4 @@
-using TradingBot.ApiService.Application.IntegrationEvents;
+using TradingBot.ApiService.Application.Candles.IntegrationEvents;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.Domain;
@@ -12,6 +12,7 @@ public class SyncHistoricalBackgroundService(
 {
     private readonly Dictionary<CandleInterval, DateTimeOffset> _startTimes = new()
     {
+        { "5m", DateTimeOffset.Parse("2025-12-01T00:00:00Z") },
         { "15m", DateTimeOffset.Parse("2025-12-01T00:00:00Z") },
         { "4h", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
         { "1d", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },

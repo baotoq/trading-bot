@@ -48,7 +48,7 @@ public class SignalGeneratorService : ISignalGeneratorService
             _logger.LogInformation("Generating signal for {Symbol} using {Strategy}", symbol, strategyName);
 
             // Create a scope to get scoped services
-            using var scope = _serviceProvider.CreateScope();
+            await using var scope = _serviceProvider.CreateAsyncScope();
 
             // Get the strategy based on the strategy name
             IStrategy? strategy = strategyName.ToLower() switch
@@ -69,7 +69,7 @@ public class SignalGeneratorService : ISignalGeneratorService
             // Check if signal is actionable (not HOLD)
             if (signal.Type == SignalType.Hold)
             {
-                _logger.LogDebug("Signal for {Symbol} is HOLD, not sending notification", symbol);
+                _logger.LogInformation("Signal for {Symbol} is HOLD, not sending notification", symbol);
                 return;
             }
 
