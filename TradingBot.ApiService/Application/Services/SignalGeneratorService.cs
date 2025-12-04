@@ -1,3 +1,5 @@
+using MediatR;
+using TradingBot.ApiService.Application.Signals.DomainEvents;
 using TradingBot.ApiService.Application.Strategies;
 using TradingBot.ApiService.Domain;
 
@@ -15,7 +17,6 @@ public interface ISignalGeneratorService
 public class SignalGeneratorService : ISignalGeneratorService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ITelegramNotificationService _telegramService;
     private readonly ILogger<SignalGeneratorService> _logger;
     private readonly Dictionary<Symbol, string> _enabledNotifications = new(); // symbol -> strategy name
     private readonly Dictionary<Symbol, DateTime> _lastSignalTime = new(); // symbol -> last signal time
@@ -25,11 +26,9 @@ public class SignalGeneratorService : ISignalGeneratorService
 
     public SignalGeneratorService(
         IServiceProvider serviceProvider,
-        ITelegramNotificationService telegramService,
         ILogger<SignalGeneratorService> logger)
     {
         _serviceProvider = serviceProvider;
-        _telegramService = telegramService;
         _logger = logger;
     }
 
@@ -84,12 +83,13 @@ public class SignalGeneratorService : ISignalGeneratorService
             _lastSignalTime[symbol] = DateTime.UtcNow;
             _lastSignalType[symbol] = signal.Type;
 
-            // Send notification to Telegram
-            await _telegramService.SendSignalNotificationAsync(signal, cancellationToken);
-
             _logger.LogInformation(
-                "Signal notification sent for {Symbol}: {Type} (Confidence: {Confidence}%)",
+                "Signal generated for {Symbol}: {Type} (Confidence: {Confidence}%)",
                 symbol, signal.Type, signal.Confidence * 100);
+
+            // Publish domain event (handlers will take care of notifications)
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await mediator.Publish(new TradingSignalGeneratedDomainEvent(signal), cancellationToken);
         }
         catch (Exception ex)
         {
