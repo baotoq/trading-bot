@@ -1,6 +1,9 @@
 using Binance.Net.Enums;
 using MediatR;
+using TradingBot.ApiService.Application.Orders.DomainEvents;
+using TradingBot.ApiService.Application.Positions.DomainEvents;
 using TradingBot.ApiService.Application.Queries;
+using TradingBot.ApiService.Application.Risk.DomainEvents;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
 using TradingBot.ApiService.Domain;
@@ -132,6 +135,17 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
 
             if (!riskCheck.IsApproved)
             {
+                // Publish TradeRejectedDomainEvent
+                await _mediator.Publish(new TradeRejectedDomainEvent(
+                    signal.Symbol,
+                    signal.Type,
+                    riskCheck.RejectionReason ?? "Risk check failed",
+                    riskCheck.Violations,
+                    signal.Confidence,
+                    signal.Strategy,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.Success = false;
                 result.Message = $"Risk check failed: {riskCheck.RejectionReason}";
                 result.Warnings = riskCheck.Violations;
@@ -147,6 +161,17 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
             // Check if can open new position
             if (!await _riskManagementService.CanOpenNewPositionAsync(request.Symbol, cancellationToken))
             {
+                // Publish TradeRejectedDomainEvent
+                await _mediator.Publish(new TradeRejectedDomainEvent(
+                    signal.Symbol,
+                    signal.Type,
+                    "Cannot open new position - existing position or max positions reached",
+                    new List<string> { "MaxPositionsReached" },
+                    signal.Confidence,
+                    signal.Strategy,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.Success = false;
                 result.Message = "Cannot open new position - existing position or max positions reached";
                 return result;
@@ -297,6 +322,40 @@ public class ExecuteTradeCommandHandler : IRequestHandler<ExecuteTradeCommand, E
             _logger.LogInformation(
                 "Position saved successfully: PositionId={PositionId}",
                 position.Id);
+
+            // Publish PositionOpenedDomainEvent
+            await _mediator.Publish(new PositionOpenedDomainEvent(
+                position.Id,
+                position.Symbol,
+                position.Side,
+                position.EntryPrice,
+                position.Quantity,
+                position.StopLoss,
+                position.TakeProfit1,
+                position.TakeProfit2,
+                position.TakeProfit3,
+                position.Leverage,
+                position.RiskAmount,
+                position.Strategy,
+                position.SignalReason,
+                position.EntryOrderId,
+                position.EntryTime ?? DateTime.UtcNow
+            ), cancellationToken);
+
+            // Publish OrderFilledDomainEvent for entry order
+            if (entryOrder.IsSuccess)
+            {
+                await _mediator.Publish(new OrderFilledDomainEvent(
+                    position.Symbol,
+                    entryOrder.OrderId,
+                    side,
+                    FuturesOrderType.Market,
+                    position.Quantity,
+                    entryOrder.Price ?? position.EntryPrice,
+                    0, // Commission not tracked in this version
+                    DateTime.UtcNow
+                ), cancellationToken);
+            }
 
             // Success result
             result.Success = true;
