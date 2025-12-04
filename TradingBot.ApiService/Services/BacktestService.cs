@@ -94,18 +94,18 @@ public class BacktestService : IBacktestService
 {
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IStrategyFactory _strategyFactory;
     private readonly ILogger<BacktestService> _logger;
 
     public BacktestService(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
-        IServiceProvider serviceProvider,
+        IStrategyFactory strategyFactory,
         ILogger<BacktestService> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
-        _serviceProvider = serviceProvider;
+        _strategyFactory = strategyFactory;
         _logger = logger;
     }
 
@@ -134,12 +134,13 @@ public class BacktestService : IBacktestService
 
         try
         {
-            // Determine timeframe based on strategy
-            var interval = strategyName.ToLowerInvariant() switch
-            {
-                var s when s.Contains("dca") || s.Contains("trend") || s.Contains("spot") => "4h",
-                _ => "5m"
-            };
+            // Parse string to enum
+            var strategyEnum = _strategyFactory.ParseStrategyName(strategyName);
+
+            // Get strategy metadata and instance
+            var metadata = _strategyFactory.GetMetadata(strategyEnum);
+            var strategy = _strategyFactory.GetStrategy(strategyEnum);
+            var interval = metadata.DefaultInterval.Value;
 
             // Get historical candles
             var candles = await _context.Candles
@@ -157,19 +158,8 @@ public class BacktestService : IBacktestService
                 return result;
             }
 
-            _logger.LogInformation("Processing {Count} candles on {Interval} timeframe", candles.Count, interval);
-
-            // Get strategy instance
-            IStrategy strategy = strategyName.ToLowerInvariant() switch
-            {
-                "ema" or "emascalper" or "ema momentum scalper" =>
-                    _serviceProvider.GetRequiredService<EmaMomentumScalperStrategy>(),
-                "btc spot dca" or "dca" or "btcspotdca" =>
-                    _serviceProvider.GetRequiredService<BtcSpotDcaStrategy>(),
-                "btc spot trend" or "trend" or "btcspottrend" =>
-                    _serviceProvider.GetRequiredService<BtcSpotTrendStrategy>(),
-                _ => throw new ArgumentException($"Unknown strategy: {strategyName}")
-            };
+            _logger.LogInformation("Processing {Count} candles on {Interval} timeframe for {Strategy}",
+                candles.Count, interval, metadata.DisplayName);
 
             var currentCapital = initialCapital;
             var equity = initialCapital;

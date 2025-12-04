@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         {
             opts.SerializerOptions.Converters.Add(new SymbolJsonConverter());
             opts.SerializerOptions.Converters.Add(new CandleIntervalJsonConverter());
+            opts.SerializerOptions.Converters.Add(new StrategyNameJsonConverter());
         });
 
         // Register trading services
@@ -36,14 +37,19 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<IRealtimeCandleService, RealtimeCandleService>();
         builder.Services.AddSingleton<ISignalGeneratorService, SignalGeneratorService>();
 
-        // Register strategies
+        // Register strategy factory
+        builder.Services.AddSingleton<IStrategyFactory, StrategyFactory>();
+
+        // Register strategies (needed for factory resolution)
         builder.Services.AddScoped<EmaMomentumScalperStrategy>();
-        builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
-
+        builder.Services.AddScoped<BollingerSqueezeStrategy>();
+        builder.Services.AddScoped<RsiDivergenceStrategy>();
         builder.Services.AddScoped<BtcSpotDcaStrategy>();
-        builder.Services.AddScoped<IStrategy, BtcSpotDcaStrategy>();
-
         builder.Services.AddScoped<BtcSpotTrendStrategy>();
+
+        // Register as IStrategy for collection injection (if needed)
+        builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
+        builder.Services.AddScoped<IStrategy, BtcSpotDcaStrategy>();
         builder.Services.AddScoped<IStrategy, BtcSpotTrendStrategy>();
 
         // Configure Binance API clients
