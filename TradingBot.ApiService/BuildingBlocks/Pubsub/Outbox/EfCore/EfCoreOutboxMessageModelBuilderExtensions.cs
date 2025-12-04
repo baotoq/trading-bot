@@ -11,6 +11,7 @@ public static class EfCoreOutboxMessageModelBuilderExtensions
         {
             EntityTypeBuilder<OutboxMessage> outbox = modelBuilder.Entity<OutboxMessage>();
 
+            outbox.ToTable("OutboxMessages");
             outbox.HasKey(p => p.Id);
             outbox.HasIndex(p => p.ProcessingStatus);
 

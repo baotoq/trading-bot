@@ -8,6 +8,8 @@ using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Endpoints;
 using TradingBot.ApiService.Infrastructure;
 using TradingBot.ServiceDefaults;
+using TradingBot.ApiService.Application.Options;
+using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -45,8 +47,11 @@ try
         });
     });
 
-    builder.AddApplicationServices();
+    builder.Services.AddDistributedLock();
     builder.AddPubSubServices();
+    builder.AddApplicationOptions();
+
+    builder.AddApplicationServices();
     builder.AddPersistentServices();
 
     var app = builder.Build();

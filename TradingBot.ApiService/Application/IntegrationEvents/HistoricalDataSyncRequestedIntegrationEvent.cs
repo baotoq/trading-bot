@@ -1,7 +1,7 @@
 using Binance.Net.Interfaces.Clients;
 using Dapr.Client;
 using Microsoft.EntityFrameworkCore;
-using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
@@ -18,7 +18,7 @@ public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 public class HistoricalDataSyncRequestedIntegrationEventHandler(
         ILogger<HistoricalDataSyncRequestedIntegrationEventHandler> logger,
         ApplicationDbContext context,
-        ILockStore lockStore,
+        IDistributedLock lockStore,
         IBinanceRestClient binanceClient
     ) : IIntegrationEventHandler<HistoricalDataSyncRequestedIntegrationEvent>
 {

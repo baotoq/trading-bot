@@ -5,6 +5,7 @@ using CryptoExchange.Net.Authentication;
 using TradingBot.ApiService.Application.Options;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Strategies;
+using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 
 namespace TradingBot.ApiService.Application;
 
@@ -15,15 +16,12 @@ public static class ServiceCollectionExtensions
         // Add MediatR for commands and queries
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-        builder.AddApplicationOptions();
-
         // Register trading services
         builder.Services.AddScoped<ITechnicalIndicatorService, TechnicalIndicatorService>();
         builder.Services.AddScoped<IPositionCalculatorService, PositionCalculatorService>();
         builder.Services.AddScoped<IRiskManagementService, RiskManagementService>();
         builder.Services.AddScoped<IBinanceService, BinanceService>();
         builder.Services.AddScoped<IBacktestService, BacktestService>();
-        builder.Services.AddScoped<ILockStore, LockStore>();
 
         // Register real-time services
         builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();

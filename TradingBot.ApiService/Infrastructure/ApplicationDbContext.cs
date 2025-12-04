@@ -11,7 +11,6 @@ public class ApplicationDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Candle> Candles => Set<Candle>();
     public DbSet<Position> Positions => Set<Position>();
     public DbSet<TradeLog> TradeLogs => Set<TradeLog>();
-    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -15,6 +15,7 @@
     <PackageReference Include="Binance.Net" Version="11.11.0" />
     <PackageReference Include="CryptoExchange.Net" Version="9.13.0" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.16.1" />
+    <PackageReference Include="Dapr.DistributedLock" Version="1.16.1" />
     <PackageReference Include="MediatR" Version="13.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.0.1" />
