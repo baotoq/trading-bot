@@ -1,4 +1,6 @@
+using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.Application.Risk.DomainEvents;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
 
@@ -26,6 +28,7 @@ public class RiskManagementService : IRiskManagementService
 {
     private readonly ApplicationDbContext _context;
     private readonly IBinanceService _binanceService;
+    private readonly IMediator _mediator;
     private readonly ILogger<RiskManagementService> _logger;
     private readonly IConfiguration _configuration;
 
@@ -43,11 +46,13 @@ public class RiskManagementService : IRiskManagementService
     public RiskManagementService(
         ApplicationDbContext context,
         IBinanceService binanceService,
+        IMediator mediator,
         ILogger<RiskManagementService> logger,
         IConfiguration configuration)
     {
         _context = context;
         _binanceService = binanceService;
+        _mediator = mediator;
         _logger = logger;
         _configuration = configuration;
     }
@@ -67,6 +72,15 @@ public class RiskManagementService : IRiskManagementService
             var consecutiveLosses = await GetConsecutiveLossesAsync(cancellationToken);
             if (consecutiveLosses >= MaxConsecutiveLosses)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "MaxConsecutiveLosses",
+                    $"Max consecutive losses reached ({consecutiveLosses}/{MaxConsecutiveLosses})",
+                    consecutiveLosses,
+                    MaxConsecutiveLosses,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Max consecutive losses reached ({consecutiveLosses}/{MaxConsecutiveLosses})";
                 result.Violations.Add(result.RejectionReason);
@@ -82,6 +96,15 @@ public class RiskManagementService : IRiskManagementService
             var todayTrades = await GetTodayTradeCountAsync(cancellationToken);
             if (todayTrades >= MaxDailyTrades)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "MaxDailyTrades",
+                    $"Max daily trades reached ({todayTrades}/{MaxDailyTrades})",
+                    todayTrades,
+                    MaxDailyTrades,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Max daily trades reached ({todayTrades}/{MaxDailyTrades})";
                 result.Violations.Add(result.RejectionReason);
@@ -92,6 +115,15 @@ public class RiskManagementService : IRiskManagementService
             var todayDrawdown = await GetTodayDrawdownPercentAsync(cancellationToken);
             if (todayDrawdown >= MaxDailyDrawdownPercent)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "MaxDailyDrawdown",
+                    $"Max daily drawdown reached ({todayDrawdown:F2}%/{MaxDailyDrawdownPercent}%)",
+                    todayDrawdown,
+                    MaxDailyDrawdownPercent,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Max daily drawdown reached ({todayDrawdown:F2}%/{MaxDailyDrawdownPercent}%)";
                 result.Violations.Add(result.RejectionReason);
@@ -106,6 +138,15 @@ public class RiskManagementService : IRiskManagementService
             // Check 4: Risk per trade (must be between 2% and 4%)
             if (parameters.StopLossPercent < MinRiskPerTradePercent)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "StopLossTooTight",
+                    $"Stop-loss too tight ({parameters.StopLossPercent:F2}% < {MinRiskPerTradePercent}%)",
+                    parameters.StopLossPercent,
+                    MinRiskPerTradePercent,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Stop-loss too tight ({parameters.StopLossPercent:F2}% < {MinRiskPerTradePercent}%)";
                 result.Violations.Add(result.RejectionReason);
@@ -114,6 +155,15 @@ public class RiskManagementService : IRiskManagementService
 
             if (parameters.StopLossPercent > MaxRiskPerTradePercent)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "StopLossTooWide",
+                    $"Stop-loss too wide ({parameters.StopLossPercent:F2}% > {MaxRiskPerTradePercent}%)",
+                    parameters.StopLossPercent,
+                    MaxRiskPerTradePercent,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Stop-loss too wide ({parameters.StopLossPercent:F2}% > {MaxRiskPerTradePercent}%)";
                 result.Violations.Add(result.RejectionReason);
@@ -124,6 +174,15 @@ public class RiskManagementService : IRiskManagementService
             var openPositions = await GetOpenPositionsCountAsync(cancellationToken);
             if (openPositions >= MaxConcurrentPositions)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "MaxConcurrentPositions",
+                    $"Max concurrent positions reached ({openPositions}/{MaxConcurrentPositions})",
+                    openPositions,
+                    MaxConcurrentPositions,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Max concurrent positions reached ({openPositions}/{MaxConcurrentPositions})";
                 result.Violations.Add(result.RejectionReason);
@@ -138,6 +197,15 @@ public class RiskManagementService : IRiskManagementService
 
             if (newExposurePercent > MaxTotalExposurePercent)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "MaxTotalExposure",
+                    $"Total exposure would exceed limit ({newExposurePercent:F2}% > {MaxTotalExposurePercent}%)",
+                    newExposurePercent,
+                    MaxTotalExposurePercent,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Total exposure would exceed limit ({newExposurePercent:F2}% > {MaxTotalExposurePercent}%)";
                 result.Violations.Add(result.RejectionReason);
@@ -150,6 +218,15 @@ public class RiskManagementService : IRiskManagementService
 
             if (riskRewardRatio < MinRiskRewardRatio)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "RiskRewardRatioTooLow",
+                    $"Risk/reward ratio too low ({riskRewardRatio:F2} < {MinRiskRewardRatio})",
+                    riskRewardRatio,
+                    MinRiskRewardRatio,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Risk/reward ratio too low ({riskRewardRatio:F2} < {MinRiskRewardRatio})";
                 result.Violations.Add(result.RejectionReason);
@@ -159,6 +236,15 @@ public class RiskManagementService : IRiskManagementService
             // Check 8: Signal confidence
             if (signal.Confidence < 0.5m)
             {
+                await _mediator.Publish(new RiskViolationDetectedDomainEvent(
+                    signal.Symbol,
+                    "SignalConfidenceTooLow",
+                    $"Signal confidence too low ({signal.Confidence * 100:F0}% < 50%)",
+                    signal.Confidence * 100,
+                    50m,
+                    DateTime.UtcNow
+                ), cancellationToken);
+
                 result.IsApproved = false;
                 result.RejectionReason = $"Signal confidence too low ({signal.Confidence * 100:F0}% < 50%)";
                 result.Violations.Add(result.RejectionReason);
