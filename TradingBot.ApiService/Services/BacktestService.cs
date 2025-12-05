@@ -95,17 +95,20 @@ public class BacktestService : IBacktestService
     private readonly ApplicationDbContext _context;
     private readonly ITechnicalIndicatorService _indicatorService;
     private readonly IStrategyFactory _strategyFactory;
+    private readonly IInMemoryCandleCache _memoryCache;
     private readonly ILogger<BacktestService> _logger;
 
     public BacktestService(
         ApplicationDbContext context,
         ITechnicalIndicatorService indicatorService,
         IStrategyFactory strategyFactory,
+        IInMemoryCandleCache memoryCache,
         ILogger<BacktestService> logger)
     {
         _context = context;
         _indicatorService = indicatorService;
         _strategyFactory = strategyFactory;
+        _memoryCache = memoryCache;
         _logger = logger;
     }
 
@@ -142,14 +145,7 @@ public class BacktestService : IBacktestService
             var strategy = _strategyFactory.GetStrategy(strategyEnum);
             var interval = metadata.DefaultInterval.Value;
 
-            // Get historical candles
-            var candles = await _context.Candles
-                .Where(c => c.Symbol == symbol &&
-                           c.Interval == interval &&
-                           c.OpenTime >= startDate &&
-                           c.OpenTime <= endDate)
-                .OrderBy(c => c.OpenTime)
-                .ToListAsync(cancellationToken);
+            var candles = await _memoryCache.GetCandlesAsync(symbol, interval, startDate, endDate, cancellationToken);
 
             var minCandles = interval == "4h" ? 200 : 100;
             if (candles.Count < minCandles)

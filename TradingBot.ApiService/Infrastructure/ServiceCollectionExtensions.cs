@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
             builder.Services.AddHostedService<DatabaseMigrationBackgroundService>();
             builder.Services.AddHostedService<SyncHistoricalBackgroundService>();
             builder.Services.AddHostedService<AutoMonitorBackgroundService>();
+            builder.Services.AddHostedService<CandlePreloadBackgroundService>();
         }
 
         public void AddPubSubServices()

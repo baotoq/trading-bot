@@ -36,6 +36,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ITelegramNotificationService, TelegramNotificationService>();
         builder.Services.AddSingleton<IRealtimeCandleService, RealtimeCandleService>();
         builder.Services.AddSingleton<ISignalGeneratorService, SignalGeneratorService>();
+        builder.Services.AddSingleton<ICandleCacheService, CandleCacheService>();
+        builder.Services.AddSingleton<IInMemoryCandleCache, InMemoryCandleCache>();
 
         // Register strategy factory
         builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();

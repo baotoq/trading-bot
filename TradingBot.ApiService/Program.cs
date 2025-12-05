@@ -55,6 +55,8 @@ try
     builder.AddPubSubServices();
     builder.AddApplicationOptions();
 
+    builder.AddRedisDistributedCache("redis");
+
     builder.AddApplicationServices();
     builder.AddPersistentServices();
 

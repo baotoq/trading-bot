@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Domain;
 using TradingBot.ApiService.Infrastructure;
@@ -21,7 +22,9 @@ public record CandleClosedDomainEvent(
 public class CaptureCandleOnCandleClosedHandler(
         ILogger<CaptureCandleOnCandleClosedHandler> logger,
         ApplicationDbContext context,
-        IMediator mediator
+        IMediator mediator,
+        ICandleCacheService cacheService,
+        IInMemoryCandleCache memoryCache
     ) : INotificationHandler<CandleClosedDomainEvent>
 {
     public async Task Handle(CandleClosedDomainEvent @event, CancellationToken cancellationToken)
@@ -74,6 +77,9 @@ public class CaptureCandleOnCandleClosedHandler(
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        await cacheService.InvalidateCandlesAsync(candle.Symbol, candle.Interval, cancellationToken);
+        memoryCache.Invalidate(candle.Symbol, candle.Interval);
 
         await mediator.Publish(new CandleCapturedDomainEvent(existingCandle), cancellationToken);
     }
