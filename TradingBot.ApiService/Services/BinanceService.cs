@@ -43,6 +43,8 @@ public interface IBinanceService
     Task<decimal> GetCurrentPriceAsync(Symbol symbol, CancellationToken cancellationToken = default);
 
     Task<FundingRateInfo> GetFundingRateInfoAsync(Symbol symbol, CancellationToken cancellationToken = default);
+
+    Task<List<FundingRateInfo>> GetAllFundingRatesAsync(CancellationToken cancellationToken = default);
 }
 
 public class BinanceOrderResult
@@ -104,10 +106,12 @@ public class BinanceSpotOrderResult
 
 public class FundingRateInfo
 {
+    public Symbol Symbol { get; set; } = string.Empty;
     public decimal FundingRate { get; set; }
     public DateTime NextFundingTime { get; set; }
     public int MinutesToNextFunding { get; set; }
     public decimal EstimatedAnnualizedRate { get; set; }
+    public decimal MarkPrice { get; set; }
 }
 
 public class BinanceService : IBinanceService
@@ -501,21 +505,65 @@ public class BinanceService : IBinanceService
 
                 return new FundingRateInfo
                 {
+                    Symbol = symbol,
                     FundingRate = data.FundingRate ?? 0m,
                     NextFundingTime = nextFundingTime,
                     MinutesToNextFunding = Math.Max(0, minutesToNext),
-                    // Annualized rate: funding rate * 3 times/day * 365 days
-                    EstimatedAnnualizedRate = (data.FundingRate ?? 0m) * 3 * 365
+                    EstimatedAnnualizedRate = (data.FundingRate ?? 0m) * 3 * 365,
+                    MarkPrice = data.MarkPrice
                 };
             }
 
             _logger.LogWarning("Failed to fetch funding rate info: {Error}", result.Error?.Message);
-            return new FundingRateInfo();
+            return new FundingRateInfo { Symbol = symbol };
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception fetching funding rate info for {Symbol}", symbol);
-            return new FundingRateInfo();
+            return new FundingRateInfo { Symbol = symbol };
+        }
+    }
+
+    public async Task<List<FundingRateInfo>> GetAllFundingRatesAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Fetching all funding rates");
+
+        try
+        {
+            var result = await _client.UsdFuturesApi.ExchangeData.GetMarkPricesAsync(ct: cancellationToken);
+
+            if (result.Success && result.Data != null)
+            {
+                var fundingRates = result.Data
+                    .Where(d => d.Symbol.EndsWith("USDT")) // Only USDT perpetuals
+                    .Select(data =>
+                    {
+                        var nextFundingTime = data.NextFundingTime ?? DateTime.UtcNow.AddHours(8);
+                        var minutesToNext = (int)(nextFundingTime - DateTime.UtcNow).TotalMinutes;
+
+                        return new FundingRateInfo
+                        {
+                            Symbol = data.Symbol,
+                            FundingRate = data.FundingRate ?? 0m,
+                            NextFundingTime = nextFundingTime,
+                            MinutesToNextFunding = Math.Max(0, minutesToNext),
+                            EstimatedAnnualizedRate = (data.FundingRate ?? 0m) * 3 * 365,
+                            MarkPrice = data.MarkPrice
+                        };
+                    })
+                    .ToList();
+
+                _logger.LogInformation("Fetched funding rates for {Count} symbols", fundingRates.Count);
+                return fundingRates;
+            }
+
+            _logger.LogWarning("Failed to fetch all funding rates: {Error}", result.Error?.Message);
+            return new List<FundingRateInfo>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception fetching all funding rates");
+            return new List<FundingRateInfo>();
         }
     }
 }

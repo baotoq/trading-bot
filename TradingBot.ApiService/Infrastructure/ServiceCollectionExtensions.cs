@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
             builder.Services.AddHostedService<SyncHistoricalBackgroundService>();
             builder.Services.AddHostedService<AutoMonitorBackgroundService>();
             builder.Services.AddHostedService<CandlePreloadBackgroundService>();
+            builder.Services.AddHostedService<FundingRateScannerBackgroundService>();
         }
 
         public void AddPubSubServices()
