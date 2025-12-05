@@ -12,7 +12,7 @@ public class MarketCondition
     public bool IsLowVolatility { get; set; }
     public bool CanTrade { get; set; }
     public string Reason { get; set; } = string.Empty;
-    public DateTime Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
 
     // Trend information
     public bool IsBullish { get; set; }

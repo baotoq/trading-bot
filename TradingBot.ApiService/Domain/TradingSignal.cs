@@ -9,7 +9,7 @@ public class TradingSignal
     public string Strategy { get; set; } = string.Empty;
     public string Reason { get; set; } = string.Empty;
     public Dictionary<string, decimal> Indicators { get; set; } = new();
-    public DateTime Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
 
     // Additional properties for entry management
     public decimal? EntryPrice { get; set; }

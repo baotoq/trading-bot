@@ -8,8 +8,8 @@ namespace TradingBot.ApiService.Application.Requests;
 public record BacktestRequest(
     Symbol Symbol,
     string Strategy,
-    DateTime StartDate,
-    DateTime EndDate,
+    DateTimeOffset StartDate,
+    DateTimeOffset EndDate,
     decimal InitialCapital = 10000m,
     decimal RiskPercent = 1.5m);
 
@@ -19,7 +19,7 @@ public record BacktestRequest(
 public record CompareRequest(
     Symbol Symbol,
     List<string> Strategies,
-    DateTime StartDate,
-    DateTime EndDate,
+    DateTimeOffset StartDate,
+    DateTimeOffset EndDate,
     decimal InitialCapital = 10000m,
     decimal RiskPercent = 1.5m);

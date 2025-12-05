@@ -38,17 +38,16 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<ISignalGeneratorService, SignalGeneratorService>();
 
         // Register strategy factory
-        builder.Services.AddSingleton<IStrategyFactory, StrategyFactory>();
+        builder.Services.AddScoped<IStrategyFactory, StrategyFactory>();
 
-        // Register strategies (needed for factory resolution)
         builder.Services.AddScoped<EmaMomentumScalperStrategy>();
         builder.Services.AddScoped<BollingerSqueezeStrategy>();
         builder.Services.AddScoped<RsiDivergenceStrategy>();
         builder.Services.AddScoped<BtcSpotDcaStrategy>();
         builder.Services.AddScoped<BtcSpotTrendStrategy>();
-
-        // Register as IStrategy for collection injection (if needed)
         builder.Services.AddScoped<IStrategy, EmaMomentumScalperStrategy>();
+        builder.Services.AddScoped<IStrategy, BollingerSqueezeStrategy>();
+        builder.Services.AddScoped<IStrategy, RsiDivergenceStrategy>();
         builder.Services.AddScoped<IStrategy, BtcSpotDcaStrategy>();
         builder.Services.AddScoped<IStrategy, BtcSpotTrendStrategy>();
 

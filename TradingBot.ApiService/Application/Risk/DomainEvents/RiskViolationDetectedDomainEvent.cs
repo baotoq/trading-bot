@@ -11,7 +11,7 @@ public record RiskViolationDetectedDomainEvent(
     string Description,
     decimal CurrentValue,
     decimal ThresholdValue,
-    DateTime DetectedAt
+    DateTimeOffset DetectedAt
 ) : IDomainEvent;
 
 public class SendRiskViolationAlertHandler(

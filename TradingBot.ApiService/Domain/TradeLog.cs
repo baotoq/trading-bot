@@ -10,7 +10,7 @@ public class TradeLog : AuditedEntity
     public TradeSide Side { get; set; }
 
     // Entry details
-    public DateTime EntryTime { get; set; }
+    public DateTimeOffset EntryTime { get; set; }
     public decimal EntryPrice { get; set; }
     public decimal Quantity { get; set; }
     public decimal StopLoss { get; set; }

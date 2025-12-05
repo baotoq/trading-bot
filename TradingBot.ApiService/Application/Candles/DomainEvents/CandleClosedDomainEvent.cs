@@ -9,8 +9,8 @@ namespace TradingBot.ApiService.Application.Candles.DomainEvents;
 public record CandleClosedDomainEvent(
     Symbol Symbol,
     CandleInterval Interval,
-    DateTime OpenTime,
-    DateTime CloseTime,
+    DateTimeOffset OpenTime,
+    DateTimeOffset CloseTime,
     decimal OpenPrice,
     decimal ClosePrice,
     decimal HighPrice,

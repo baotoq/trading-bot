@@ -11,7 +11,7 @@ public record OrderFailedDomainEvent(
     OrderSide Side,
     FuturesOrderType Type,
     string ErrorMessage,
-    DateTime FailedAt
+    DateTimeOffset FailedAt
 ) : IDomainEvent;
 
 public class SendOrderFailedAlertHandler(

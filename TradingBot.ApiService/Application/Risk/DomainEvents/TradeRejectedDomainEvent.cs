@@ -11,7 +11,7 @@ public record TradeRejectedDomainEvent(
     List<string> Violations,
     decimal Confidence,
     string Strategy,
-    DateTime RejectedAt
+    DateTimeOffset RejectedAt
 ) : IDomainEvent;
 
 public class LogTradeRejectedHandler(

@@ -13,7 +13,7 @@ public record OrderFilledDomainEvent(
     decimal Quantity,
     decimal FilledPrice,
     decimal Commission,
-    DateTime FilledAt
+    DateTimeOffset FilledAt
 ) : IDomainEvent;
 
 public class LogOrderFilledHandler(

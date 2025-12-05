@@ -56,7 +56,7 @@ namespace TradingBot.ApiService.Migrations
 
                     b.HasIndex("ProcessingStatus");
 
-                    b.ToTable("OutboxMessages");
+                    b.ToTable("OutboxMessages", (string)null);
                 });
 
             modelBuilder.Entity("TradingBot.ApiService.Domain.Candle", b =>
@@ -69,13 +69,13 @@ namespace TradingBot.ApiService.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTimeOffset>("OpenTime")
+                    b.Property<DateTime>("OpenTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("ClosePrice")
                         .HasColumnType("numeric");
 
-                    b.Property<DateTimeOffset>("CloseTime")
+                    b.Property<DateTime>("CloseTime")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("CreatedAt")

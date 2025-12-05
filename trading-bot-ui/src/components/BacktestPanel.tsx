@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Form, Input, Button, InputNumber, DatePicker, message, Table, Statistic, Select } from "antd";
+import { Card, Form, Button, InputNumber, DatePicker, message, Table, Statistic, Select } from "antd";
 import { ExperimentOutlined } from "@ant-design/icons";
 import { tradingApi } from "@/lib/api";
 import type { BacktestResult } from "@/types";
@@ -115,9 +115,15 @@ export default function BacktestPanel() {
             <Form.Item
               label="Symbol"
               name="symbol"
-              rules={[{ required: true, message: "Please enter a symbol" }]}
+              rules={[{ required: true, message: "Please select a symbol" }]}
             >
-              <Input placeholder="e.g., BTCUSDT" size="large" />
+              <Select size="large" placeholder="Select a trading pair" showSearch>
+                <Select.Option value="BTCUSDT">BTC/USDT - Bitcoin</Select.Option>
+                <Select.Option value="ETHUSDT">ETH/USDT - Ethereum</Select.Option>
+                <Select.Option value="BNBUSDT">BNB/USDT - Binance Coin</Select.Option>
+                <Select.Option value="SOLUSDT">SOL/USDT - Solana</Select.Option>
+                <Select.Option value="XRPUSDT">XRP/USDT - Ripple</Select.Option>
+              </Select>
             </Form.Item>
           </div>
           <div className="flex-1">

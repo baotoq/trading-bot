@@ -20,7 +20,7 @@ public record PositionOpenedDomainEvent(
     string Strategy,
     string SignalReason,
     long? EntryOrderId,
-    DateTime EntryTime
+    DateTimeOffset EntryTime
 ) : IDomainEvent;
 
 public class SendPositionOpenedNotificationHandler(

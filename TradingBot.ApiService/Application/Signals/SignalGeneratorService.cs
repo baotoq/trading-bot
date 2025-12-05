@@ -16,7 +16,6 @@ public interface ISignalGeneratorService
 
 public class SignalGeneratorService : ISignalGeneratorService
 {
-    private readonly IStrategyFactory _strategyFactory;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<SignalGeneratorService> _logger;
     private readonly Dictionary<Symbol, string> _enabledNotifications = new(); // symbol -> strategy name
@@ -26,11 +25,9 @@ public class SignalGeneratorService : ISignalGeneratorService
     private readonly TimeSpan _cooldownPeriod = TimeSpan.FromMinutes(5); // Don't spam same signal within 5 minutes
 
     public SignalGeneratorService(
-        IStrategyFactory strategyFactory,
         IServiceProvider serviceProvider,
         ILogger<SignalGeneratorService> logger)
     {
-        _strategyFactory = strategyFactory;
         _serviceProvider = serviceProvider;
         _logger = logger;
     }
@@ -51,15 +48,16 @@ public class SignalGeneratorService : ISignalGeneratorService
 
             // Create a scope to get scoped services
             await using var scope = _serviceProvider.CreateAsyncScope();
+            var strategyFactory = scope.ServiceProvider.GetRequiredService<IStrategyFactory>();
 
             // Parse strategy name and get strategy instance
-            if (!_strategyFactory.TryParseStrategyName(strategyName, out var strategyEnum))
+            if (!strategyFactory.TryParseStrategyName(strategyName, out var strategyEnum))
             {
                 _logger.LogWarning("Strategy {Strategy} not found for {Symbol}", strategyName, symbol);
                 return;
             }
 
-            var strategy = _strategyFactory.GetStrategy(strategyEnum);
+            var strategy = strategyFactory.GetStrategy(strategyEnum);
 
             // Analyze and generate signal
             var signal = await strategy.AnalyzeAsync(symbol, cancellationToken);

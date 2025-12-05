@@ -41,7 +41,7 @@ public class BinanceOrderResult
     public OrderStatus Status { get; set; }
     public string? ErrorMessage { get; set; }
     public bool IsSuccess { get; set; }
-    public DateTime Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
 }
 
 public class BinanceAccountBalance

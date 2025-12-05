@@ -16,6 +16,10 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
+AppContext.SetSwitch("System.Globalization.EnforceGenericTimeZone", true);
+TimeZoneInfo.ClearCachedData();
+Environment.SetEnvironmentVariable("TZ", "UTC");
+
 try
 {
     Log.Information("Starting application");

@@ -10,8 +10,8 @@ public interface IBacktestService
     Task<BacktestResult> RunBacktestAsync(
         Symbol symbol,
         string strategyName,
-        DateTime startDate,
-        DateTime endDate,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
         decimal initialCapital = 10000m,
         decimal riskPercent = 1.5m,
         CancellationToken cancellationToken = default);
@@ -19,8 +19,8 @@ public interface IBacktestService
     Task<ComparisonResult> CompareStrategiesAsync(
         Symbol symbol,
         List<string> strategies,
-        DateTime startDate,
-        DateTime endDate,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
         decimal initialCapital = 10000m,
         decimal riskPercent = 1.5m,
         CancellationToken cancellationToken = default);
@@ -28,10 +28,10 @@ public interface IBacktestService
 
 public class BacktestResult
 {
-    public string StrategyName { get; set; } = string.Empty;
-    public Symbol Symbol { get; set; } = string.Empty;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public string StrategyName { get; set; }
+    public Symbol Symbol { get; set; }
+    public DateTimeOffset StartDate { get; set; }
+    public DateTimeOffset EndDate { get; set; }
     public decimal InitialCapital { get; set; }
     public decimal FinalCapital { get; set; }
     public decimal NetProfit { get; set; }
@@ -65,8 +65,8 @@ public class BacktestResult
 
 public class BacktestTrade
 {
-    public DateTime EntryTime { get; set; }
-    public DateTime ExitTime { get; set; }
+    public DateTimeOffset EntryTime { get; set; }
+    public DateTimeOffset ExitTime { get; set; }
     public TradeSide Side { get; set; }
     public decimal EntryPrice { get; set; }
     public decimal ExitPrice { get; set; }
@@ -81,8 +81,8 @@ public class BacktestTrade
 public class ComparisonResult
 {
     public Symbol Symbol { get; set; } = string.Empty;
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public DateTimeOffset StartDate { get; set; }
+    public DateTimeOffset EndDate { get; set; }
     public List<BacktestResult> Results { get; set; } = new();
     public string BestStrategy { get; set; } = string.Empty;
     public string BestByWinRate { get; set; } = string.Empty;
@@ -112,8 +112,8 @@ public class BacktestService : IBacktestService
     public async Task<BacktestResult> RunBacktestAsync(
         Symbol symbol,
         string strategyName,
-        DateTime startDate,
-        DateTime endDate,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
         decimal initialCapital = 10000m,
         decimal riskPercent = 1.5m,
         CancellationToken cancellationToken = default)
@@ -185,7 +185,7 @@ public class BacktestService : IBacktestService
 
                     if (exitResult.Item1)
                     {
-                        openTrade.ExitTime = currentCandle.OpenTime.DateTime;
+                        openTrade.ExitTime = currentCandle.OpenTime;
                         openTrade.ExitPrice = exitResult.Item2;
                         openTrade.ExitReason = exitResult.Item3;
 
@@ -272,7 +272,7 @@ public class BacktestService : IBacktestService
 
                             openTrade = new BacktestTrade
                             {
-                                EntryTime = currentCandle.OpenTime.DateTime,
+                                EntryTime = currentCandle.OpenTime,
                                 Side = isLong ? TradeSide.Long : TradeSide.Short,
                                 EntryPrice = entryPrice,
                                 Quantity = quantity
@@ -294,7 +294,7 @@ public class BacktestService : IBacktestService
             if (openTrade != null)
             {
                 var lastCandle = candles.Last();
-                openTrade.ExitTime = lastCandle.OpenTime.DateTime;
+                openTrade.ExitTime = lastCandle.OpenTime;
                 openTrade.ExitPrice = lastCandle.ClosePrice;
                 openTrade.ExitReason = "End of backtest period";
 
@@ -362,8 +362,8 @@ public class BacktestService : IBacktestService
     public async Task<ComparisonResult> CompareStrategiesAsync(
         Symbol symbol,
         List<string> strategies,
-        DateTime startDate,
-        DateTime endDate,
+        DateTimeOffset startDate,
+        DateTimeOffset endDate,
         decimal initialCapital = 10000m,
         decimal riskPercent = 1.5m,
         CancellationToken cancellationToken = default)

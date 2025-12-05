@@ -41,7 +41,6 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
         DateTimeOffset startTime = @event.StartTime;
         if (lastCandle != null)
         {
-            // Fetch from the last candle we have (with 1-minute overlap to ensure no gaps)
             startTime = lastCandle.OpenTime.AddMinutes(-1);
             logger.LogInformation("Last candle for {Symbol} {Interval}: {Time}",
                 @event.Symbol, @event.Interval, lastCandle.OpenTime);
@@ -50,7 +49,7 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
         var result = await binanceClient.SpotApi.ExchangeData.GetKlinesAsync(
             @event.Symbol,
             @event.Interval.ToKlineInterval(),
-            startTime.DateTime,
+            startTime.UtcDateTime,
             null,
             1000,
             cancellationToken);
