@@ -27,12 +27,45 @@ This is a professional crypto trading system built with .NET 10.0, supporting bo
    - [RiskManagementService.cs](TradingBot.ApiService/Application/Services/RiskManagementService.cs) - Enforces risk limits
    - [BinanceService.cs](TradingBot.ApiService/Application/Services/BinanceService.cs) - Binance API integration
    - [BacktestService.cs](TradingBot.ApiService/Application/Services/BacktestService.cs) - Historical strategy testing
+   - [RealtimeCandleService.cs](TradingBot.ApiService/Services/RealtimeCandleService.cs) - WebSocket live candle monitoring
+   - [TelegramNotificationService.cs](TradingBot.ApiService/Application/Services/TelegramNotificationService.cs) - Telegram alerts and notifications
 
 3. **Domain Models**
    - [TradingSignal.cs](TradingBot.ApiService/Domain/TradingSignal.cs) - Trading signals with confidence
    - [Position.cs](TradingBot.ApiService/Domain/Position.cs) - Active position tracking
    - [TradeLog.cs](TradingBot.ApiService/Domain/TradeLog.cs) - Complete trade history
    - [MarketCondition.cs](TradingBot.ApiService/Domain/MarketCondition.cs) - Market regime analysis
+
+4. **Event-Driven Architecture** (NEW)
+
+   The system uses MediatR domain events for decoupled, reactive behavior:
+
+   **Signal Events:**
+   - [TradingSignalGeneratedDomainEvent](TradingBot.ApiService/Application/Signals/DomainEvents/TradingSignalGeneratedDomainEvent.cs) - Published when strategy generates a signal
+
+   **Position Events:**
+   - [PositionOpenedDomainEvent](TradingBot.ApiService/Application/Positions/DomainEvents/PositionOpenedDomainEvent.cs) - Position successfully opened
+   - [PositionClosedDomainEvent](TradingBot.ApiService/Application/Positions/DomainEvents/PositionClosedDomainEvent.cs) - Position fully closed
+   - [PositionPartiallyFilledDomainEvent](TradingBot.ApiService/Application/Positions/DomainEvents/PositionPartiallyFilledDomainEvent.cs) - Partial TP hit
+
+   **Order Events:**
+   - [OrderFilledDomainEvent](TradingBot.ApiService/Application/Orders/DomainEvents/OrderFilledDomainEvent.cs) - Order execution confirmed
+   - [OrderFailedDomainEvent](TradingBot.ApiService/Application/Orders/DomainEvents/OrderFailedDomainEvent.cs) - Order execution failed
+
+   **Risk Events:**
+   - [RiskViolationDetectedDomainEvent](TradingBot.ApiService/Application/Risk/DomainEvents/RiskViolationDetectedDomainEvent.cs) - Risk rule violation
+   - [TradeRejectedDomainEvent](TradingBot.ApiService/Application/Risk/DomainEvents/TradeRejectedDomainEvent.cs) - Trade rejected by risk management
+
+   **Candle Events:**
+   - [CandleClosedDomainEvent](TradingBot.ApiService/Application/Candles/DomainEvents/CandleClosedDomainEvent.cs) - Real-time candle completed
+   - [CandleCapturedDomainEvent](TradingBot.ApiService/Application/Candles/DomainEvents/CandleCapturedDomainEvent.cs) - Historical candle stored
+
+   **Event Handlers:**
+   Each domain event has dedicated handlers that react to events:
+   - Send Telegram notifications
+   - Update database records
+   - Trigger follow-up actions
+   - Log important events
 
 ## Risk Management Rules
 
@@ -114,6 +147,30 @@ Example with $10,000 account, 2.5% risk:
 ### Backtest Endpoints
 - `POST /api/backtest/run` - Run single strategy backtest
 - `POST /api/backtest/compare` - Compare multiple strategies
+
+### Real-time Monitoring Endpoints (NEW)
+- `POST /realtime/monitor/start` - Start WebSocket monitoring for a symbol/interval
+- `POST /realtime/monitor/stop` - Stop monitoring
+- `GET /realtime/monitor/active` - List all active monitors
+- `GET /realtime/monitor/status` - Check if monitoring a specific symbol/interval
+
+**Example: Start monitoring BTCUSDT on 4h candles**
+```json
+POST /realtime/monitor/start
+{
+  "symbol": "BTCUSDT",
+  "interval": "4h",
+  "strategy": "BTC Spot DCA",
+  "autoTrade": false  // Paper trading mode
+}
+```
+
+When a candle closes, the system:
+1. Publishes `CandleClosedDomainEvent`
+2. Triggers strategy analysis if configured
+3. Generates trading signals if conditions met
+4. Sends Telegram notifications
+5. Executes trades if `autoTrade: true`
 
 ## Technical Indicators Used
 
@@ -351,17 +408,55 @@ POST /realtime/monitor/start
 4. Analyze trade-by-trade results
 5. Never skip validation phases
 
-## Logging
+## Logging & Notifications
 
-All phases log to console via Serilog:
+### Console Logging (Serilog)
+All phases log to console:
 - Market analysis results
 - Signal detection with confidence
 - Position calculations
 - Risk validations
 - Order execution status
+- Real-time candle updates
+- Domain event processing
 - Errors with full context
 
-Check logs to debug issues or understand decisions.
+### Telegram Notifications (NEW)
+
+The system sends automated Telegram alerts for critical events:
+
+**Signal Notifications:**
+- Trading signals generated (Buy/Sell/StrongBuy/StrongSell)
+- Signal confidence and reasoning
+- Current market conditions
+
+**Position Notifications:**
+- Position opened (entry price, SL, TPs, leverage)
+- Position closed (P&L, duration, outcome)
+- Partial fills (TP1/TP2/TP3 hit)
+
+**Risk Alerts:**
+- Risk violations detected
+- Trade rejections with reasons
+- Daily drawdown warnings
+- Consecutive loss alerts
+
+**Order Updates:**
+- Order filled confirmations
+- Order failures with error details
+
+**Configuration:**
+Set Telegram credentials in `appsettings.json`:
+```json
+{
+  "Telegram": {
+    "BotToken": "your-bot-token",
+    "ChatId": "your-chat-id"
+  }
+}
+```
+
+Check logs and Telegram for real-time updates on trading activity.
 
 ## Recent Updates (December 2024)
 
@@ -372,6 +467,10 @@ Check logs to debug issues or understand decisions.
 4. **Paper Trading Mode** - Real-time monitoring without execution (`autoTrade: false`)
 5. **Validation Documentation** - Complete guide with metrics and thresholds
 6. **Test Suite** - 50+ HTTP test examples for all strategies
+7. **Event-Driven Architecture** - Domain events for Position, Risk, Order, Signal, and Candle lifecycle
+8. **Real-time WebSocket Service** - Live candle monitoring via Binance WebSocket
+9. **Telegram Notifications** - Automated alerts for signals, positions, and risk violations
+10. **Auto-monitoring for BTCUSDT** - Automatic real-time tracking on startup
 
 ### Strategy Portfolio
 - **Futures/Scalping:** 4 strategies (EMA Momentum, Bollinger Squeeze, RSI Divergence, VWAP)
@@ -391,9 +490,12 @@ Check logs to debug issues or understand decisions.
 1. ~~Add BTC spot strategies~~ ✅ Completed
 2. ~~Implement paper trading mode~~ ✅ Completed
 3. ~~Create validation system~~ ✅ Completed
-4. Add real-time position monitoring dashboard
-5. Implement automated trailing stop adjustments
-6. Add multi-symbol support for DCA strategy
+4. ~~Event-driven architecture~~ ✅ Completed
+5. ~~Real-time WebSocket monitoring~~ ✅ Completed
+6. ~~Telegram notifications~~ ✅ Completed
+7. Add real-time position monitoring dashboard
+8. Implement automated trailing stop adjustments
+9. Add multi-symbol support for DCA strategy
 
 ### Medium-term Goals
 1. Create web dashboard for performance metrics
@@ -501,7 +603,38 @@ POST /realtime/monitor/start
 - API Settings: `TradingBot.ApiService/appsettings.json`
 - DI Registration: `TradingBot.ApiService/Application/ServiceCollectionExtensions.cs`
 
+## System Architecture Highlights
+
+### Event-Driven Design Benefits
+
+1. **Decoupling:** Strategies, risk management, and notifications are independent
+2. **Extensibility:** Add new event handlers without modifying core logic
+3. **Observability:** All critical events are logged and can trigger alerts
+4. **Testing:** Easy to test individual handlers in isolation
+5. **Reliability:** Event failures don't break main trading workflow
+
+### Real-time Monitoring Flow
+
+```
+Binance WebSocket → CandleClosedDomainEvent → Strategy Analysis → TradingSignalGeneratedDomainEvent
+                                                                              ↓
+                                                                    Risk Validation
+                                                                              ↓
+                                                                    PositionOpenedDomainEvent
+                                                                              ↓
+                                                                    Telegram Notification
+```
+
+### Notification Flow
+
+Every domain event can trigger multiple handlers:
+- **Logging Handler:** Write to console/file logs
+- **Telegram Handler:** Send user notifications
+- **Database Handler:** Persist event data
+- **Metrics Handler:** Update performance tracking
+- **Custom Handlers:** Add your own reactions
+
 ---
 
 **Last Updated:** December 2024
-**Current Version:** v2.0 (with BTC Spot Strategies & Validation System)
+**Current Version:** v2.1 (with Event-Driven Architecture & Real-time Monitoring)
