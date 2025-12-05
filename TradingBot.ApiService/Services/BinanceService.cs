@@ -28,6 +28,21 @@ public interface IBinanceService
     Task<bool> SetLeverageAsync(Symbol symbol, int leverage, CancellationToken cancellationToken = default);
 
     Task<BinancePositionInfo?> GetPositionAsync(Symbol symbol, CancellationToken cancellationToken = default);
+
+    // Spot trading methods for delta-neutral hedging
+    Task<BinanceSpotOrderResult> PlaceSpotOrderAsync(
+        Symbol symbol,
+        OrderSide side,
+        SpotOrderType orderType,
+        decimal quantity,
+        decimal? price = null,
+        CancellationToken cancellationToken = default);
+
+    Task<decimal> GetSpotBalanceAsync(string asset, CancellationToken cancellationToken = default);
+
+    Task<decimal> GetCurrentPriceAsync(Symbol symbol, CancellationToken cancellationToken = default);
+
+    Task<FundingRateInfo> GetFundingRateInfoAsync(Symbol symbol, CancellationToken cancellationToken = default);
 }
 
 public class BinanceOrderResult
@@ -70,6 +85,29 @@ public enum OrderStatus
     Canceled,
     Rejected,
     Expired
+}
+
+public class BinanceSpotOrderResult
+{
+    public long OrderId { get; set; }
+    public Symbol Symbol { get; set; } = string.Empty;
+    public OrderSide Side { get; set; }
+    public SpotOrderType Type { get; set; }
+    public decimal Quantity { get; set; }
+    public decimal? Price { get; set; }
+    public decimal ExecutedQuantity { get; set; }
+    public OrderStatus Status { get; set; }
+    public string? ErrorMessage { get; set; }
+    public bool IsSuccess { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
+}
+
+public class FundingRateInfo
+{
+    public decimal FundingRate { get; set; }
+    public DateTime NextFundingTime { get; set; }
+    public int MinutesToNextFunding { get; set; }
+    public decimal EstimatedAnnualizedRate { get; set; }
 }
 
 public class BinanceService : IBinanceService
@@ -329,5 +367,155 @@ public class BinanceService : IBinanceService
             Binance.Net.Enums.OrderStatus.Expired => OrderStatus.Expired,
             _ => OrderStatus.New
         };
+    }
+
+    public async Task<BinanceSpotOrderResult> PlaceSpotOrderAsync(
+        Symbol symbol,
+        OrderSide side,
+        SpotOrderType orderType,
+        decimal quantity,
+        decimal? price = null,
+        CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation(
+            "Placing spot order: {Symbol} {Side} {Type} Qty={Quantity} Price={Price}",
+            symbol, side, orderType, quantity, price);
+
+        try
+        {
+            var result = await _client.SpotApi.Trading.PlaceOrderAsync(
+                symbol: symbol.Value,
+                side: side,
+                type: orderType,
+                quantity: quantity,
+                price: price,
+                ct: cancellationToken);
+
+            if (result.Success && result.Data != null)
+            {
+                _logger.LogInformation(
+                    "Spot order placed successfully: OrderId={OrderId}, Status={Status}",
+                    result.Data.Id, result.Data.Status);
+
+                return new BinanceSpotOrderResult
+                {
+                    OrderId = result.Data.Id,
+                    Symbol = result.Data.Symbol,
+                    Side = result.Data.Side,
+                    Type = result.Data.Type,
+                    Quantity = result.Data.Quantity,
+                    ExecutedQuantity = result.Data.QuantityFilled,
+                    Price = result.Data.Price,
+                    Status = MapOrderStatus(result.Data.Status),
+                    IsSuccess = true,
+                    Timestamp = result.Data.CreateTime
+                };
+            }
+            else
+            {
+                _logger.LogError("Spot order placement failed: {Error}", result.Error?.Message);
+                return new BinanceSpotOrderResult
+                {
+                    IsSuccess = false,
+                    ErrorMessage = result.Error?.Message ?? "Unknown error",
+                    Timestamp = DateTime.UtcNow
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception placing spot order for {Symbol}", symbol);
+            return new BinanceSpotOrderResult
+            {
+                IsSuccess = false,
+                ErrorMessage = ex.Message,
+                Timestamp = DateTime.UtcNow
+            };
+        }
+    }
+
+    public async Task<decimal> GetSpotBalanceAsync(string asset, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Fetching spot balance for {Asset}", asset);
+
+        try
+        {
+            var result = await _client.SpotApi.Account.GetAccountInfoAsync(ct: cancellationToken);
+
+            if (result.Success && result.Data != null)
+            {
+                var balance = result.Data.Balances.FirstOrDefault(b => b.Asset == asset);
+                return balance?.Available ?? 0m;
+            }
+
+            _logger.LogWarning("Failed to fetch spot balance: {Error}", result.Error?.Message);
+            return 0m;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception fetching spot balance for {Asset}", asset);
+            return 0m;
+        }
+    }
+
+    public async Task<decimal> GetCurrentPriceAsync(Symbol symbol, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Fetching current price for {Symbol}", symbol);
+
+        try
+        {
+            var result = await _client.SpotApi.ExchangeData.GetPriceAsync(
+                symbol: symbol.Value,
+                ct: cancellationToken);
+
+            if (result.Success && result.Data != null)
+            {
+                return result.Data.Price;
+            }
+
+            _logger.LogWarning("Failed to fetch price: {Error}", result.Error?.Message);
+            return 0m;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception fetching price for {Symbol}", symbol);
+            return 0m;
+        }
+    }
+
+    public async Task<FundingRateInfo> GetFundingRateInfoAsync(Symbol symbol, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Fetching funding rate info for {Symbol}", symbol);
+
+        try
+        {
+            var result = await _client.UsdFuturesApi.ExchangeData.GetMarkPriceAsync(
+                symbol: symbol.Value,
+                ct: cancellationToken);
+
+            if (result.Success && result.Data != null)
+            {
+                var data = result.Data;
+                var nextFundingTime = data.NextFundingTime ?? DateTime.UtcNow.AddHours(8);
+                var minutesToNext = (int)(nextFundingTime - DateTime.UtcNow).TotalMinutes;
+
+                return new FundingRateInfo
+                {
+                    FundingRate = data.FundingRate ?? 0m,
+                    NextFundingTime = nextFundingTime,
+                    MinutesToNextFunding = Math.Max(0, minutesToNext),
+                    // Annualized rate: funding rate * 3 times/day * 365 days
+                    EstimatedAnnualizedRate = (data.FundingRate ?? 0m) * 3 * 365
+                };
+            }
+
+            _logger.LogWarning("Failed to fetch funding rate info: {Error}", result.Error?.Message);
+            return new FundingRateInfo();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception fetching funding rate info for {Symbol}", symbol);
+            return new FundingRateInfo();
+        }
     }
 }
