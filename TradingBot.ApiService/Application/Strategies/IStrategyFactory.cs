@@ -8,7 +8,8 @@ public enum StrategyName
     BollingerSqueeze,
     RsiDivergence,
     BtcSpotDca,
-    BtcSpotTrend
+    BtcSpotTrend,
+    FundingRateArbitrage
 }
 
 public interface IStrategyFactory
@@ -34,5 +35,6 @@ public class StrategyMetadata
 public enum StrategyType
 {
     FuturesScalping,
-    SpotLongTerm
+    SpotLongTerm,
+    FundingArbitrage
 }

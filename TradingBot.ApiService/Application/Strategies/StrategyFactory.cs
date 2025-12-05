@@ -47,6 +47,14 @@ public class StrategyFactory : IStrategyFactory
             DefaultInterval = new CandleInterval("4h"),
             Description = "Swing trading strategy with trend following for BTC spot",
             Type = StrategyType.SpotLongTerm
+        },
+        [StrategyName.FundingRateArbitrage] = new()
+        {
+            Name = StrategyName.FundingRateArbitrage,
+            DisplayName = "Funding Rate Arbitrage",
+            DefaultInterval = new CandleInterval("1h"),
+            Description = "Low-risk strategy that profits from funding rate payments by entering positions before settlement",
+            Type = StrategyType.FundingArbitrage
         }
     };
 
@@ -141,6 +149,7 @@ public class StrategyFactory : IStrategyFactory
             StrategyName.RsiDivergence => _serviceProvider.GetRequiredService<RsiDivergenceStrategy>(),
             StrategyName.BtcSpotDca => _serviceProvider.GetRequiredService<BtcSpotDcaStrategy>(),
             StrategyName.BtcSpotTrend => _serviceProvider.GetRequiredService<BtcSpotTrendStrategy>(),
+            StrategyName.FundingRateArbitrage => _serviceProvider.GetRequiredService<FundingRateArbitrageStrategy>(),
             _ => throw new ArgumentException($"Strategy '{strategyName}' is registered but not implemented")
         };
     }
