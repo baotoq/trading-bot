@@ -12,7 +12,10 @@ public record HistoricalDataSyncRequestedIntegrationEvent : IntegrationEvent
 {
     public required Symbol Symbol { get; init; }
     public required CandleInterval Interval { get; init; }
-    public DateTimeOffset StartTime { get; init; } = DateTimeOffset.Parse("2025-12-01T00:00:00Z");
+    /// <summary>
+    /// The earliest date to sync data from. Defaults to 3 months ago.
+    /// </summary>
+    public DateTimeOffset StartTime { get; init; } = DateTimeOffset.UtcNow.AddMonths(-3);
 }
 
 public class HistoricalDataSyncRequestedIntegrationEventHandler(
