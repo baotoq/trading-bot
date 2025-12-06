@@ -10,15 +10,13 @@ public class SyncHistoricalBackgroundService(
     ILogger<SyncHistoricalBackgroundService> logger
 ) : TimeBackgroundService(logger)
 {
-    // Minimum 3 months of historical data for all intervals
-    private static readonly DateTimeOffset ThreeMonthsAgo = DateTimeOffset.UtcNow.AddMonths(-3);
-
     private readonly Dictionary<CandleInterval, DateTimeOffset> _startTimes = new()
     {
-        // Short timeframes: 3 months of data
-        { "5m", ThreeMonthsAgo },
-        { "15m", ThreeMonthsAgo },
-        // Longer timeframes: 1 year of data for better trend analysis
+        // 5m: 1 month (sufficient for scalping strategies)
+        { "5m", DateTimeOffset.UtcNow.AddMonths(-1) },
+        // 15m: 3 months
+        { "15m", DateTimeOffset.UtcNow.AddMonths(-3) },
+        // Longer timeframes: 1 year for trend analysis
         { "4h", DateTimeOffset.UtcNow.AddYears(-1) },
         { "1d", DateTimeOffset.UtcNow.AddYears(-1) },
     };
