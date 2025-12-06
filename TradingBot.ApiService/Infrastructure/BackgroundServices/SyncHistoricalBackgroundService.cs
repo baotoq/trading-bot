@@ -10,12 +10,17 @@ public class SyncHistoricalBackgroundService(
     ILogger<SyncHistoricalBackgroundService> logger
 ) : TimeBackgroundService(logger)
 {
+    // Minimum 3 months of historical data for all intervals
+    private static readonly DateTimeOffset ThreeMonthsAgo = DateTimeOffset.UtcNow.AddMonths(-3);
+
     private readonly Dictionary<CandleInterval, DateTimeOffset> _startTimes = new()
     {
-        { "5m", DateTimeOffset.Parse("2025-12-01T00:00:00Z") },
-        { "15m", DateTimeOffset.Parse("2025-12-01T00:00:00Z") },
-        { "4h", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
-        { "1d", DateTimeOffset.Parse("2025-01-01T00:00:00Z") },
+        // Short timeframes: 3 months of data
+        { "5m", ThreeMonthsAgo },
+        { "15m", ThreeMonthsAgo },
+        // Longer timeframes: 1 year of data for better trend analysis
+        { "4h", DateTimeOffset.UtcNow.AddYears(-1) },
+        { "1d", DateTimeOffset.UtcNow.AddYears(-1) },
     };
     private readonly Symbol[] _symbols = [
         "BTCUSDT",
