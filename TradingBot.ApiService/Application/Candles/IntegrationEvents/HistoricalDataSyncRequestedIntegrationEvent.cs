@@ -32,25 +32,44 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
             return;
         }
 
-        // Get the last candle we have in the database for this symbol/interval
-        var lastCandle = await context.Candles
+        // Sync from END to START (newest to oldest)
+        // Get the oldest candle we have in the database for this symbol/interval
+        var oldestCandle = await context.Candles
             .Where(c => c.Symbol == @event.Symbol && c.Interval == @event.Interval)
-            .OrderByDescending(c => c.OpenTime)
+            .OrderBy(c => c.OpenTime)
             .FirstOrDefaultAsync(cancellationToken);
 
-        DateTimeOffset startTime = @event.StartTime;
-        if (lastCandle != null)
+        // End time is either the oldest candle we have, or current time if no data exists
+        DateTimeOffset endTime;
+        if (oldestCandle != null)
         {
-            startTime = lastCandle.OpenTime.AddMinutes(-1);
-            logger.LogInformation("Last candle for {Symbol} {Interval}: {Time}",
-                @event.Symbol, @event.Interval, lastCandle.OpenTime);
+            // We have data - fetch older data (before our oldest candle)
+            endTime = oldestCandle.OpenTime.AddMinutes(-1);
+            logger.LogInformation("Oldest candle for {Symbol} {Interval}: {Time}, fetching older data",
+                @event.Symbol, @event.Interval, oldestCandle.OpenTime);
+        }
+        else
+        {
+            // No data - start from now
+            endTime = DateTimeOffset.UtcNow;
+            logger.LogInformation("No existing candles for {Symbol} {Interval}, starting from now",
+                @event.Symbol, @event.Interval);
         }
 
+        // Don't fetch if we've already reached the start time
+        if (endTime <= @event.StartTime)
+        {
+            logger.LogInformation("Historical sync complete for {Symbol} {Interval} - reached start time {StartTime}",
+                @event.Symbol, @event.Interval, @event.StartTime);
+            return;
+        }
+
+        // Fetch candles from Binance (from StartTime to EndTime, limited to 1000)
         var result = await binanceClient.SpotApi.ExchangeData.GetKlinesAsync(
             @event.Symbol,
             @event.Interval.ToKlineInterval(),
-            startTime.UtcDateTime,
-            null,
+            @event.StartTime.UtcDateTime,
+            endTime.UtcDateTime,
             1000,
             cancellationToken);
 
@@ -104,8 +123,11 @@ public class HistoricalDataSyncRequestedIntegrationEventHandler(
 
         var savedCount = await context.SaveChangesAsync(cancellationToken);
 
+        var oldestFetched = entities.MinBy(e => e.OpenTime)?.OpenTime;
+        var newestFetched = entities.MaxBy(e => e.OpenTime)?.OpenTime;
+
         logger.LogInformation(
-            "Synced {Count} candles for {Symbol} {Interval} (saved {SavedCount} changes)",
-            entities.Count, @event.Symbol, @event.Interval, savedCount);
+            "Synced {Count} candles for {Symbol} {Interval} (saved {SavedCount} changes) | Range: {Oldest} to {Newest}",
+            entities.Count, @event.Symbol, @event.Interval, savedCount, oldestFetched, newestFetched);
     }
 }
