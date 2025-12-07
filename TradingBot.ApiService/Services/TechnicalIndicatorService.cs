@@ -6,7 +6,9 @@ public interface ITechnicalIndicatorService
 {
     decimal CalculateSMA(List<Candle> candles, int period);
     decimal CalculateEMA(List<Candle> candles, int period);
+    List<decimal> CalculateEMASeries(List<Candle> candles, int period);
     decimal CalculateRSI(List<Candle> candles, int period = 14);
+    List<decimal> CalculateRSISeries(List<Candle> candles, int period = 14, int count = 5);
     (decimal macd, decimal signal, decimal histogram) CalculateMACD(
         List<Candle> candles,
         int fastPeriod = 12,
@@ -22,10 +24,36 @@ public interface ITechnicalIndicatorService
     decimal GetSwingHigh(List<Candle> candles, int lookback = 10);
     decimal GetSwingLow(List<Candle> candles, int lookback = 10);
     decimal CalculateVWAP(List<Candle> candles);
+    List<decimal> CalculateVWAPSeries(List<Candle> candles, int count = 5);
+    decimal CalculateVWAPSlope(List<Candle> candles, int lookback = 5);
+    List<VolumeProfileNode> CalculateVolumeProfile(List<Candle> candles, int bins = 20);
+    List<decimal> FindHighVolumeNodes(List<Candle> candles, int bins = 20, int topN = 3);
     List<decimal> FindSupportLevels(List<Candle> candles, int lookback = 50);
     List<decimal> FindResistanceLevels(List<Candle> candles, int lookback = 50);
     bool DetectBullishDivergence(List<Candle> candles, List<decimal> rsiValues, int lookback = 14);
     bool DetectBearishDivergence(List<Candle> candles, List<decimal> rsiValues, int lookback = 14);
+    CandlestickPattern DetectCandlestickPattern(List<Candle> candles);
+}
+
+public class VolumeProfileNode
+{
+    public decimal PriceLevel { get; set; }
+    public decimal Volume { get; set; }
+    public decimal PercentOfTotal { get; set; }
+}
+
+public enum CandlestickPattern
+{
+    None,
+    BullishEngulfing,
+    BearishEngulfing,
+    Hammer,
+    InvertedHammer,
+    ShootingStar,
+    HangingMan,
+    Doji,
+    MorningStar,
+    EveningStar
 }
 
 public class TechnicalIndicatorService : ITechnicalIndicatorService
@@ -386,5 +414,259 @@ public class TechnicalIndicatorService : ITechnicalIndicatorService
         var rsiIsLowerHigh = recentRsi[secondHigh.index] < recentRsi[firstHigh.index];
 
         return priceIsHigherHigh && rsiIsLowerHigh;
+    }
+
+    public List<decimal> CalculateEMASeries(List<Candle> candles, int period)
+    {
+        if (candles.Count < period)
+            throw new ArgumentException($"Not enough candles. Need {period}, got {candles.Count}");
+
+        var result = new List<decimal>();
+        var multiplier = 2m / (period + 1);
+        var closePrices = candles.Select(c => c.ClosePrice).ToList();
+
+        // Start with SMA for first EMA value
+        var ema = closePrices.Take(period).Average();
+        result.Add(ema);
+
+        // Calculate EMA for remaining values
+        for (int i = period; i < closePrices.Count; i++)
+        {
+            ema = (closePrices[i] - ema) * multiplier + ema;
+            result.Add(ema);
+        }
+
+        return result;
+    }
+
+    public List<decimal> CalculateRSISeries(List<Candle> candles, int period = 14, int count = 5)
+    {
+        if (candles.Count < period + count)
+            throw new ArgumentException($"Not enough candles. Need {period + count}, got {candles.Count}");
+
+        var result = new List<decimal>();
+
+        for (int i = 0; i < count; i++)
+        {
+            var subset = candles.Take(candles.Count - i).ToList();
+            if (subset.Count >= period + 1)
+            {
+                result.Insert(0, CalculateRSI(subset, period));
+            }
+        }
+
+        return result;
+    }
+
+    public List<decimal> CalculateVWAPSeries(List<Candle> candles, int count = 5)
+    {
+        if (candles.Count < count)
+            throw new ArgumentException($"Not enough candles. Need {count}, got {candles.Count}");
+
+        var result = new List<decimal>();
+
+        for (int i = 0; i < count; i++)
+        {
+            var subset = candles.Take(candles.Count - i).ToList();
+            if (subset.Count > 0)
+            {
+                result.Insert(0, CalculateVWAP(subset));
+            }
+        }
+
+        return result;
+    }
+
+    public decimal CalculateVWAPSlope(List<Candle> candles, int lookback = 5)
+    {
+        if (candles.Count < lookback)
+            return 0;
+
+        var vwapSeries = CalculateVWAPSeries(candles, lookback);
+        if (vwapSeries.Count < 2)
+            return 0;
+
+        // Calculate slope using linear regression
+        var n = vwapSeries.Count;
+        var sumX = 0m;
+        var sumY = 0m;
+        var sumXY = 0m;
+        var sumX2 = 0m;
+
+        for (int i = 0; i < n; i++)
+        {
+            sumX += i;
+            sumY += vwapSeries[i];
+            sumXY += i * vwapSeries[i];
+            sumX2 += i * i;
+        }
+
+        var denominator = (n * sumX2 - sumX * sumX);
+        if (denominator == 0)
+            return 0;
+
+        // Slope normalized by average price
+        var slope = (n * sumXY - sumX * sumY) / denominator;
+        var avgVwap = sumY / n;
+
+        // Return slope as percentage change per period
+        return avgVwap != 0 ? (slope / avgVwap) * 100 : 0;
+    }
+
+    public List<VolumeProfileNode> CalculateVolumeProfile(List<Candle> candles, int bins = 20)
+    {
+        if (candles.Count == 0)
+            return new List<VolumeProfileNode>();
+
+        var highPrice = candles.Max(c => c.HighPrice);
+        var lowPrice = candles.Min(c => c.LowPrice);
+        var priceRange = highPrice - lowPrice;
+
+        if (priceRange == 0)
+            return new List<VolumeProfileNode>
+            {
+                new VolumeProfileNode
+                {
+                    PriceLevel = highPrice,
+                    Volume = candles.Sum(c => c.Volume),
+                    PercentOfTotal = 100
+                }
+            };
+
+        var binSize = priceRange / bins;
+        var volumeProfile = new Dictionary<int, decimal>();
+
+        // Initialize bins
+        for (int i = 0; i < bins; i++)
+        {
+            volumeProfile[i] = 0;
+        }
+
+        // Distribute volume across bins
+        foreach (var candle in candles)
+        {
+            var typicalPrice = (candle.HighPrice + candle.LowPrice + candle.ClosePrice) / 3;
+            var binIndex = (int)Math.Min((typicalPrice - lowPrice) / binSize, bins - 1);
+            volumeProfile[binIndex] += candle.Volume;
+        }
+
+        var totalVolume = volumeProfile.Values.Sum();
+        if (totalVolume == 0)
+            totalVolume = 1;
+
+        return volumeProfile
+            .Select(kvp => new VolumeProfileNode
+            {
+                PriceLevel = lowPrice + (kvp.Key + 0.5m) * binSize, // Center of bin
+                Volume = kvp.Value,
+                PercentOfTotal = (kvp.Value / totalVolume) * 100
+            })
+            .OrderByDescending(n => n.Volume)
+            .ToList();
+    }
+
+    public List<decimal> FindHighVolumeNodes(List<Candle> candles, int bins = 20, int topN = 3)
+    {
+        var volumeProfile = CalculateVolumeProfile(candles, bins);
+        return volumeProfile
+            .Take(topN)
+            .Select(n => n.PriceLevel)
+            .ToList();
+    }
+
+    public CandlestickPattern DetectCandlestickPattern(List<Candle> candles)
+    {
+        if (candles.Count < 3)
+            return CandlestickPattern.None;
+
+        var current = candles[^1];
+        var previous = candles[^2];
+        var twoBefore = candles[^3];
+
+        var body = current.ClosePrice - current.OpenPrice;
+        var bodySize = Math.Abs(body);
+        var upperWick = current.HighPrice - Math.Max(current.OpenPrice, current.ClosePrice);
+        var lowerWick = Math.Min(current.OpenPrice, current.ClosePrice) - current.LowPrice;
+        var totalRange = current.HighPrice - current.LowPrice;
+
+        var prevBody = previous.ClosePrice - previous.OpenPrice;
+        var prevBodySize = Math.Abs(prevBody);
+
+        // Avoid division by zero
+        if (totalRange == 0)
+            return CandlestickPattern.None;
+
+        var bodyRatio = bodySize / totalRange;
+        var upperWickRatio = upperWick / totalRange;
+        var lowerWickRatio = lowerWick / totalRange;
+
+        // Doji: Very small body
+        if (bodyRatio < 0.1m)
+        {
+            return CandlestickPattern.Doji;
+        }
+
+        // Bullish Engulfing: Current bullish candle engulfs previous bearish candle
+        if (body > 0 && prevBody < 0 &&
+            current.OpenPrice < previous.ClosePrice &&
+            current.ClosePrice > previous.OpenPrice &&
+            bodySize > prevBodySize)
+        {
+            return CandlestickPattern.BullishEngulfing;
+        }
+
+        // Bearish Engulfing: Current bearish candle engulfs previous bullish candle
+        if (body < 0 && prevBody > 0 &&
+            current.OpenPrice > previous.ClosePrice &&
+            current.ClosePrice < previous.OpenPrice &&
+            bodySize > prevBodySize)
+        {
+            return CandlestickPattern.BearishEngulfing;
+        }
+
+        // Hammer: Small body at top, long lower wick (bullish reversal)
+        if (body > 0 && lowerWickRatio > 0.6m && upperWickRatio < 0.1m && bodyRatio < 0.3m)
+        {
+            return CandlestickPattern.Hammer;
+        }
+
+        // Inverted Hammer: Small body at bottom, long upper wick (bullish reversal)
+        if (body > 0 && upperWickRatio > 0.6m && lowerWickRatio < 0.1m && bodyRatio < 0.3m)
+        {
+            return CandlestickPattern.InvertedHammer;
+        }
+
+        // Shooting Star: Small body at bottom, long upper wick (bearish reversal)
+        if (body < 0 && upperWickRatio > 0.6m && lowerWickRatio < 0.1m && bodyRatio < 0.3m)
+        {
+            return CandlestickPattern.ShootingStar;
+        }
+
+        // Hanging Man: Small body at top, long lower wick (bearish reversal)
+        if (body < 0 && lowerWickRatio > 0.6m && upperWickRatio < 0.1m && bodyRatio < 0.3m)
+        {
+            return CandlestickPattern.HangingMan;
+        }
+
+        // Morning Star (3-candle bullish reversal)
+        var twoPrevBody = twoBefore.ClosePrice - twoBefore.OpenPrice;
+        if (twoPrevBody < 0 && // First candle bearish
+            Math.Abs(prevBody) < Math.Abs(twoPrevBody) * 0.3m && // Second candle small
+            body > 0 && // Third candle bullish
+            current.ClosePrice > (twoBefore.OpenPrice + twoBefore.ClosePrice) / 2)
+        {
+            return CandlestickPattern.MorningStar;
+        }
+
+        // Evening Star (3-candle bearish reversal)
+        if (twoPrevBody > 0 && // First candle bullish
+            Math.Abs(prevBody) < twoPrevBody * 0.3m && // Second candle small
+            body < 0 && // Third candle bearish
+            current.ClosePrice < (twoBefore.OpenPrice + twoBefore.ClosePrice) / 2)
+        {
+            return CandlestickPattern.EveningStar;
+        }
+
+        return CandlestickPattern.None;
     }
 }

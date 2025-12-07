@@ -9,7 +9,8 @@ public enum StrategyName
     RsiDivergence,
     BtcSpotDca,
     BtcSpotTrend,
-    FundingRateArbitrage
+    FundingRateArbitrage,
+    ConfluenceTrading
 }
 
 public interface IStrategyFactory

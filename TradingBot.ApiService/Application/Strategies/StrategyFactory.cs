@@ -55,6 +55,14 @@ public class StrategyFactory : IStrategyFactory
             DefaultInterval = new CandleInterval("1h"),
             Description = "Low-risk strategy that profits from funding rate payments by entering positions before settlement",
             Type = StrategyType.FundingArbitrage
+        },
+        [StrategyName.ConfluenceTrading] = new()
+        {
+            Name = StrategyName.ConfluenceTrading,
+            DisplayName = "Confluence Trading",
+            DefaultInterval = new CandleInterval("5m"),
+            Description = "Multi-timeframe confluence strategy using EMA Ribbon, VWAP, Volume Profile, and candlestick patterns for high-probability entries",
+            Type = StrategyType.FuturesScalping
         }
     };
 
@@ -150,6 +158,7 @@ public class StrategyFactory : IStrategyFactory
             StrategyName.BtcSpotDca => _serviceProvider.GetRequiredService<BtcSpotDcaStrategy>(),
             StrategyName.BtcSpotTrend => _serviceProvider.GetRequiredService<BtcSpotTrendStrategy>(),
             StrategyName.FundingRateArbitrage => _serviceProvider.GetRequiredService<FundingRateArbitrageStrategy>(),
+            StrategyName.ConfluenceTrading => _serviceProvider.GetRequiredService<ConfluenceTradingStrategy>(),
             _ => throw new ArgumentException($"Strategy '{strategyName}' is registered but not implemented")
         };
     }
