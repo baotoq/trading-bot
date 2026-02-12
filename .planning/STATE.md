@@ -14,7 +14,7 @@
 |-------|--------|-------|
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 3: Smart Multipliers | In Progress | 1/3 plans complete ███░░░░░░░ |
+| Phase 3: Smart Multipliers | In Progress | 2/3 plans complete ██████░░░░ |
 | Phase 4: Enhanced Notifications & Observability | Not Started | Blocked by Phase 3 |
 
 ## Key Decisions
@@ -49,6 +49,11 @@
 | Non-nullable decimal for multiplier metadata | 2026-02-12 | 0 = "not calculated" for Phase 2 purchases |
 | CandleData intermediate type | 2026-02-12 | Separates API deserialization from domain entity |
 | OHLCV precision(18,8) | 2026-02-12 | Matches crypto exchange 8-decimal standard |
+| Return 0 sentinel for unavailable price data | 2026-02-12 | BTC never 0, unambiguous signal, simpler than nullables |
+| Use daily close for 30-day high calculation | 2026-02-12 | Avoid flash spike distortion from intraday wicks |
+| Stale data policy: use last known values | 2026-02-12 | Override FR-7: stale data better than no data |
+| Bootstrap once on startup, refresh daily 00:05 UTC | 2026-02-12 | Ensures data before first DCA, fresh daily candles |
+| 10% tolerance for 200-day SMA gaps | 2026-02-12 | Accept 180+ days for SMA calculation resilience |
 
 ## Known Risks
 
@@ -58,13 +63,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 15:17:02 UTC
-**Stopped at:** Completed 03-01-PLAN.md (Data Foundation for Smart Multipliers)
+**Last session:** 2026-02-12 15:22:50 UTC
+**Stopped at:** Completed 03-02-PLAN.md (Price Data Service & Background Refresh)
 **Resume file:** None
 
 ## Next Action
 
-Phase 3 Plan 1 complete. Ready for Plan 2: Smart Multiplier Calculation Service
+Phase 3 Plan 2 complete. Ready for Plan 3: DCA Multiplier Calculator Integration
 
 ---
 *State updated: 2026-02-12*
