@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-**Phase 4: Enhanced Notifications & Observability** — In Progress (2/3 plans complete)
+**Phase 4: Enhanced Notifications & Observability** — Complete (3/3 plans complete)
 
 ## Progress
 
@@ -15,7 +15,7 @@
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 3: Smart Multipliers | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 4: Enhanced Notifications & Observability | In Progress | ██████░░░░ 2/3 plans |
+| Phase 4: Enhanced Notifications & Observability | Complete | All plans complete ██████████ 3/3 plans |
 
 ## Key Decisions
 
@@ -64,6 +64,11 @@
 | Running totals query excludes dry-run purchases | 2026-02-12 | WHERE !IsDryRun filter ensures accurate totals for real spending |
 | Natural language multiplier reasoning | 2026-02-12 | Transform multiplier metadata into readable explanations in notifications |
 | SIMULATION banner for dry-run notifications | 2026-02-12 | Warning emoji + clear text at top distinguishes simulations from real purchases |
+| Weekly summary timing: Sunday 20:00-21:00 UTC | 2026-02-12 | End-of-week reporting cadence with hourly check |
+| Missed purchase verification window: target + 40 minutes | 2026-02-12 | Allows 10-min execution window + 30-min grace period |
+| Health check threshold: 36 hours | 2026-02-12 | Catches multi-day silent failures while allowing schedule flexibility |
+| De-duplication via DateOnly fields | 2026-02-12 | In-memory guard prevents duplicate messages without database overhead |
+| Diagnostic reasoning in missed purchase alerts | 2026-02-12 | Queries failed purchases to include specific diagnosis for faster troubleshooting |
 
 ## Known Risks
 
@@ -73,13 +78,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 16:08:26 UTC
-**Stopped at:** Completed 04-02-PLAN.md (Rich Notifications with Multiplier Reasoning)
+**Last session:** 2026-02-12 16:10:39 UTC
+**Stopped at:** Completed 04-03-PLAN.md (Weekly Summary & Health Monitoring)
 **Resume file:** None
 
 ## Next Action
 
-Phase 4 in progress (2/3 plans complete). Next: 04-03 (Weekly Summary & Health Monitoring)
+Phase 4 complete (3/3 plans). All features from ROADMAP.md phases 1-4 delivered. Ready for Phase 5 or future enhancements.
 
 ---
 *State updated: 2026-02-12*
