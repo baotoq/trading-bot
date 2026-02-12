@@ -4,6 +4,7 @@ using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using TradingBot.ApiService.Application.BackgroundJobs;
+using TradingBot.ApiService.Application.Health;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Configuration;
@@ -84,6 +85,16 @@ try
 
     // Price data refresh (runs daily at 00:05 UTC, bootstraps on startup)
     builder.Services.AddHostedService<PriceDataRefreshService>();
+
+    // Weekly summary (runs Sunday 20:00-21:00 UTC)
+    builder.Services.AddHostedService<WeeklySummaryService>();
+
+    // Missed purchase verification (runs every 30 minutes)
+    builder.Services.AddHostedService<MissedPurchaseVerificationService>();
+
+    // Health checks
+    builder.Services.AddHealthChecks()
+        .AddCheck<DcaHealthCheck>("dca-service");
 
     builder.AddRedisDistributedCache("redis");
 
