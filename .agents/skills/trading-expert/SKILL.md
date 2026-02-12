@@ -2,13 +2,12 @@
 name: trading-expert
 version: 1.0.0
 description: Expert-level algorithmic trading, market systems, quantitative analysis, and trading platforms
-category: domains
-tags: [trading, algorithmic-trading, quant, markets, finance, hft]
-allowed-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash(python:*)
+metadata:
+  version: "1.0.0"
+  domain: trading
+  triggers: trading, algorithmic-trading, quant, markets, finance, hft
+  role: specialist
+  scope: implementation
 ---
 
 # Trading Expert
