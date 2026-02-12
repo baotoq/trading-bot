@@ -36,7 +36,11 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 
 ### Active
 
-(No active requirements — next milestone will define new goals)
+- [ ] Backtesting engine with historical price simulation
+- [ ] External price data source (CoinGecko) for 2-4 years of BTC history
+- [ ] Parameter sweep across multiplier tiers, thresholds, and base amounts
+- [ ] API endpoints returning structured JSON results
+- [ ] Comprehensive metrics: cost basis, total BTC, max drawdown, smart vs fixed DCA comparison
 
 ### Out of Scope
 
@@ -44,8 +48,19 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Futures/perps trading — spot only
 - Multi-asset support — BTC only for now
 - Web dashboard — logs and Telegram are sufficient
-- Backtesting — build the bot first, backtest later if needed
+- ~~Backtesting~~ — moved to Active for v1.1
 - Monthly spending caps — daily amount + multipliers are the only controls
+
+## Current Milestone: v1.1 Backtesting Engine
+
+**Goal:** Add a backtesting engine that simulates DCA strategies against historical BTC price data, supports parameter sweeps, and exposes results via API.
+
+**Target features:**
+- Historical price data ingestion from CoinGecko (2-4 years of BTC daily candles)
+- Strategy simulation engine reusing existing multiplier logic
+- Parameter sweep: automatically try many tier/multiplier combinations and rank by performance
+- API endpoints returning structured JSON with comprehensive metrics
+- Comparison metrics: smart DCA vs fixed DCA (cost basis, total BTC, drawdown, efficiency ratios)
 
 ## Context
 
@@ -56,6 +71,7 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - PostgreSQL for persistence (Purchase + DailyPrice entities), auto-migrations on startup
 - 4 background services: DCA scheduler, price data refresh, weekly summary, missed purchase verification
 - Telegram notifications for all purchase outcomes with rich formatting
+- Existing MultiplierCalculator is pure stateless logic — ideal for reuse in backtesting
 
 ## Constraints
 
@@ -82,4 +98,4 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 | Dry-run bypasses idempotency | Allows repeated safe testing without interference | ✓ Good |
 
 ---
-*Last updated: 2026-02-12 after v1.0 milestone*
+*Last updated: 2026-02-12 after v1.1 milestone start*
