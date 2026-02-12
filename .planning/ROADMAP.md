@@ -82,32 +82,29 @@ Plans:
 
 ---
 
-## Phase 4: Enhanced Notifications & Observability
+## Phase 4: Enhanced Notifications & Observability ✓
 
 **Goal:** Rich Telegram messages explaining buy reasoning, running totals, health monitoring, and dry-run mode for testing.
 
 **Requirements:** FR-11, FR-12, FR-13
 
-**Why last:** Polish layer. The bot operates correctly with basic notifications. This phase adds operational confidence and testing capability.
+**Status:** Complete (2026-02-12)
 
 **Success criteria:**
-- [ ] Telegram buy messages include: multiplier reasoning, 30d high, drop %, MA status
-- [ ] Running totals: total BTC, total USD spent, average cost
-- [ ] Weekly summary notification
-- [ ] Health check endpoint with DCA service status
-- [ ] Daily verification detects missed purchases
-- [ ] Dry-run mode executes full logic without placing orders
-- [ ] Dry-run notifications marked clearly as simulated
+- [x] Telegram buy messages include: multiplier reasoning, 30d high, drop %, MA status
+- [x] Running totals: total BTC, total USD spent, average cost
+- [x] Weekly summary notification
+- [x] Health check endpoint with DCA service status
+- [x] Daily verification detects missed purchases
+- [x] Dry-run mode executes full logic without placing orders
+- [x] Dry-run notifications marked clearly as simulated
 
-**Research needed:** No — existing Telegram and health check patterns in codebase
-
-**Plans:** 3 plans
+**Plans:** 3 plans (3 complete)
 
 Plans:
-
-- [ ] 04-01-PLAN.md — Dry-run mode, IsDryRun flag, enhanced PurchaseCompletedEvent with multiplier metadata, EF Core migration
-- [ ] 04-02-PLAN.md — Rich notification handlers: multiplier reasoning, running totals, SIMULATION banner
-- [ ] 04-03-PLAN.md — Weekly summary service, missed purchase verification, DCA health check, Program.cs wiring
+- [x] 04-01-PLAN.md — Dry-run mode, IsDryRun flag, enhanced PurchaseCompletedEvent with multiplier metadata, EF Core migration
+- [x] 04-02-PLAN.md — Rich notification handlers: multiplier reasoning, running totals, SIMULATION banner
+- [x] 04-03-PLAN.md — Weekly summary service, missed purchase verification, DCA health check, Program.cs wiring
 
 ---
 
@@ -133,9 +130,9 @@ Strictly sequential — each phase builds on the previous. No parallelization be
 | FR-7: 30-Day High Tracking | 3 | Complete |
 | FR-8: Dip Multiplier Tiers | 3 | Complete |
 | FR-9: 200-Day MA Boost | 3 | Complete |
-| FR-11: Rich Notifications | 4 | Pending |
-| FR-12: Health Check | 4 | Pending |
-| FR-13: Dry-Run Mode | 4 | Pending |
+| FR-11: Rich Notifications | 4 | Complete |
+| FR-12: Health Check | 4 | Complete |
+| FR-13: Dry-Run Mode | 4 | Complete |
 
 ---
 *Roadmap created: 2026-02-12*
