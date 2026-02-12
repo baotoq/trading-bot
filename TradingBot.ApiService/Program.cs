@@ -8,6 +8,7 @@ using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Locking;
+using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ServiceDefaults;
 
 Log.Logger = new LoggerConfiguration()
@@ -66,6 +67,9 @@ try
 
     // Hyperliquid API client with EIP-712 signing
     builder.Services.AddHyperliquid(builder.Configuration);
+
+    // Telegram notifications with MediatR
+    builder.Services.AddTelegram(builder.Configuration);
 
     builder.AddRedisDistributedCache("redis");
 
