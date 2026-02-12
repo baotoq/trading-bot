@@ -101,6 +101,14 @@ Plans:
 
 **Research needed:** No — existing Telegram and health check patterns in codebase
 
+**Plans:** 3 plans
+
+Plans:
+
+- [ ] 04-01-PLAN.md — Dry-run mode, IsDryRun flag, enhanced PurchaseCompletedEvent with multiplier metadata, EF Core migration
+- [ ] 04-02-PLAN.md — Rich notification handlers: multiplier reasoning, running totals, SIMULATION banner
+- [ ] 04-03-PLAN.md — Weekly summary service, missed purchase verification, DCA health check, Program.cs wiring
+
 ---
 
 ## Phase Dependencies
