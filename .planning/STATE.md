@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-**Phase 3: Smart Multipliers** — Complete
+**Phase 4: Enhanced Notifications & Observability** — In Progress (1/3 plans complete)
 
 ## Progress
 
@@ -15,7 +15,7 @@
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 3: Smart Multipliers | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 4: Enhanced Notifications & Observability | Not Started | Ready to start |
+| Phase 4: Enhanced Notifications & Observability | In Progress | ███░░░░░░░ 1/3 plans |
 
 ## Key Decisions
 
@@ -57,6 +57,10 @@
 | MaxMultiplierCap configurable with default 4.5x | 2026-02-12 | Natural max from tier structure, effectively uncapped but allows safety limits |
 | Component-level fallback for price data | 2026-02-12 | 0 price data = 1.0x for that component, other components still calculated |
 | Exception-level fallback to 1.0x multiplier | 2026-02-12 | Never let multiplier calculation failure prevent DCA purchase |
+| DRY-RUN-{guid} order ID format | 2026-02-12 | Traceability for simulated purchases without colliding with real order IDs |
+| Idempotency bypass in dry-run mode | 2026-02-12 | Allow repeated testing without interference, real-mode behavior unchanged |
+| IsDryRun defaults to false | 2026-02-12 | Backward compatibility: existing purchases treated as real (non-dry-run) |
+| All multiplier metadata in events | 2026-02-12 | PurchaseCompletedEvent carries 6 fields for rich notification formatting |
 
 ## Known Risks
 
@@ -66,13 +70,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 15:29:21 UTC
-**Stopped at:** Completed 03-03-PLAN.md (DCA Multiplier Calculator Integration)
+**Last session:** 2026-02-12 16:03:22 UTC
+**Stopped at:** Completed 04-01-PLAN.md (Dry-Run Mode & Event Enrichment)
 **Resume file:** None
 
 ## Next Action
 
-Phase 3 complete. Ready for Phase 4: Enhanced Notifications & Observability
+Phase 4 in progress (1/3 plans complete). Next: 04-02 (Rich Notifications with Multiplier Reasoning)
 
 ---
 *State updated: 2026-02-12*
