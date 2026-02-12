@@ -188,6 +188,50 @@ public class HyperliquidClient
     }
 
     /// <summary>
+    /// Gets historical daily candles for a symbol from Hyperliquid.
+    /// </summary>
+    /// <param name="symbol">Symbol name (e.g., "BTC")</param>
+    /// <param name="startTime">Start time for candles (inclusive)</param>
+    /// <param name="endTime">End time for candles (inclusive)</param>
+    public async Task<List<CandleData>> GetCandlesAsync(
+        string symbol,
+        DateTimeOffset startTime,
+        DateTimeOffset endTime,
+        CancellationToken ct = default)
+    {
+        var request = new
+        {
+            type = "candleSnapshot",
+            req = new
+            {
+                coin = symbol,
+                interval = "1d",
+                startTime = startTime.ToUnixTimeMilliseconds(),
+                endTime = endTime.ToUnixTimeMilliseconds()
+            }
+        };
+
+        var response = await PostInfoAsync<List<CandleResponse>>(request, ct);
+
+        var result = response.Select(c => new CandleData
+        {
+            Date = DateOnly.FromDateTime(DateTimeOffset.FromUnixTimeMilliseconds(c.T).UtcDateTime),
+            Symbol = symbol,
+            Open = decimal.Parse(c.O, CultureInfo.InvariantCulture),
+            High = decimal.Parse(c.H, CultureInfo.InvariantCulture),
+            Low = decimal.Parse(c.L, CultureInfo.InvariantCulture),
+            Close = decimal.Parse(c.C, CultureInfo.InvariantCulture),
+            Volume = decimal.Parse(c.V, CultureInfo.InvariantCulture),
+            Timestamp = DateTimeOffset.FromUnixTimeMilliseconds(c.CloseT)
+        }).ToList();
+
+        _logger.LogInformation("Fetched {Count} candles for {Symbol} from {Start} to {End}",
+            result.Count, symbol, startTime, endTime);
+
+        return result;
+    }
+
+    /// <summary>
     /// Converts decimal to string with 8 decimal places and normalized format.
     /// Matches Python SDK float_to_wire logic.
     /// </summary>

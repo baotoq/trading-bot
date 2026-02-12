@@ -13,6 +13,12 @@ public class Purchase : BaseEntity
     public string? OrderId { get; set; }
     public string? RawResponse { get; set; }
     public string? FailureReason { get; set; }
+
+    // Multiplier metadata fields for audit trail
+    public string? MultiplierTier { get; set; }
+    public decimal DropPercentage { get; set; }
+    public decimal High30Day { get; set; }
+    public decimal Ma200Day { get; set; }
 }
 
 public enum PurchaseStatus
