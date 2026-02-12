@@ -2,6 +2,53 @@
 
 **Analysis Date:** 2026-02-12
 
+## Domain-Driven Design (DDD)
+
+**Approach:** Follow DDD tactical patterns throughout the domain model layer.
+
+**Strongly-Typed IDs:**
+- All entity identifiers must be strongly-typed value objects, not primitive types (`Guid`, `int`, `string`)
+- Example: `OrderId`, `StrategyId`, `UserId` instead of raw `Guid`
+- Implement as `record struct` for zero-allocation value semantics
+- Include EF Core value converters for database mapping
+
+```csharp
+public readonly record struct OrderId(Guid Value)
+{
+    public static OrderId New() => new(Guid.CreateVersion7());
+}
+```
+
+**Value Objects:**
+- Model domain concepts that are defined by their attributes, not identity
+- Examples: `Token` (symbol, chain, decimals), `Price`, `Quantity`, `TradingPair`, `Leverage`
+- Implement as `record` or `record struct` for built-in equality
+- Encapsulate validation in factory methods or constructors
+- Must be immutable
+
+```csharp
+public record Token(string Symbol, string Chain, int Decimals)
+{
+    public static Token Create(string symbol, string chain, int decimals)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(symbol);
+        ArgumentOutOfRangeException.ThrowIfNegative(decimals);
+        return new Token(symbol.ToUpperInvariant(), chain, decimals);
+    }
+}
+```
+
+**Entities:**
+- Have a unique strongly-typed identity
+- Encapsulate business logic and invariants
+- Raise domain events for state changes
+- Inherit from `BaseEntity` or `AuditedEntity`
+
+**Aggregates:**
+- Define transactional boundaries
+- External references use strongly-typed IDs only (no navigation to other aggregates)
+- Root entity controls all modifications within the aggregate
+
 ## Naming Patterns
 
 **Files:**
