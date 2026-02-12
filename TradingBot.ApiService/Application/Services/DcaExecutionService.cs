@@ -33,6 +33,11 @@ public class DcaExecutionService(
 
     public async Task ExecuteDailyPurchaseAsync(DateOnly purchaseDate, CancellationToken ct = default)
     {
+        var options = dcaOptions.CurrentValue;
+
+        if (options.DryRun)
+            logger.LogInformation("[DRY RUN] Executing simulated purchase for {Date}", purchaseDate);
+
         // Step 1: Acquire distributed lock (prevents concurrent executions for same day)
         var lockKey = $"dca-purchase-{purchaseDate:yyyy-MM-dd}";
         await using var lockResponse = await distributedLock.AcquireLockAsync(lockKey, TimeSpan.FromMinutes(5), ct);
@@ -45,28 +50,34 @@ public class DcaExecutionService(
 
         logger.LogInformation("Acquired lock for {Date}, starting purchase execution", purchaseDate);
 
-        // Step 2: Idempotency check (ensure no successful purchase already exists for today)
+        // Step 2: Idempotency check — skip entirely in dry-run mode
         var todayStart = purchaseDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var todayEnd = purchaseDate.AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
-        var existingPurchase = await dbContext.Purchases
-            .Where(p => p.ExecutedAt >= todayStart && p.ExecutedAt < todayEnd)
-            .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
-            .FirstOrDefaultAsync(ct);
-
-        if (existingPurchase != null)
+        if (!options.DryRun)
         {
-            logger.LogInformation("Purchase already completed today {Date}: {PurchaseId}", purchaseDate, existingPurchase.Id);
-            await publisher.Publish(new PurchaseSkippedEvent(
-                "Already purchased today",
-                null,
-                null,
-                DateTimeOffset.UtcNow), ct);
-            return;
+            var existingPurchase = await dbContext.Purchases
+                .Where(p => p.ExecutedAt >= todayStart && p.ExecutedAt < todayEnd)
+                .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
+                .FirstOrDefaultAsync(ct);
+
+            if (existingPurchase != null)
+            {
+                logger.LogInformation("Purchase already completed today {Date}: {PurchaseId}", purchaseDate, existingPurchase.Id);
+                await publisher.Publish(new PurchaseSkippedEvent(
+                    "Already purchased today",
+                    null,
+                    null,
+                    DateTimeOffset.UtcNow), ct);
+                return;
+            }
+        }
+        else
+        {
+            logger.LogInformation("[DRY RUN] Bypassing idempotency check for {Date}", purchaseDate);
         }
 
         // Step 3: Check USDC balance
-        var options = dcaOptions.CurrentValue;
         var usdcBalance = await hyperliquidClient.GetBalancesAsync(ct);
 
         logger.LogInformation("USDC balance: {Balance}, target amount: {Target}", usdcBalance, options.BaseDailyAmount);
@@ -132,19 +143,32 @@ public class DcaExecutionService(
             DropPercentage = multiplierResult.DropPercentage,
             High30Day = multiplierResult.High30Day,
             Ma200Day = multiplierResult.Ma200Day,
+            IsDryRun = options.DryRun,
             Status = PurchaseStatus.Pending
         };
 
         try
         {
-            // Use 5% slippage tolerance for IOC (immediate-or-cancel) order
-            var limitPrice = currentPrice * 1.05m;
-            var orderResponse = await hyperliquidClient.PlaceSpotOrderAsync(
-                btcAssetIndex,
-                true, // isBuy
-                roundedQuantity,
-                limitPrice,
-                ct);
+            if (options.DryRun)
+            {
+                logger.LogInformation("[DRY RUN] Simulating order: {Quantity} BTC at {Price}", roundedQuantity, currentPrice);
+                purchase.Quantity = roundedQuantity;
+                purchase.Price = currentPrice;
+                purchase.Cost = roundedQuantity * currentPrice;
+                purchase.Status = PurchaseStatus.Filled;
+                purchase.OrderId = $"DRY-RUN-{Guid.NewGuid():N}";
+                purchase.IsDryRun = true;
+            }
+            else
+            {
+                // Use 5% slippage tolerance for IOC (immediate-or-cancel) order
+                var limitPrice = currentPrice * 1.05m;
+                var orderResponse = await hyperliquidClient.PlaceSpotOrderAsync(
+                    btcAssetIndex,
+                    true, // isBuy
+                    roundedQuantity,
+                    limitPrice,
+                    ct);
 
             // Parse fill info from response
             var status = orderResponse.Response?.Data?.Statuses.FirstOrDefault();
@@ -187,7 +211,8 @@ public class DcaExecutionService(
                 logger.LogError("Order response missing fill/resting status");
             }
 
-            purchase.RawResponse = JsonSerializer.Serialize(orderResponse);
+                purchase.RawResponse = JsonSerializer.Serialize(orderResponse);
+            }
         }
         catch (HyperliquidApiException ex)
         {
@@ -220,7 +245,13 @@ public class DcaExecutionService(
                 purchase.Cost,
                 remainingUsdc,
                 currentBtcBalance,
-                purchase.ExecutedAt), ct);
+                purchase.ExecutedAt,
+                purchase.Multiplier,
+                purchase.MultiplierTier,
+                purchase.DropPercentage,
+                purchase.High30Day,
+                purchase.Ma200Day,
+                purchase.IsDryRun), ct);
 
             logger.LogInformation("Published PurchaseCompletedEvent for {PurchaseId}", purchase.Id);
         }
