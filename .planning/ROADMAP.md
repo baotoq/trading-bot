@@ -30,31 +30,29 @@ Plans:
 
 ---
 
-## Phase 2: Core DCA Engine
+## Phase 2: Core DCA Engine ✓
 
 **Goal:** Bot buys a fixed USD amount of BTC daily on Hyperliquid, persists the result, and sends a Telegram confirmation. End-to-end working buy flow.
 
 **Requirements:** FR-4, FR-5, FR-6
 
-**Why second:** Delivers immediate user value. Even without smart multipliers, a reliable daily fixed-amount buy is useful. Also validates the full pipeline: schedule -> lock -> balance check -> order -> persist -> notify.
+**Status:** Complete (2026-02-12)
 
 **Success criteria:**
-- [ ] DcaSchedulerBackgroundService triggers daily at configured time
-- [ ] Bot buys configured base amount of BTC on Hyperliquid spot
-- [ ] Purchase persisted with all metadata (price, qty, cost, status)
-- [ ] Telegram notification sent on success and failure
-- [ ] Idempotent: no duplicate purchases on same day
-- [ ] Handles partial fills correctly
-- [ ] Retries transient failures up to 3 times
+- [x] DcaSchedulerBackgroundService triggers daily at configured time
+- [x] Bot buys configured base amount of BTC on Hyperliquid spot
+- [x] Purchase persisted with all metadata (price, qty, cost, status)
+- [x] Telegram notification sent on success and failure
+- [x] Idempotent: no duplicate purchases on same day
+- [x] Handles partial fills correctly
+- [x] Retries transient failures up to 3 times
 
-**Research needed:** Yes — order status polling, partial fill behavior on Hyperliquid spot
-
-**Plans:** 3 plans
+**Plans:** 3 plans (3 complete)
 
 Plans:
-- [ ] 02-01-PLAN.md — Domain events, Telegram notification service, and MediatR handlers
-- [ ] 02-02-PLAN.md — DCA execution service (core buy pipeline: lock, balance, order, persist, events)
-- [ ] 02-03-PLAN.md — DCA scheduler background service and Program.cs DI wiring
+- [x] 02-01-PLAN.md — Domain events, Telegram notification service, and MediatR handlers
+- [x] 02-02-PLAN.md — DCA execution service (core buy pipeline: lock, balance, order, persist, events)
+- [x] 02-03-PLAN.md — DCA scheduler background service and Program.cs DI wiring
 
 ---
 
@@ -116,9 +114,9 @@ Strictly sequential — each phase builds on the previous. No parallelization be
 | FR-2: Domain Models | 1 | Pending |
 | FR-3: Fix Distributed Lock | 1 | Pending |
 | FR-10: Configuration | 1 | Pending |
-| FR-4: Daily Schedule | 2 | Pending |
-| FR-5: Core DCA Execution | 2 | Pending |
-| FR-6: Basic Notifications | 2 | Pending |
+| FR-4: Daily Schedule | 2 | Complete |
+| FR-5: Core DCA Execution | 2 | Complete |
+| FR-6: Basic Notifications | 2 | Complete |
 | FR-7: 30-Day High Tracking | 3 | Pending |
 | FR-8: Dip Multiplier Tiers | 3 | Pending |
 | FR-9: 200-Day MA Boost | 3 | Pending |
