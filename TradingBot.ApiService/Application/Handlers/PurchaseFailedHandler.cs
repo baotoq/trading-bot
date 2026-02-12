@@ -12,12 +12,19 @@ public class PurchaseFailedHandler(
     {
         logger.LogInformation("Handling PurchaseFailedEvent with error type {ErrorType}", notification.ErrorType);
 
+        var retryMessage = notification.RetryCount >= 3
+            ? "All retries exhausted. Manual intervention may be needed."
+            : "The bot will retry automatically on transient errors.";
+
         var message = $"""
             *BTC Purchase Failed*
 
             *Error:* {notification.ErrorType}
-            *Message:* `{notification.ErrorMessage}`
+            *Details:* `{notification.ErrorMessage}`
             *Retries:* {notification.RetryCount}/3
+
+            {retryMessage}
+            Check logs if this persists.
 
             _{notification.FailedAt:yyyy-MM-dd HH:mm:ss} UTC_
             """;

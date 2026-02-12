@@ -12,6 +12,9 @@ public class PurchaseSkippedHandler(
     {
         logger.LogInformation("Handling PurchaseSkippedEvent with reason {Reason}", notification.Reason);
 
+        // Build contextual detail based on skip reason
+        var contextualDetail = BuildContextualDetail(notification.Reason);
+
         var balanceLine = notification.CurrentBalance.HasValue
             ? $"*Balance:* `${notification.CurrentBalance.Value:F2}` USDC\n"
             : string.Empty;
@@ -24,7 +27,7 @@ public class PurchaseSkippedHandler(
             *BTC Purchase Skipped*
 
             *Reason:* {notification.Reason}
-            {balanceLine}{requiredLine}
+            {contextualDetail}{balanceLine}{requiredLine}
             _{notification.SkippedAt:yyyy-MM-dd HH:mm:ss} UTC_
             """;
 
@@ -36,5 +39,26 @@ public class PurchaseSkippedHandler(
         {
             logger.LogError(ex, "Error sending Telegram notification for skipped purchase");
         }
+    }
+
+    private string BuildContextualDetail(string reason)
+    {
+        if (reason.Contains("Already purchased today", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Next buy scheduled tomorrow.\n\n";
+        }
+
+        if (reason.Contains("Insufficient balance", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Please add USDC to your Hyperliquid account.\n\n";
+        }
+
+        if (reason.Contains("below minimum order value", StringComparison.OrdinalIgnoreCase))
+        {
+            return "The calculated buy amount was too small for a valid order.\n\n";
+        }
+
+        // Default: no additional context
+        return "\n";
     }
 }
