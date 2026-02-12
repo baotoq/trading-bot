@@ -6,6 +6,7 @@ using Serilog.Templates.Themes;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Locking;
 using TradingBot.ServiceDefaults;
 
@@ -62,6 +63,9 @@ try
 
     // PostgreSQL distributed lock
     builder.Services.AddPostgresDistributedLock();
+
+    // Hyperliquid API client with EIP-712 signing
+    builder.Services.AddHyperliquid(builder.Configuration);
 
     builder.AddRedisDistributedCache("redis");
 

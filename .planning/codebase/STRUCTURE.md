@@ -82,6 +82,9 @@ trading-bot/
 
 ## Key File Locations
 
+**Solution File**
+- `TradingBot.slnx`
+
 **Entry Points:**
 - `TradingBot.ApiService/Program.cs`: Application startup, dependency injection, middleware setup
 - `TradingBot.AppHost/AppHost.cs`: Local development orchestration with Postgres, Redis, Dapr
