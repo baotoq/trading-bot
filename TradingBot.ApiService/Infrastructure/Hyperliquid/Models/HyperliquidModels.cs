@@ -268,6 +268,52 @@ public class OrderDetails
     public string OrigSz { get; set; } = string.Empty;
 }
 
+// Candle/OHLCV data responses
+public class CandleResponse
+{
+    [JsonPropertyName("t")]
+    public long T { get; set; }
+
+    [JsonPropertyName("T")]
+    public long CloseT { get; set; }
+
+    [JsonPropertyName("s")]
+    public string S { get; set; } = string.Empty;
+
+    [JsonPropertyName("i")]
+    public string I { get; set; } = string.Empty;
+
+    [JsonPropertyName("o")]
+    public string O { get; set; } = string.Empty;
+
+    [JsonPropertyName("h")]
+    public string H { get; set; } = string.Empty;
+
+    [JsonPropertyName("l")]
+    public string L { get; set; } = string.Empty;
+
+    [JsonPropertyName("c")]
+    public string C { get; set; } = string.Empty;
+
+    [JsonPropertyName("v")]
+    public string V { get; set; } = string.Empty;
+
+    [JsonPropertyName("n")]
+    public int N { get; set; }
+}
+
+public class CandleData
+{
+    public DateOnly Date { get; set; }
+    public string Symbol { get; set; } = string.Empty;
+    public decimal Open { get; set; }
+    public decimal High { get; set; }
+    public decimal Low { get; set; }
+    public decimal Close { get; set; }
+    public decimal Volume { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
+}
+
 // Custom exception for Hyperliquid API errors
 public class HyperliquidApiException : Exception
 {
