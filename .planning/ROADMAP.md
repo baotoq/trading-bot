@@ -36,7 +36,7 @@ Plans:
 
 **Requirements:** FR-4, FR-5, FR-6
 
-**Why second:** Delivers immediate user value. Even without smart multipliers, a reliable daily fixed-amount buy is useful. Also validates the full pipeline: schedule → lock → balance check → order → persist → notify.
+**Why second:** Delivers immediate user value. Even without smart multipliers, a reliable daily fixed-amount buy is useful. Also validates the full pipeline: schedule -> lock -> balance check -> order -> persist -> notify.
 
 **Success criteria:**
 - [ ] DcaSchedulerBackgroundService triggers daily at configured time
@@ -48,6 +48,13 @@ Plans:
 - [ ] Retries transient failures up to 3 times
 
 **Research needed:** Yes — order status polling, partial fill behavior on Hyperliquid spot
+
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Domain events, Telegram notification service, and MediatR handlers
+- [ ] 02-02-PLAN.md — DCA execution service (core buy pipeline: lock, balance, order, persist, events)
+- [ ] 02-03-PLAN.md — DCA scheduler background service and Program.cs DI wiring
 
 ---
 
@@ -96,7 +103,7 @@ Plans:
 ## Phase Dependencies
 
 ```
-Phase 1 (Foundation) → Phase 2 (Core DCA) → Phase 3 (Smart Multipliers) → Phase 4 (Observability)
+Phase 1 (Foundation) -> Phase 2 (Core DCA) -> Phase 3 (Smart Multipliers) -> Phase 4 (Observability)
 ```
 
 Strictly sequential — each phase builds on the previous. No parallelization between phases.
