@@ -23,7 +23,8 @@
       "WebFetch(domain:masstransit.io)",
       "WebFetch(domain:microsoft.github.io)",
       "Bash(ln:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Read(**/get-shit-done/templates/**)"
     ]
   }
 }
