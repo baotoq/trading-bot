@@ -1,978 +1,871 @@
-# Architecture: Hyperliquid BTC Smart DCA Bot
+# Architecture: Backtesting Engine Integration
 
-**Domain:** Smart DCA Trading Bot for BTC Spot on Hyperliquid
+**Domain:** DCA Strategy Backtesting for existing BTC Smart DCA Bot
 **Researched:** 2026-02-12
-**Confidence:** HIGH (based on existing BuildingBlocks analysis)
+**Confidence:** HIGH (based on thorough analysis of existing codebase, well-understood patterns)
 
 ## Executive Summary
 
-The smart DCA bot integrates with existing .NET 10.0 infrastructure using a **layered, event-driven architecture** with clear component boundaries. The bot leverages BuildingBlocks (TimeBackgroundService, domain events, outbox pattern, EF Core, distributed locks) to create a reliable, observable, and maintainable system.
+The backtesting engine integrates into the existing .NET 10.0 DCA bot by **extracting the multiplier calculation logic into a reusable pure-function core** and building a new simulation layer that feeds historical price data through it. The key architectural insight is that `DcaExecutionService.CalculateMultiplierAsync` currently contains the multiplier logic *inline* -- it needs to be extracted into a standalone `MultiplierCalculator` static class that both live execution and backtesting can call without any infrastructure dependencies (no DB, no HTTP, no DI).
 
 **Key Architectural Decisions:**
-1. **Scheduler-driven execution** via TimeBackgroundService for daily buy cycles
-2. **Event-driven notifications** using MediatR domain events + outbox pattern
-3. **Hyperliquid API client** as isolated infrastructure service
-4. **Price data service** with 30-day cache for drop-from-high calculations
-5. **Domain-driven design** with Purchase aggregate root and value objects
+1. **Extract MultiplierCalculator** as a static pure-function class -- zero dependencies, infinitely reusable
+2. **IPriceDataProvider abstraction** to swap between live API and in-memory historical data
+3. **Synchronous request-response** for single backtests (sub-second for 4 years of daily data)
+4. **Parallel.ForEachAsync** for parameter sweeps (CPU-bound, embarrassingly parallel)
+5. **No persistence** of backtest results -- compute on-the-fly (cheap to recompute, expensive to store every sweep)
+6. **Minimal API endpoints** returning structured JSON -- no UI, no WebSocket, no async polling
+7. **CoinGecko as historical data source** -- 4+ years of BTC daily OHLC, ingested into existing DailyPrice table
+
+## Integration Points with Existing Code
+
+### What Gets Reused (Unchanged)
+
+| Component | Location | How Backtesting Uses It |
+|-----------|----------|------------------------|
+| `DailyPrice` entity | `Models/DailyPrice.cs` | Same entity stores CoinGecko historical data |
+| `DcaOptions` model | `Configuration/DcaOptions.cs` | Backtesting creates DcaOptions instances for each parameter combination |
+| `MultiplierTier` model | `Configuration/DcaOptions.cs` | Parameter sweep generates different tier configurations |
+| `TradingBotDbContext` | `Infrastructure/Data/TradingBotDbContext.cs` | Query historical DailyPrice data for simulation |
+| `BaseEntity` / `AuditedEntity` | `BuildingBlocks/` | If backtest results are persisted (optional) |
+
+### What Gets Extracted (Refactored)
+
+| Current Location | What's Extracted | New Location |
+|------------------|-----------------|--------------|
+| `DcaExecutionService.CalculateMultiplierAsync` (lines 270-354) | Multiplier calculation logic | `Application/Services/MultiplierCalculator.cs` (new static class) |
+| Inline 30-day high / drop-% / bear-boost logic | Pure math: (high, current, tiers) -> multiplier | Same static class, zero dependencies |
+
+### What's New (Added)
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| `MultiplierCalculator` | Static pure-function multiplier logic | `Application/Services/MultiplierCalculator.cs` |
+| `BacktestSimulator` | Runs DCA simulation over price series | `Application/Backtesting/BacktestSimulator.cs` |
+| `ParameterSweepService` | Parallelizes simulation across parameter combos | `Application/Backtesting/ParameterSweepService.cs` |
+| `CoinGeckoClient` | Fetches 4-year BTC OHLC history | `Infrastructure/CoinGecko/CoinGeckoClient.cs` |
+| `CoinGeckoDataIngestionService` | One-time/on-demand import to DailyPrice | `Infrastructure/CoinGecko/CoinGeckoDataIngestionService.cs` |
+| `BacktestRequest` | Request DTO for single backtest | `Application/Backtesting/Models/BacktestRequest.cs` |
+| `BacktestResult` | Response DTO with metrics | `Application/Backtesting/Models/BacktestResult.cs` |
+| `SweepRequest` / `SweepResult` | DTOs for parameter sweep | `Application/Backtesting/Models/SweepModels.cs` |
+| `CoinGeckoOptions` | API key, base URL config | `Configuration/CoinGeckoOptions.cs` |
+| Backtest API endpoints | Minimal API route group | Registered in `Program.cs` |
 
 ## Recommended Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      PRESENTATION LAYER                         │
-├─────────────────────────────────────────────────────────────────┤
-│  Program.cs                                                      │
-│  - Registers DI services                                         │
-│  - Configures background services                                │
-│  - Sets up database migrations                                   │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                     APPLICATION LAYER                           │
-├─────────────────────────────────────────────────────────────────┤
-│  DcaSchedulerBackgroundService : TimeBackgroundService          │
-│  - Runs on configurable schedule (e.g., daily at 10:00 AM UTC)  │
-│  - Acquires distributed lock for DCA execution                  │
-│  - Orchestrates buy cycle workflow                              │
-│                                                                  │
-│  DcaExecutionService (Scoped)                                   │
-│  - Fetches current price data                                   │
-│  - Calculates multiplier (drop-from-high + 200 MA boost)        │
-│  - Executes buy order via Hyperliquid                           │
-│  - Publishes domain events                                      │
-│  - Persists purchase record                                     │
-│                                                                  │
-│  PriceDataService (Scoped)                                      │
-│  - Fetches current BTC price from Hyperliquid                   │
-│  - Calculates 30-day high (cached/database)                     │
-│  - Calculates 200-day MA (cached/database)                      │
-│  - Returns PriceAnalysis value object                           │
-│                                                                  │
-│  MultiplierCalculator (Stateless)                               │
-│  - Calculates drop-from-high percentage                         │
-│  - Maps to tier multiplier (1x / 1.5x / 2x / 3x)                │
-│  - Applies 200 MA bear market boost (1.5x additional)           │
-│  - Returns MultiplierResult value object                        │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                       DOMAIN LAYER                              │
-├─────────────────────────────────────────────────────────────────┤
-│  Purchase (Aggregate Root : BaseEntity)                         │
-│  - Id : Guid (UUIDv7)                                            │
-│  - Timestamp : DateTimeOffset                                   │
-│  - AmountUsd : decimal                                           │
-│  - BtcPrice : decimal                                            │
-│  - BtcQuantity : decimal                                         │
-│  - Multiplier : decimal                                          │
-│  - DropFromHighPct : decimal                                     │
-│  - Below200Ma : bool                                             │
-│  - HyperliquidOrderId : string                                   │
-│                                                                  │
-│  DcaConfiguration (Value Object)                                │
-│  - BaseAmountUsd : decimal                                       │
-│  - ScheduleCron : string (e.g., "0 10 * * *" for 10 AM daily)   │
-│  - DropTiers : List<DropTier>                                    │
-│  - BearMarketMultiplier : decimal (1.5x)                         │
-│                                                                  │
-│  DropTier (Value Object)                                        │
-│  - MinDropPct : decimal                                          │
-│  - MaxDropPct : decimal                                          │
-│  - Multiplier : decimal                                          │
-│                                                                  │
-│  PriceAnalysis (Value Object)                                   │
-│  - CurrentPrice : decimal                                        │
-│  - ThirtyDayHigh : decimal                                       │
-│  - TwoHundredDayMa : decimal                                     │
-│  - DropFromHighPct : decimal                                     │
-│  - IsBelowMa : bool                                              │
-│                                                                  │
-│  MultiplierResult (Value Object)                                │
-│  - BaseMultiplier : decimal                                      │
-│  - BearMarketBoost : decimal                                     │
-│  - FinalMultiplier : decimal                                     │
-│  - Tier : DropTier                                               │
-│                                                                  │
-│  Domain Events:                                                  │
-│  - DcaCycleStartedDomainEvent                                    │
-│  - BuyOrderExecutedDomainEvent                                   │
-│  - BuyOrderFailedDomainEvent                                     │
-│  - PriceDataRefreshedDomainEvent                                 │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                   INFRASTRUCTURE LAYER                          │
-├─────────────────────────────────────────────────────────────────┤
-│  HyperliquidApiClient (Scoped)                                  │
-│  - GetCurrentPrice(symbol) : Task<decimal>                       │
-│  - GetHistoricalCandles(symbol, days) : Task<List<Candle>>      │
-│  - ExecuteSpotBuy(symbol, amountUsd) : Task<OrderResult>        │
-│  - Handles authentication (API key/wallet signature)            │
-│  - Uses HttpClient with resilience policies                     │
-│                                                                  │
-│  ApplicationDbContext : DbContext                               │
-│  - DbSet<Purchase> Purchases                                     │
-│  - DbSet<DailyPrice> DailyPrices (cache for 30-day/200-day)     │
-│  - DbSet<OutboxMessage> OutboxMessages (from BuildingBlocks)    │
-│  - Configures entity mappings                                    │
-│                                                                  │
-│  DailyPrice (Entity : BaseEntity)                               │
-│  - Date : DateOnly                                               │
-│  - Symbol : string                                               │
-│  - High : decimal                                                │
-│  - Low : decimal                                                 │
-│  - Close : decimal                                               │
-│  - Used for 30-day high and 200-day MA calculations             │
-│                                                                  │
-│  TelegramNotificationService (from existing)                    │
-│  - SendBuyNotification(Purchase, PriceAnalysis)                 │
-│  - SendErrorNotification(Exception)                             │
-│  - Uses Telegram.Bot SDK                                         │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│                      BUILDINGBLOCKS                             │
-│                      (Existing Infrastructure)                   │
-├─────────────────────────────────────────────────────────────────┤
-│  TimeBackgroundService - Base class for scheduler                │
-│  MediatR + IDomainEvent - Event publishing                       │
-│  OutboxEventPublisher + OutboxMessageBackgroundService          │
-│  EfCoreOutboxStore - Transactional outbox                       │
-│  IDistributedLock - Prevent concurrent DCA executions           │
-│  BaseEntity, AuditedEntity - Entity base classes                │
-│  Serilog - Structured logging                                    │
-│  PostgreSQL + EF Core - Persistence                              │
-│  Redis - Distributed cache for price data                        │
-└─────────────────────────────────────────────────────────────────┘
+EXISTING (unchanged)                    NEW (backtesting)
+========================               ========================
+
+Program.cs ─────────────────────────── + MapBacktestEndpoints()
+  |                                        |
+  |                                    Backtest API Endpoints
+  |                                    POST /api/backtest
+  |                                    POST /api/backtest/sweep
+  |                                    POST /api/backtest/data/ingest
+  |                                    GET  /api/backtest/data/status
+  |                                        |
+DcaExecutionService ──── EXTRACTS ──── MultiplierCalculator (static)
+  |                      LOGIC TO          |
+  | (now calls                         BacktestSimulator
+  |  MultiplierCalculator                  |
+  |  instead of inline)                ParameterSweepService
+  |                                        |
+PriceDataService                       CoinGeckoClient
+  |                                        |
+TradingBotDbContext ─── SHARED ──────── (same DailyPrice table)
 ```
 
-## Component Boundaries
+## Component Design
 
-| Component | Responsibility | Depends On | Consumed By |
-|-----------|---------------|------------|-------------|
-| **DcaSchedulerBackgroundService** | Trigger daily buy cycle at configured time | IServiceProvider, IDistributedLock | Hosted by Program.cs |
-| **DcaExecutionService** | Orchestrate buy workflow (fetch price → calculate → buy → persist → publish) | PriceDataService, MultiplierCalculator, HyperliquidApiClient, ApplicationDbContext | DcaSchedulerBackgroundService |
-| **PriceDataService** | Fetch and cache price data for analysis | HyperliquidApiClient, ApplicationDbContext, IDistributedCache | DcaExecutionService |
-| **MultiplierCalculator** | Pure calculation logic for multipliers | DcaConfiguration, PriceAnalysis | DcaExecutionService |
-| **HyperliquidApiClient** | HTTP integration with Hyperliquid API | HttpClient, IConfiguration (API keys) | PriceDataService, DcaExecutionService |
-| **ApplicationDbContext** | EF Core persistence layer | PostgreSQL connection | All services needing database access |
-| **TelegramNotificationService** | Send alerts to user's Telegram | Telegram.Bot, IConfiguration | Domain event handlers |
-| **Domain Event Handlers** | React to DCA lifecycle events (send notifications, log metrics) | TelegramNotificationService, ILogger | MediatR pipeline |
+### 1. MultiplierCalculator (Extracted Core Logic)
 
-## Data Flow: Daily Buy Cycle
+**The most critical refactoring.** Currently the multiplier logic lives inside `DcaExecutionService.CalculateMultiplierAsync` as a private async method that depends on `IPriceDataService` (DB queries). This must be split into:
 
-```
-1. TRIGGER (Daily at configured time)
-   DcaSchedulerBackgroundService.ProcessAsync()
-   ↓
-   Acquire distributed lock: "dca-execution-lock" (TTL: 5 minutes)
-   ↓
-
-2. ORCHESTRATION
-   DcaExecutionService.ExecuteBuyCycle()
-   ↓
-   Publish: DcaCycleStartedDomainEvent
-   ↓
-
-3. PRICE ANALYSIS
-   PriceDataService.GetCurrentPriceAnalysis()
-   ↓
-   HyperliquidApiClient.GetCurrentPrice("BTC")
-   ↓
-   Load DailyPrices from database (last 200 days) OR
-   Fetch missing days from Hyperliquid + cache in database
-   ↓
-   Calculate 30-day high, 200-day MA
-   ↓
-   Return PriceAnalysis value object
-   ↓
-
-4. MULTIPLIER CALCULATION
-   MultiplierCalculator.Calculate(PriceAnalysis, DcaConfiguration)
-   ↓
-   Calculate drop from high: (high - current) / high * 100
-   ↓
-   Map to tier: 0-5% = 1x, 5-10% = 1.5x, 10-20% = 2x, >20% = 3x
-   ↓
-   Apply bear market boost: If current < 200 MA, multiply by 1.5x
-   ↓
-   Return MultiplierResult value object
-   ↓
-
-5. ORDER EXECUTION
-   Calculate purchase amount: BaseAmountUsd * FinalMultiplier
-   ↓
-   HyperliquidApiClient.ExecuteSpotBuy("BTC", purchaseAmount)
-   ↓
-   Receive OrderResult (orderId, executedPrice, btcQuantity)
-   ↓
-
-6. PERSISTENCE
-   Create Purchase entity:
-   - AmountUsd, BtcPrice, BtcQuantity, Multiplier, DropFromHighPct
-   - Below200Ma, HyperliquidOrderId, Timestamp
-   ↓
-   Save to ApplicationDbContext
-   ↓
-   Publish: BuyOrderExecutedDomainEvent (via outbox pattern)
-   ↓
-   Commit transaction (Purchase + OutboxMessage atomically)
-   ↓
-
-7. NOTIFICATION (Async via OutboxMessageBackgroundService)
-   OutboxMessageBackgroundService processes OutboxMessage
-   ↓
-   Deserialize: BuyOrderExecutedDomainEvent
-   ↓
-   MediatR publishes to handlers
-   ↓
-   BuyOrderExecutedHandler sends Telegram notification:
-   "✅ BTC Buy Executed
-    Amount: $150 (1.5x multiplier)
-    Price: $42,350
-    Quantity: 0.00354 BTC
-    Drop from 30d high: 8.2%
-    Below 200 MA: Yes (bear market boost applied)
-    Total BTC accumulated: 0.245 BTC"
-   ↓
-
-8. RELEASE LOCK
-   Distributed lock disposed/released
-```
-
-## Integration with Existing BuildingBlocks
-
-### 1. TimeBackgroundService Integration
-
-**Pattern:** DcaSchedulerBackgroundService extends TimeBackgroundService
+- **Pure calculation**: given (currentPrice, high30Day, ma200Day, tiers, bearBoostFactor, maxCap) -> MultiplierResult
+- **Data fetching**: stays in DcaExecutionService, calls PriceDataService, then passes values to calculator
 
 ```csharp
-public class DcaSchedulerBackgroundService : TimeBackgroundService
+// Application/Services/MultiplierCalculator.cs
+public static class MultiplierCalculator
 {
-    private readonly IServiceProvider _services;
-    private readonly IDistributedLock _lock;
-    private readonly DcaConfiguration _config;
-
-    protected override TimeSpan Interval => CalculateNextInterval();
-
-    protected override async Task ProcessAsync(CancellationToken ct)
+    /// <summary>
+    /// Pure function: computes multiplier from price data and configuration.
+    /// No I/O, no DI, no async -- suitable for tight simulation loops.
+    /// </summary>
+    public static MultiplierResult Calculate(
+        decimal currentPrice,
+        decimal high30Day,
+        decimal ma200Day,
+        IReadOnlyList<MultiplierTier> tiers,
+        decimal bearBoostFactor,
+        decimal maxMultiplierCap)
     {
-        // Acquire lock to prevent concurrent executions
-        await using var lockHandle = await _lock.AcquireLockAsync(
-            "dca-execution-lock", TimeSpan.FromMinutes(5), ct);
+        // Drop percentage from 30-day high
+        decimal dropPercent = high30Day > 0
+            ? (high30Day - currentPrice) / high30Day * 100m
+            : 0m;
 
-        if (!lockHandle.Success) return; // Another instance is running
+        // Tier matching (descending, first match wins)
+        decimal dipMultiplier = 1.0m;
+        string tier = "None";
+        var matchedTier = tiers
+            .OrderByDescending(t => t.DropPercentage)
+            .FirstOrDefault(t => dropPercent >= t.DropPercentage);
 
-        // Execute buy cycle
-        await using var scope = _services.CreateAsyncScope();
-        var executor = scope.ServiceProvider.GetRequiredService<DcaExecutionService>();
-        await executor.ExecuteBuyCycle(ct);
-    }
-
-    private TimeSpan CalculateNextInterval()
-    {
-        // Parse cron expression and return time until next execution
-        // Example: If scheduled for 10:00 AM daily, return time until next 10 AM
-    }
-}
-```
-
-**Why this pattern:**
-- Leverages existing infrastructure (logging, error handling, periodic timer)
-- Inherits graceful shutdown and exception recovery
-- Automatic retry on failure (next interval)
-
-### 2. Domain Events + Outbox Pattern Integration
-
-**Pattern:** Publish events transactionally with Purchase entity
-
-```csharp
-public class DcaExecutionService
-{
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IEventPublisher _eventPublisher; // OutboxEventPublisher
-
-    public async Task ExecuteBuyCycle(CancellationToken ct)
-    {
-        // ... price analysis and order execution ...
-
-        var purchase = new Purchase
+        if (matchedTier != null)
         {
-            AmountUsd = purchaseAmount,
-            BtcPrice = orderResult.ExecutedPrice,
-            BtcQuantity = orderResult.Quantity,
-            Multiplier = multiplier.FinalMultiplier,
-            HyperliquidOrderId = orderResult.OrderId
-        };
-
-        await _dbContext.Purchases.AddAsync(purchase, ct);
-
-        // Publish event via outbox (stored in same transaction)
-        await _eventPublisher.PublishAsync(
-            new BuyOrderExecutedDomainEvent(purchase.Id), ct);
-
-        // Atomic commit: Purchase + OutboxMessage
-        await _dbContext.SaveChangesAsync(ct);
-    }
-}
-```
-
-**Why this pattern:**
-- Guarantees event delivery (transactional outbox)
-- Decouples execution from notification (async processing)
-- Allows multiple handlers (Telegram, logging, metrics)
-
-### 3. Distributed Lock Integration
-
-**Pattern:** Use IDistributedLock to prevent concurrent DCA executions
-
-```csharp
-// In DcaSchedulerBackgroundService
-await using var lockHandle = await _lock.AcquireLockAsync(
-    "dca-execution-lock", TimeSpan.FromMinutes(5), ct);
-
-if (!lockHandle.Success)
-{
-    _logger.LogWarning("DCA execution already in progress, skipping");
-    return;
-}
-```
-
-**Why this pattern:**
-- Prevents double-buying if multiple instances are deployed
-- Safe for horizontal scaling
-- Redis-backed lock survives service restarts
-
-### 4. EF Core + PostgreSQL Integration
-
-**Pattern:** Extend ApplicationDbContext with new entities
-
-```csharp
-public class ApplicationDbContext : DbContext
-{
-    public DbSet<Purchase> Purchases { get; set; }
-    public DbSet<DailyPrice> DailyPrices { get; set; }
-    public DbSet<OutboxMessage> OutboxMessages { get; set; } // From BuildingBlocks
-
-    protected override void OnModelCreating(ModelBuilder builder)
-    {
-        // Configure outbox pattern
-        builder.ApplyOutboxMessageConfiguration();
-
-        // Configure Purchase entity
-        builder.Entity<Purchase>(entity =>
-        {
-            entity.HasKey(p => p.Id);
-            entity.Property(p => p.AmountUsd).HasColumnType("decimal(18,2)");
-            entity.Property(p => p.BtcPrice).HasColumnType("decimal(18,2)");
-            entity.Property(p => p.BtcQuantity).HasColumnType("decimal(18,8)");
-            entity.HasIndex(p => p.Timestamp);
-        });
-
-        // Configure DailyPrice entity
-        builder.Entity<DailyPrice>(entity =>
-        {
-            entity.HasKey(p => new { p.Symbol, p.Date });
-            entity.Property(p => p.Close).HasColumnType("decimal(18,2)");
-            entity.HasIndex(p => p.Date);
-        });
-    }
-}
-```
-
-**Why this pattern:**
-- Single database for all data (purchases, price cache, outbox)
-- Atomic transactions across entities
-- EF Core migrations track schema evolution
-
-### 5. Redis Cache Integration
-
-**Pattern:** Cache 30-day and 200-day price data to reduce API calls
-
-```csharp
-public class PriceDataService
-{
-    private readonly IDistributedCache _cache;
-    private readonly HyperliquidApiClient _api;
-    private readonly ApplicationDbContext _dbContext;
-
-    public async Task<PriceAnalysis> GetCurrentPriceAnalysis(CancellationToken ct)
-    {
-        var currentPrice = await _api.GetCurrentPrice("BTC", ct);
-
-        // Try cache for 30-day high
-        var thirtyDayHigh = await _cache.GetStringAsync("btc-30d-high", ct);
-        if (thirtyDayHigh == null)
-        {
-            // Cache miss: calculate from database or API
-            thirtyDayHigh = await CalculateThirtyDayHigh(ct);
-            await _cache.SetStringAsync("btc-30d-high", thirtyDayHigh,
-                new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1) }, ct);
+            dipMultiplier = matchedTier.Multiplier;
+            tier = $">= {matchedTier.DropPercentage}%";
         }
 
-        // Similar pattern for 200-day MA
-        // ...
+        // Bear market boost
+        decimal bearMultiplier = (ma200Day > 0 && currentPrice < ma200Day)
+            ? bearBoostFactor
+            : 1.0m;
 
-        return new PriceAnalysis(currentPrice, ...);
+        // Stack multiplicatively with cap
+        decimal total = Math.Min(dipMultiplier * bearMultiplier, maxMultiplierCap);
+
+        return new MultiplierResult(total, dipMultiplier, bearMultiplier,
+            tier, dropPercent, high30Day, ma200Day);
     }
 }
 ```
 
-**Why this pattern:**
-- Reduces Hyperliquid API calls (rate limits, cost)
-- Fast lookups for frequently accessed data
-- Automatic expiration and refresh
-
-### 6. Telegram Notification Integration
-
-**Pattern:** Domain event handlers trigger notifications
+**After extraction, `DcaExecutionService.CalculateMultiplierAsync` becomes a thin wrapper:**
 
 ```csharp
-public class BuyOrderExecutedHandler : INotificationHandler<BuyOrderExecutedDomainEvent>
+private async Task<MultiplierResult> CalculateMultiplierAsync(
+    decimal currentPrice, DcaOptions options, CancellationToken ct)
 {
-    private readonly TelegramNotificationService _telegram;
-    private readonly ApplicationDbContext _dbContext;
-
-    public async Task Handle(BuyOrderExecutedDomainEvent evt, CancellationToken ct)
+    try
     {
-        var purchase = await _dbContext.Purchases.FindAsync(evt.PurchaseId, ct);
+        var high30Day = await priceDataService.Get30DayHighAsync("BTC", ct);
+        var ma200Day = await priceDataService.Get200DaySmaAsync("BTC", ct);
 
-        var message = $"""
-            ✅ BTC Buy Executed
-            Amount: ${purchase.AmountUsd:F2} ({purchase.Multiplier:F1}x multiplier)
-            Price: ${purchase.BtcPrice:F2}
-            Quantity: {purchase.BtcQuantity:F8} BTC
-            Drop from 30d high: {purchase.DropFromHighPct:F1}%
-            Below 200 MA: {(purchase.Below200Ma ? "Yes (bear market boost)" : "No")}
-            Order ID: {purchase.HyperliquidOrderId}
-            """;
-
-        await _telegram.SendMessageAsync(message, ct);
+        return MultiplierCalculator.Calculate(
+            currentPrice, high30Day, ma200Day,
+            options.MultiplierTiers, options.BearBoostFactor,
+            options.MaxMultiplierCap);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Multiplier calculation failed, falling back to 1.0x");
+        return MultiplierResult.Default;
     }
 }
 ```
 
-**Why this pattern:**
-- Decoupled from execution logic
-- Can add multiple notification channels (email, webhook)
-- Async processing via outbox (doesn't block buy execution)
+**Why static, not DI?** The backtesting simulation loop calls this millions of times during parameter sweeps. Zero allocation overhead, no service resolution, maximum throughput.
 
-## Suggested Build Order
+### 2. BacktestSimulator
 
-The following order respects dependency chains and enables incremental validation.
+The core simulation engine. Given a price series and DCA configuration, simulates daily purchases and produces metrics.
 
-### Phase 1: Foundation (Core Infrastructure)
-
-**Build First:**
-1. **Domain Models** (no dependencies)
-   - Purchase entity
-   - DailyPrice entity
-   - Value objects: DcaConfiguration, DropTier, PriceAnalysis, MultiplierResult
-   - Domain events: DcaCycleStartedDomainEvent, BuyOrderExecutedDomainEvent, etc.
-
-2. **ApplicationDbContext** (depends on: domain models, BuildingBlocks)
-   - Configure Purchase and DailyPrice entities
-   - Include OutboxMessage configuration
-   - Create initial EF Core migration
-
-3. **Database Migration** (depends on: ApplicationDbContext)
-   - Run migration to create schema
-   - Verify tables created: Purchases, DailyPrices, OutboxMessages
-
-**Validation:** Can persist Purchase entities and query database
-
-### Phase 2: External Integration (Hyperliquid API)
-
-**Build Next:**
-4. **HyperliquidApiClient** (depends on: HttpClient, configuration)
-   - Implement GetCurrentPrice()
-   - Implement GetHistoricalCandles()
-   - Implement ExecuteSpotBuy()
-   - Add authentication (API key/wallet signature)
-   - Add error handling and retry policies
-
-5. **Integration Tests** (depends on: HyperliquidApiClient)
-   - Test connection to Hyperliquid testnet
-   - Verify price fetching
-   - Test spot buy execution (small amount)
-
-**Validation:** Can fetch real price data and execute test orders
-
-### Phase 3: Business Logic (Price Analysis + Multipliers)
-
-**Build Next:**
-6. **MultiplierCalculator** (depends on: value objects, DcaConfiguration)
-   - Implement drop-from-high calculation
-   - Implement tier mapping
-   - Implement bear market boost
-   - Unit tests for all scenarios
-
-7. **PriceDataService** (depends on: HyperliquidApiClient, ApplicationDbContext, Redis)
-   - Implement current price fetching
-   - Implement 30-day high calculation (with caching)
-   - Implement 200-day MA calculation (with caching)
-   - Return PriceAnalysis value object
-
-**Validation:** Can calculate correct multipliers for test scenarios
-
-### Phase 4: Execution Workflow (DCA Engine)
-
-**Build Next:**
-8. **DcaExecutionService** (depends on: all previous components)
-   - Orchestrate full buy cycle
-   - Integrate price analysis → multiplier calculation → order execution
-   - Persist Purchase entity
-   - Publish domain events via outbox
-
-9. **Domain Event Handlers** (depends on: domain events, TelegramNotificationService)
-   - BuyOrderExecutedHandler
-   - BuyOrderFailedHandler
-   - Log important metrics
-
-**Validation:** Can execute manual buy cycle via API endpoint or test harness
-
-### Phase 5: Scheduling (Background Service)
-
-**Build Next:**
-10. **DcaSchedulerBackgroundService** (depends on: DcaExecutionService, TimeBackgroundService)
-    - Implement time-based scheduling (configurable cron)
-    - Integrate distributed lock
-    - Handle errors gracefully
-
-11. **Configuration Management** (depends on: appsettings.json)
-    - DcaConfiguration: base amount, schedule, tiers
-    - Hyperliquid API credentials
-    - Telegram credentials
-
-**Validation:** Can run automated daily buys
-
-### Phase 6: Observability (Logging + Notifications)
-
-**Build Last:**
-12. **Telegram Notifications** (depends on: domain event handlers)
-    - Rich notifications with all purchase details
-    - Error notifications
-
-13. **Enhanced Logging** (depends on: Serilog)
-    - Structured logging for each step
-    - Performance metrics
-    - Audit trail
-
-**Validation:** Receive Telegram alerts for every buy
-
-## Dependencies Between Components
-
-```
-Purchase, DailyPrice, Value Objects (no dependencies)
-    ↓
-ApplicationDbContext (depends on: entities, BuildingBlocks)
-    ↓
-HyperliquidApiClient (depends on: HttpClient)
-    ↓
-MultiplierCalculator (depends on: value objects)
-    ↓
-PriceDataService (depends on: HyperliquidApiClient, ApplicationDbContext, Redis)
-    ↓
-DcaExecutionService (depends on: PriceDataService, MultiplierCalculator, HyperliquidApiClient, ApplicationDbContext, OutboxEventPublisher)
-    ↓
-Domain Event Handlers (depends on: TelegramNotificationService, ApplicationDbContext)
-    ↓
-DcaSchedulerBackgroundService (depends on: DcaExecutionService, TimeBackgroundService, IDistributedLock)
-```
-
-## Architecture Patterns to Follow
-
-### Pattern 1: Command-Query Separation
-
-**What:** Separate read operations (price queries) from write operations (order execution)
-
-**When:** All price data fetching vs. order placement
-
-**Example:**
 ```csharp
-// Query: Read-only, cacheable
-public class PriceDataService
+// Application/Backtesting/BacktestSimulator.cs
+public class BacktestSimulator
 {
-    public Task<PriceAnalysis> GetCurrentPriceAnalysis(); // Query
-}
+    /// <summary>
+    /// Simulates a DCA strategy over historical price data.
+    /// Pure computation -- no I/O during simulation.
+    /// Loads price data once, then iterates in-memory.
+    /// </summary>
+    public BacktestResult Simulate(
+        IReadOnlyList<DailyPrice> priceData,  // Pre-loaded, sorted by date
+        BacktestParameters parameters)
+    {
+        // Pre-compute 200-day SMA and 30-day high for each day
+        // using sliding window (O(n) -- no repeated DB queries)
 
-// Command: State-changing, transactional
-public class DcaExecutionService
-{
-    public Task ExecuteBuyCycle(); // Command
+        var purchases = new List<SimulatedPurchase>();
+        decimal totalCostUsd = 0m;
+        decimal totalBtc = 0m;
+        decimal peakValue = 0m;
+        decimal maxDrawdown = 0m;
+
+        for (int i = parameters.WarmupDays; i < priceData.Count; i++)
+        {
+            var today = priceData[i];
+            var high30Day = ComputeRollingHigh(priceData, i, parameters.HighLookbackDays);
+            var ma200Day = ComputeRollingSma(priceData, i, parameters.MaPeriod);
+
+            var multiplierResult = MultiplierCalculator.Calculate(
+                today.Close, high30Day, ma200Day,
+                parameters.Tiers, parameters.BearBoostFactor,
+                parameters.MaxMultiplierCap);
+
+            var amount = parameters.BaseDailyAmount * multiplierResult.TotalMultiplier;
+            var btcBought = amount / today.Close;
+
+            totalCostUsd += amount;
+            totalBtc += btcBought;
+
+            // Track portfolio value for drawdown calculation
+            var portfolioValue = totalBtc * today.Close;
+            peakValue = Math.Max(peakValue, portfolioValue);
+            var drawdown = peakValue > 0 ? (peakValue - portfolioValue) / peakValue : 0;
+            maxDrawdown = Math.Max(maxDrawdown, drawdown);
+
+            purchases.Add(new SimulatedPurchase(
+                today.Date, today.Close, amount, btcBought,
+                multiplierResult.TotalMultiplier, multiplierResult.Tier));
+        }
+
+        // Compute fixed DCA baseline for comparison
+        var fixedResult = SimulateFixedDca(priceData, parameters);
+
+        return new BacktestResult
+        {
+            // Smart DCA metrics
+            TotalInvested = totalCostUsd,
+            TotalBtc = totalBtc,
+            AverageCostBasis = totalCostUsd / totalBtc,
+            FinalPortfolioValue = totalBtc * priceData[^1].Close,
+            MaxDrawdownPercent = maxDrawdown * 100m,
+            TotalPurchases = purchases.Count,
+
+            // Fixed DCA comparison
+            FixedDcaTotalBtc = fixedResult.TotalBtc,
+            FixedDcaAverageCost = fixedResult.AverageCostBasis,
+            BtcAdvantagePercent = (totalBtc - fixedResult.TotalBtc) / fixedResult.TotalBtc * 100m,
+            CostBasisAdvantagePercent = (fixedResult.AverageCostBasis - (totalCostUsd / totalBtc))
+                / fixedResult.AverageCostBasis * 100m,
+
+            // Detailed purchase log (optional, can be trimmed for large sweeps)
+            Purchases = purchases,
+
+            // Metadata
+            StartDate = priceData[parameters.WarmupDays].Date,
+            EndDate = priceData[^1].Date,
+            Parameters = parameters
+        };
+    }
+
+    // Efficient O(1) sliding window computations
+    private decimal ComputeRollingHigh(IReadOnlyList<DailyPrice> data, int index, int lookback) { ... }
+    private decimal ComputeRollingSma(IReadOnlyList<DailyPrice> data, int index, int period) { ... }
 }
 ```
 
-### Pattern 2: Value Objects for Immutability
+**Key design choices:**
+- **Price data loaded once** into memory before simulation starts (eliminates DB I/O during loop)
+- **Sliding window** for 30-day high and 200-day SMA (not repeated DB queries like live code)
+- **Fixed DCA baseline** always computed for comparison
+- **No async** in the simulation loop -- pure CPU work
+- **Returns structured result** with all metrics for JSON serialization
 
-**What:** Use immutable value objects for calculations and analysis
+### 3. ParameterSweepService
 
-**When:** Price analysis, multiplier results, configuration
+Generates parameter combinations and runs simulations in parallel.
 
-**Example:**
 ```csharp
-public record PriceAnalysis(
-    decimal CurrentPrice,
-    decimal ThirtyDayHigh,
-    decimal TwoHundredDayMa,
-    decimal DropFromHighPct,
-    bool IsBelowMa
-)
+// Application/Backtesting/ParameterSweepService.cs
+public class ParameterSweepService
 {
-    // All properties are init-only, immutable
+    private readonly BacktestSimulator _simulator;
+
+    /// <summary>
+    /// Runs backtests across all combinations of parameter ranges.
+    /// Uses Parallel.ForEachAsync for CPU-bound parallelism.
+    /// </summary>
+    public async Task<SweepResult> RunSweepAsync(
+        IReadOnlyList<DailyPrice> priceData,
+        SweepRequest request,
+        CancellationToken ct)
+    {
+        var combinations = GenerateCombinations(request);
+        var results = new ConcurrentBag<BacktestResult>();
+
+        await Parallel.ForEachAsync(
+            combinations,
+            new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                CancellationToken = ct
+            },
+            (parameters, token) =>
+            {
+                var result = _simulator.Simulate(priceData, parameters);
+                results.Add(result);
+                return ValueTask.CompletedTask;
+            });
+
+        // Rank results by BTC advantage over fixed DCA
+        var ranked = results
+            .OrderByDescending(r => r.BtcAdvantagePercent)
+            .ToList();
+
+        return new SweepResult
+        {
+            TotalCombinations = combinations.Count,
+            TopResults = ranked.Take(request.TopN ?? 10).ToList(),
+            WorstResults = ranked.TakeLast(3).Reverse().ToList(),
+            BestParameters = ranked.First().Parameters,
+            CompletedAt = DateTimeOffset.UtcNow
+        };
+    }
+
+    private List<BacktestParameters> GenerateCombinations(SweepRequest request)
+    {
+        // Cartesian product of:
+        // - Base daily amounts: [5, 10, 15, 20, ...]
+        // - Tier configurations: [{5%->1.5x, 10%->2x, 20%->3x}, {3%->1.5x, 7%->2x, ...}, ...]
+        // - Bear boost factors: [1.0, 1.25, 1.5, 2.0]
+        // - Max caps: [3.0, 4.5, 6.0]
+        // - High lookback days: [14, 30, 60]
+        // - MA periods: [100, 200, 365]
+    }
 }
 ```
 
-### Pattern 3: Repository Pattern (via EF Core DbContext)
+**Why Parallel.ForEachAsync:**
+- Each simulation is independent (embarrassingly parallel)
+- CPU-bound, not I/O-bound -- thread pool parallelism is ideal
+- `ConcurrentBag<T>` for lock-free result collection
+- Respects cancellation token for graceful abort
+- Automatically throttles to CPU count (avoids oversubscription)
 
-**What:** Encapsulate data access behind DbContext
+**Performance estimate:** A single 4-year backtest (1,460 daily prices) runs in microseconds. A sweep of 1,000 combinations completes in milliseconds on modern hardware. No need for background jobs or async polling.
 
-**When:** All database operations
+### 4. CoinGecko Historical Data Client
 
-**Example:**
 ```csharp
-// DbContext IS the repository
-public class ApplicationDbContext : DbContext
+// Infrastructure/CoinGecko/CoinGeckoClient.cs
+public class CoinGeckoClient(
+    HttpClient http,
+    IOptions<CoinGeckoOptions> options,
+    ILogger<CoinGeckoClient> logger)
 {
-    public DbSet<Purchase> Purchases { get; set; }
+    /// <summary>
+    /// Fetches BTC daily OHLC data from CoinGecko.
+    /// Endpoint: /coins/{id}/ohlc/range (pro) or /coins/{id}/market_chart/range (free)
+    /// </summary>
+    public async Task<List<CoinGeckoDailyPrice>> GetHistoricalOhlcAsync(
+        DateOnly from,
+        DateOnly to,
+        CancellationToken ct)
+    {
+        // CoinGecko free tier: /coins/bitcoin/market_chart/range
+        // Parameters: vs_currency=usd, from=<unix>, to=<unix>
+        // Returns: prices[], market_caps[], total_volumes[]
+        // Granularity: daily when range > 90 days
 
-    // Use LINQ directly in services:
-    var totalBtc = await _dbContext.Purchases.SumAsync(p => p.BtcQuantity);
+        // Rate limiting: free tier is 10-30 req/min, with 1 req sufficient here
+        // For OHLC specifically: /coins/bitcoin/ohlc?days=max (limited to 180 days on free)
+        // Best approach for free tier: use market_chart/range and derive OHLC from daily data points
+    }
 }
 ```
 
-### Pattern 4: Transactional Outbox
+**CoinGecko API specifics (MEDIUM confidence, from training data):**
+- Free tier provides `/coins/bitcoin/market_chart/range` with daily granularity for ranges > 90 days
+- OHLC endpoint (`/coins/bitcoin/ohlc`) may be limited to 180 days on free tier
+- For 4-year history, `market_chart/range` is the right endpoint (returns daily price points)
+- Rate limit: approximately 10-30 requests/minute on free tier (ample for one-time ingestion)
+- Response format: `{ "prices": [[timestamp_ms, price], ...] }` -- need to convert to DailyPrice format
+- Alternative: Pro/Demo API key removes rate limits and provides OHLC endpoint with longer history
 
-**What:** Publish domain events atomically with entity changes
+**Data ingestion strategy:** Fetch once, store in existing DailyPrice table, refresh incrementally.
 
-**When:** Every state change that requires notification
+### 5. CoinGecko Data Ingestion Service
 
-**Example:**
 ```csharp
-// Single transaction for entity + event
-await _dbContext.Purchases.AddAsync(purchase);
-await _eventPublisher.PublishAsync(new BuyOrderExecutedDomainEvent(purchase.Id));
-await _dbContext.SaveChangesAsync(); // Commits both
+// Infrastructure/CoinGecko/CoinGeckoDataIngestionService.cs
+public class CoinGeckoDataIngestionService(
+    CoinGeckoClient coinGeckoClient,
+    TradingBotDbContext dbContext,
+    ILogger<CoinGeckoDataIngestionService> logger)
+{
+    /// <summary>
+    /// Ingests historical BTC price data from CoinGecko into the DailyPrice table.
+    /// Idempotent: skips dates that already exist.
+    /// Called on-demand via API endpoint.
+    /// </summary>
+    public async Task<DataIngestionResult> IngestHistoricalDataAsync(
+        DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        // 1. Check what dates already exist in DailyPrice
+        // 2. Identify gaps
+        // 3. Fetch missing ranges from CoinGecko (respecting rate limits)
+        // 4. Upsert into DailyPrice table
+        // 5. Return summary (dates ingested, gaps filled, total records)
+    }
+}
 ```
 
-### Pattern 5: Distributed Lock for Idempotency
+**Important:** This writes to the same `DailyPrice` table that the live bot uses. The data source column is not currently tracked. For backtesting, this is fine -- BTC price is BTC price regardless of source. The existing `Symbol = "BTC"` and `Date` composite key handles deduplication naturally.
 
-**What:** Prevent concurrent executions of the same operation
+### 6. API Endpoints
 
-**When:** Daily DCA cycle execution
-
-**Example:**
 ```csharp
-await using var lockHandle = await _lock.AcquireLockAsync(
-    "dca-execution-lock", TimeSpan.FromMinutes(5));
+// Registered in Program.cs
+app.MapGroup("/api/backtest")
+    .MapBacktestEndpoints();
 
-if (!lockHandle.Success) return; // Another instance already running
+// Application/Backtesting/BacktestEndpoints.cs
+public static class BacktestEndpoints
+{
+    public static RouteGroupBuilder MapBacktestEndpoints(this RouteGroupBuilder group)
+    {
+        // POST /api/backtest -- Run single backtest
+        group.MapPost("/", async (
+            BacktestRequest request,
+            TradingBotDbContext db,
+            CancellationToken ct) =>
+        {
+            var priceData = await db.DailyPrices
+                .Where(p => p.Symbol == "BTC"
+                    && p.Date >= request.StartDate
+                    && p.Date <= request.EndDate)
+                .OrderBy(p => p.Date)
+                .ToListAsync(ct);
+
+            var simulator = new BacktestSimulator();
+            var result = simulator.Simulate(priceData, request.ToParameters());
+            return Results.Ok(result);
+        });
+
+        // POST /api/backtest/sweep -- Run parameter sweep
+        group.MapPost("/sweep", async (
+            SweepRequest request,
+            TradingBotDbContext db,
+            CancellationToken ct) =>
+        {
+            var priceData = await db.DailyPrices
+                .Where(p => p.Symbol == "BTC"
+                    && p.Date >= request.StartDate
+                    && p.Date <= request.EndDate)
+                .OrderBy(p => p.Date)
+                .ToListAsync(ct);
+
+            var sweepService = new ParameterSweepService(new BacktestSimulator());
+            var result = await sweepService.RunSweepAsync(priceData, request, ct);
+            return Results.Ok(result);
+        });
+
+        // POST /api/backtest/data/ingest -- Trigger CoinGecko data ingestion
+        group.MapPost("/data/ingest", async (
+            DataIngestionRequest request,
+            CoinGeckoDataIngestionService ingestion,
+            CancellationToken ct) =>
+        {
+            var result = await ingestion.IngestHistoricalDataAsync(
+                request.From, request.To, ct);
+            return Results.Ok(result);
+        });
+
+        // GET /api/backtest/data/status -- Check available price data range
+        group.MapGet("/data/status", async (
+            TradingBotDbContext db,
+            CancellationToken ct) =>
+        {
+            var earliest = await db.DailyPrices
+                .Where(p => p.Symbol == "BTC")
+                .MinAsync(p => (DateOnly?)p.Date, ct);
+            var latest = await db.DailyPrices
+                .Where(p => p.Symbol == "BTC")
+                .MaxAsync(p => (DateOnly?)p.Date, ct);
+            var count = await db.DailyPrices
+                .Where(p => p.Symbol == "BTC")
+                .CountAsync(ct);
+
+            return Results.Ok(new { earliest, latest, totalDays = count });
+        });
+
+        return group;
+    }
+}
+```
+
+## Data Flow
+
+### Single Backtest Flow
+
+```
+POST /api/backtest
+{
+  "startDate": "2022-01-01",
+  "endDate": "2025-12-31",
+  "baseDailyAmount": 10.0,
+  "multiplierTiers": [
+    { "dropPercentage": 5, "multiplier": 1.5 },
+    { "dropPercentage": 10, "multiplier": 2.0 },
+    { "dropPercentage": 20, "multiplier": 3.0 }
+  ],
+  "bearBoostFactor": 1.5,
+  "maxMultiplierCap": 4.5,
+  "highLookbackDays": 30,
+  "maPeriod": 200
+}
+       |
+       v
+[1] Load DailyPrice from PostgreSQL (WHERE Symbol='BTC' AND Date BETWEEN ...)
+    ~1,460 rows for 4 years, single query, ~5ms
+       |
+       v
+[2] BacktestSimulator.Simulate(priceData, parameters)
+    - Pre-compute sliding windows for 30-day high and 200-day SMA
+    - Iterate each day: MultiplierCalculator.Calculate() -> simulated purchase
+    - Track cumulative BTC, cost, drawdown
+    - Also run fixed DCA baseline
+    Pure CPU, ~1ms for 4 years
+       |
+       v
+[3] Return BacktestResult as JSON
+    - Smart DCA metrics (total BTC, avg cost, drawdown)
+    - Fixed DCA comparison
+    - Advantage percentages
+    - Full purchase log (optional)
+
+Total: ~10-50ms request-response
+```
+
+### Parameter Sweep Flow
+
+```
+POST /api/backtest/sweep
+{
+  "startDate": "2022-01-01",
+  "endDate": "2025-12-31",
+  "baseDailyAmounts": [5, 10, 20],
+  "tierConfigurations": [
+    { "name": "conservative", "tiers": [...] },
+    { "name": "aggressive", "tiers": [...] }
+  ],
+  "bearBoostFactors": [1.0, 1.25, 1.5, 2.0],
+  "maxMultiplierCaps": [3.0, 4.5, 6.0],
+  "highLookbackDays": [14, 30, 60],
+  "maPeriods": [100, 200],
+  "topN": 10
+}
+       |
+       v
+[1] Load DailyPrice from PostgreSQL (same as single backtest)
+    Loaded ONCE, shared across all simulations (read-only)
+       |
+       v
+[2] ParameterSweepService.GenerateCombinations()
+    3 * 2 * 4 * 3 * 3 * 2 = 432 combinations (example)
+       |
+       v
+[3] Parallel.ForEachAsync over all combinations
+    Each thread gets: (same priceData reference, unique parameters)
+    -> BacktestSimulator.Simulate() per combination
+    -> ConcurrentBag<BacktestResult>.Add()
+    ~432 simulations, ~1ms each, 8 cores = ~60ms wall time
+       |
+       v
+[4] Rank by BtcAdvantagePercent, return top N
+    - Best parameters with metrics
+    - Worst parameters for contrast
+    - Summary statistics
+
+Total: ~100-500ms for hundreds of combinations
+```
+
+### Data Ingestion Flow
+
+```
+POST /api/backtest/data/ingest
+{
+  "from": "2020-01-01",
+  "to": "2025-12-31"
+}
+       |
+       v
+[1] Query DailyPrice for existing dates in range
+       |
+       v
+[2] Identify gaps (dates without price data)
+       |
+       v
+[3] CoinGeckoClient.GetHistoricalOhlcAsync(from, to)
+    - Single HTTP request to CoinGecko API
+    - /coins/bitcoin/market_chart/range?vs_currency=usd&from=...&to=...
+    - Returns ~2,190 daily data points for 6 years
+       |
+       v
+[4] Transform CoinGecko response to DailyPrice entities
+    - Map [timestamp, price] to DailyPrice { Date, Close, Open, High, Low }
+    - Note: market_chart endpoint returns price only; OHLC endpoint gives full candles
+       |
+       v
+[5] Upsert into DailyPrice table (skip existing dates)
+       |
+       v
+[6] Return { datesIngested, totalRecords, dateRange }
+```
+
+## Synchronous vs Asynchronous: Why Synchronous
+
+**Decision: Synchronous request-response for both single backtests and parameter sweeps.**
+
+**Rationale:**
+
+| Factor | Analysis |
+|--------|----------|
+| Single backtest duration | ~5-50ms (DB query + simulation). No reason to go async. |
+| Sweep duration (100 combos) | ~100-300ms. Well within HTTP request timeout. |
+| Sweep duration (10,000 combos) | ~2-5 seconds. Acceptable for request-response. |
+| Memory per simulation | ~200KB (1,460 DailyPrice records). Price data shared (one copy). |
+| Complexity of async pattern | Requires: job queue, polling endpoint, job status table, cleanup. All unnecessary. |
+| User experience | Immediate response is better than poll-and-wait for sub-second results. |
+
+**When to reconsider:** If sweeps exceed 10,000 combinations (>30 seconds), consider chunked responses or background processing. This is unlikely given the parameter space (DCA parameters have a natural small range).
+
+**Request timeout safety:** Set `[RequestTimeout(60_000)]` on sweep endpoint for safety. Include `CancellationToken` propagation so client can abort.
+
+## Storage: Why Compute-on-the-fly
+
+**Decision: Do not persist backtest results. Recompute each time.**
+
+**Rationale:**
+
+| Factor | Compute-on-fly | Persist |
+|--------|---------------|---------|
+| Speed | ~50ms per backtest | ~5ms read (but same DB query time for price data) |
+| Storage cost | 0 | Hundreds of MB for sweep results |
+| Staleness | Always fresh | Must invalidate when parameters change |
+| Complexity | Simple | Need BacktestRun entity, migration, cleanup job |
+| Use case | "Try different params, see results" | "Compare runs over time" |
+
+The user's workflow is exploratory: try configurations, see metrics, adjust. They don't need to store every result. If they find a good configuration, they apply it to `DcaOptions` in appsettings.json.
+
+**Exception:** The data ingestion status (date range available) is inherently persisted because it writes to DailyPrice table.
+
+## Project Structure
+
+```
+TradingBot.ApiService/
+  Application/
+    Backtesting/                          # NEW - all backtesting logic
+      BacktestSimulator.cs                # Core simulation engine
+      ParameterSweepService.cs            # Parallel sweep orchestration
+      BacktestEndpoints.cs                # Minimal API endpoint definitions
+      Models/
+        BacktestRequest.cs                # Input DTO for single backtest
+        BacktestResult.cs                 # Output DTO with all metrics
+        BacktestParameters.cs             # Internal parameter record
+        SimulatedPurchase.cs              # Per-day simulation output
+        SweepRequest.cs                   # Input DTO for parameter sweep
+        SweepResult.cs                    # Output DTO for sweep results
+        DataIngestionRequest.cs           # Input DTO for data import
+        DataIngestionResult.cs            # Output DTO for import status
+    Services/
+      MultiplierCalculator.cs             # NEW - extracted from DcaExecutionService
+      DcaExecutionService.cs              # MODIFIED - uses MultiplierCalculator
+      PriceDataService.cs                 # UNCHANGED
+      IPriceDataService.cs                # UNCHANGED
+  Configuration/
+    CoinGeckoOptions.cs                   # NEW - API key, base URL
+    DcaOptions.cs                         # UNCHANGED
+  Infrastructure/
+    CoinGecko/                            # NEW - external data source
+      CoinGeckoClient.cs                  # HTTP client for CoinGecko API
+      CoinGeckoDataIngestionService.cs    # Import historical data to DailyPrice
+      ServiceCollectionExtensions.cs      # DI registration
+      Models/
+        CoinGeckoModels.cs                # API response DTOs
+  Models/
+    DailyPrice.cs                         # UNCHANGED
+    Purchase.cs                           # UNCHANGED
+  Program.cs                              # MODIFIED - registers backtesting services + endpoints
 ```
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Tight Coupling to Hyperliquid API
+### Anti-Pattern 1: Making Simulation Async
 
-**What:** Directly calling Hyperliquid API from business logic
+**What:** Using `async Task` and `await` inside the simulation loop
+**Why bad:** Simulation is pure CPU. Async adds state machine overhead per iteration. With 1,460 iterations * 1,000 sweep combos = 1.46M async state machines -- measurable overhead for zero benefit.
+**Instead:** Keep `BacktestSimulator.Simulate()` as synchronous. Only the outer sweep uses `Parallel.ForEachAsync`.
 
-**Why bad:** Cannot swap exchanges, difficult to test, violates separation of concerns
+### Anti-Pattern 2: Querying DB Per Simulated Day
 
-**Instead:** Use IExchangeClient abstraction with Hyperliquid implementation
+**What:** Calling `dbContext.DailyPrices.Where(...)` inside the simulation loop for each day's 30-day high or 200-day SMA
+**Why bad:** 1,460 DB round-trips per simulation. Turns microsecond operation into seconds.
+**Instead:** Load all price data once, compute rolling windows in-memory with O(1) sliding window.
 
-```csharp
-// BAD
-public class DcaExecutionService
-{
-    public async Task ExecuteBuyCycle()
-    {
-        var price = await HttpClient.GetAsync("https://api.hyperliquid.xyz/info");
-        // Tightly coupled to Hyperliquid
-    }
-}
+### Anti-Pattern 3: Creating New DcaOptions for Each Simulation
 
-// GOOD
-public interface IExchangeClient
-{
-    Task<decimal> GetCurrentPrice(string symbol);
-    Task<OrderResult> ExecuteSpotBuy(string symbol, decimal amountUsd);
-}
+**What:** Using `IOptionsMonitor<DcaOptions>` or binding from configuration inside backtesting
+**Why bad:** Backtesting needs to test MANY different configurations. The options system is designed for THE ONE active configuration.
+**Instead:** Use a `BacktestParameters` record that maps to the same fields but is created programmatically, not from config.
 
-public class HyperliquidApiClient : IExchangeClient
-{
-    // Hyperliquid-specific implementation
-}
-```
+### Anti-Pattern 4: Sharing Mutable State in Parallel Sweep
 
-### Anti-Pattern 2: Direct Telegram Calls from Execution Service
+**What:** Using a shared `List<BacktestResult>` across parallel tasks
+**Why bad:** Race condition, corrupted data.
+**Instead:** Use `ConcurrentBag<T>` or collect per-partition and merge after.
 
-**What:** Calling TelegramNotificationService directly from DcaExecutionService
+### Anti-Pattern 5: Coupling Backtesting to Live DCA Execution Path
 
-**Why bad:** Couples execution to notification, can't add other notification channels, blocks execution on Telegram API
+**What:** Calling `DcaExecutionService.ExecuteDailyPurchaseAsync` with mocked dependencies for backtesting
+**Why bad:** That method has distributed locks, idempotency checks, Hyperliquid API calls, DB persistence, event publishing -- none of which make sense for simulation.
+**Instead:** Extract the pure logic (MultiplierCalculator) and build a separate, lightweight simulation path.
 
-**Instead:** Use domain events + async handlers
+### Anti-Pattern 6: Background Job for Parameter Sweeps
 
-```csharp
-// BAD
-public async Task ExecuteBuyCycle()
-{
-    var purchase = await ExecuteBuy();
-    await _telegram.SendMessage(purchase); // Coupled + blocking
-}
+**What:** Implementing a BacktestBackgroundService that processes sweep requests from a queue
+**Why bad:** Overengineered. A 1,000-combination sweep takes <1 second. Adding queue infrastructure, job status tracking, polling endpoints adds weeks of work for zero user benefit.
+**Instead:** Synchronous endpoint with Parallel.ForEachAsync. If it ever gets slow, add it later.
 
-// GOOD
-public async Task ExecuteBuyCycle()
-{
-    var purchase = await ExecuteBuy();
-    await _eventPublisher.PublishAsync(new BuyOrderExecutedDomainEvent(purchase.Id));
-    // Notification happens asynchronously via event handler
-}
-```
+## Data Model Details
 
-### Anti-Pattern 3: Storing Calculated Values Without Source Data
-
-**What:** Only storing final multiplier without drop percentage or 200 MA flag
-
-**Why bad:** Cannot audit why multiplier was chosen, difficult to debug or analyze historical decisions
-
-**Instead:** Store all inputs and outputs
+### BacktestRequest (Input)
 
 ```csharp
-// BAD
-public class Purchase
+public record BacktestRequest
 {
-    public decimal Multiplier { get; set; } // 2.25x - but why?
-}
-
-// GOOD
-public class Purchase
-{
-    public decimal Multiplier { get; set; } // 2.25x
-    public decimal DropFromHighPct { get; set; } // 12.3%
-    public bool Below200Ma { get; set; } // true
-    // Can reconstruct why multiplier was 2.25x (1.5x tier * 1.5x bear boost)
+    public DateOnly StartDate { get; init; }
+    public DateOnly EndDate { get; init; }
+    public decimal BaseDailyAmount { get; init; } = 10.0m;
+    public List<MultiplierTier> MultiplierTiers { get; init; } = [];
+    public decimal BearBoostFactor { get; init; } = 1.5m;
+    public decimal MaxMultiplierCap { get; init; } = 4.5m;
+    public int HighLookbackDays { get; init; } = 30;
+    public int MaPeriod { get; init; } = 200;
+    public bool IncludePurchaseLog { get; init; } = true;
 }
 ```
 
-### Anti-Pattern 4: Synchronous HTTP Calls in Background Service
-
-**What:** Using synchronous HttpClient.Get() instead of async
-
-**Why bad:** Blocks thread pool, reduces scalability, can cause deadlocks
-
-**Instead:** Use async/await throughout
+### BacktestResult (Output)
 
 ```csharp
-// BAD
-protected override void ProcessAsync(CancellationToken ct)
+public record BacktestResult
 {
-    var price = HttpClient.Get("...").Result; // Blocking!
-}
+    // Strategy metrics
+    public decimal TotalInvested { get; init; }
+    public decimal TotalBtc { get; init; }
+    public decimal AverageCostBasis { get; init; }
+    public decimal FinalPortfolioValue { get; init; }
+    public decimal ReturnPercent { get; init; }
+    public decimal MaxDrawdownPercent { get; init; }
+    public int TotalPurchases { get; init; }
 
-// GOOD
-protected override async Task ProcessAsync(CancellationToken ct)
-{
-    var price = await HttpClient.GetAsync("...", ct); // Async
+    // Fixed DCA comparison
+    public decimal FixedDcaTotalBtc { get; init; }
+    public decimal FixedDcaAverageCost { get; init; }
+    public decimal FixedDcaFinalValue { get; init; }
+
+    // Advantage metrics (smart DCA over fixed DCA)
+    public decimal BtcAdvantagePercent { get; init; }
+    public decimal CostBasisAdvantagePercent { get; init; }
+
+    // Time range
+    public DateOnly StartDate { get; init; }
+    public DateOnly EndDate { get; init; }
+
+    // Parameters used
+    public BacktestParameters Parameters { get; init; }
+
+    // Optional detailed log
+    public List<SimulatedPurchase>? Purchases { get; init; }
 }
 ```
 
-### Anti-Pattern 5: Hardcoding Schedule in Code
-
-**What:** Hardcoding "10:00 AM daily" in background service
-
-**Why bad:** Requires redeployment to change schedule, cannot A/B test different times
-
-**Instead:** Load from configuration
+### SweepRequest (Input)
 
 ```csharp
-// BAD
-private readonly TimeSpan Interval = TimeSpan.FromDays(1);
-private readonly TimeOnly ExecutionTime = new TimeOnly(10, 0);
-
-// GOOD
-private readonly DcaConfiguration _config; // Loaded from appsettings.json
-
-protected override TimeSpan Interval => CalculateNextInterval(_config.ScheduleCron);
-```
-
-## Scalability Considerations
-
-| Concern | At Single Instance | At Multiple Instances | At High Volume |
-|---------|-------------------|----------------------|----------------|
-| **Concurrent Execution** | No issue (single service) | Use distributed lock to ensure only one instance executes DCA at a time | Same distributed lock approach |
-| **Database Connections** | Single connection pool (default 100) | Each instance has own pool, PostgreSQL handles concurrency | Increase max connections, use read replicas for price queries |
-| **Hyperliquid API Rate Limits** | Unlikely to hit (1 buy/day + few price queries) | Same (lock ensures sequential execution) | Implement rate limiter, queue requests |
-| **Outbox Processing** | Single background service polls every 5 seconds | Each instance has own outbox processor (all process same messages, idempotent) | Increase batch size (default 100), decrease interval |
-| **Price Cache Freshness** | Redis cache with 1-hour TTL | Shared Redis cache across instances | Decrease TTL for more frequent updates |
-| **Telegram Rate Limits** | Unlikely to hit (1 message/day) | Same | Batch notifications or implement message queue |
-
-## Configuration Structure
-
-```json
+public record SweepRequest
 {
-  "Dca": {
-    "BaseAmountUsd": 100,
-    "ScheduleCron": "0 10 * * *",
-    "DropTiers": [
-      { "MinDropPct": 0, "MaxDropPct": 5, "Multiplier": 1.0 },
-      { "MinDropPct": 5, "MaxDropPct": 10, "Multiplier": 1.5 },
-      { "MinDropPct": 10, "MaxDropPct": 20, "Multiplier": 2.0 },
-      { "MinDropPct": 20, "MaxDropPct": 100, "Multiplier": 3.0 }
-    ],
-    "BearMarketMultiplier": 1.5
-  },
-  "Hyperliquid": {
-    "ApiUrl": "https://api.hyperliquid.xyz",
-    "ApiKey": "your-api-key",
-    "WalletAddress": "0x...",
-    "PrivateKey": "your-private-key"
-  },
-  "Telegram": {
-    "BotToken": "your-bot-token",
-    "ChatId": "your-chat-id"
-  },
-  "ConnectionStrings": {
-    "Database": "Host=localhost;Database=tradingbotdb;Username=postgres;Password=***"
-  },
-  "Redis": {
-    "ConnectionString": "localhost:6379"
-  }
+    public DateOnly StartDate { get; init; }
+    public DateOnly EndDate { get; init; }
+
+    // Parameter ranges to sweep
+    public List<decimal> BaseDailyAmounts { get; init; } = [10.0m];
+    public List<List<MultiplierTier>> TierConfigurations { get; init; } = [];
+    public List<decimal> BearBoostFactors { get; init; } = [1.0m, 1.5m];
+    public List<decimal> MaxMultiplierCaps { get; init; } = [4.5m];
+    public List<int> HighLookbackDays { get; init; } = [30];
+    public List<int> MaPeriods { get; init; } = [200];
+
+    // Output control
+    public int? TopN { get; init; } = 10;
 }
 ```
 
-## Error Handling Strategy
+## Suggested Build Order
 
-**Strategy:** Graceful degradation with retry and notification
+Respects dependencies and enables incremental validation.
 
-**Patterns:**
+### Phase 1: MultiplierCalculator Extraction
 
-1. **API Failures:** Retry with exponential backoff (Polly)
-   - If Hyperliquid API is down, retry 3 times with 1s, 2s, 4s delays
-   - If all retries fail, publish BuyOrderFailedDomainEvent → Telegram alert
+**What:** Extract multiplier logic from DcaExecutionService into static MultiplierCalculator class.
+**Modify:** `DcaExecutionService.cs` (thin wrapper calling static method)
+**Create:** `Application/Services/MultiplierCalculator.cs`
+**Test:** Unit tests for MultiplierCalculator with various price/tier scenarios
+**Validates:** Core logic works identically to current inline implementation (regression test)
+**Risk:** LOW -- mechanical refactoring, behavior-preserving
 
-2. **Price Data Unavailable:** Use cached data or skip cycle
-   - If cannot fetch current price, use last known price from database (with staleness check)
-   - If data is too stale (>1 hour), skip cycle and alert user
+### Phase 2: Backtest Models and Simulator
 
-3. **Order Execution Failure:** Log and alert, do not retry automatically
-   - Market orders can partially fill or reject (insufficient balance, etc.)
-   - Do NOT retry automatically (risk double-buying)
-   - Publish BuyOrderFailedDomainEvent with full error details
+**What:** Build the core simulation engine with request/response DTOs.
+**Create:** All files in `Application/Backtesting/` and `Application/Backtesting/Models/`
+**Depends on:** Phase 1 (MultiplierCalculator)
+**Test:** Unit tests with hardcoded price data arrays
+**Validates:** Simulation produces correct metrics, fixed DCA comparison is accurate
 
-4. **Database Failures:** Fail fast, rely on next cycle
-   - If cannot persist Purchase, rollback transaction
-   - Do NOT execute buy if cannot persist (risk losing record)
-   - Alert user via fallback mechanism (Serilog → console → monitoring)
+### Phase 3: CoinGecko Integration and Data Ingestion
 
-5. **Lock Acquisition Failure:** Skip cycle gracefully
-   - If cannot acquire distributed lock (another instance running), log and return
-   - Next cycle will retry
+**What:** Historical data source and import pipeline.
+**Create:** All files in `Infrastructure/CoinGecko/`
+**Create:** `Configuration/CoinGeckoOptions.cs`
+**Depends on:** Existing DailyPrice entity and TradingBotDbContext
+**Test:** Integration test fetching real CoinGecko data, verifying DailyPrice records
+**Validates:** Can populate 4 years of BTC price history
 
-## Monitoring and Observability
+### Phase 4: API Endpoints and Parameter Sweep
 
-**Key Metrics to Track:**
+**What:** HTTP endpoints for triggering backtests, sweeps, and data ingestion.
+**Create:** `Application/Backtesting/BacktestEndpoints.cs`
+**Modify:** `Program.cs` (register services and map endpoints)
+**Depends on:** Phases 1-3
+**Test:** Integration tests via HTTP client, verify JSON response structure
+**Validates:** Full end-to-end: ingest data -> run backtest -> get results via API
 
-1. **DCA Execution Metrics:**
-   - `dca.cycle.started` (count)
-   - `dca.cycle.completed` (count)
-   - `dca.cycle.failed` (count)
-   - `dca.cycle.duration` (histogram)
-   - `dca.purchase.amount_usd` (gauge)
-   - `dca.purchase.btc_quantity` (gauge)
-   - `dca.purchase.multiplier` (gauge)
+### Dependency Chain
 
-2. **Hyperliquid API Metrics:**
-   - `hyperliquid.api.request.count` (count)
-   - `hyperliquid.api.request.duration` (histogram)
-   - `hyperliquid.api.error.count` (count)
+```
+Phase 1: MultiplierCalculator extraction
+    |
+    v
+Phase 2: BacktestSimulator + models (uses MultiplierCalculator)
+    |
+    v
+Phase 3: CoinGecko integration (populates DailyPrice data)
+    |
+    v
+Phase 4: API endpoints + sweep (wires everything together)
+```
 
-3. **Outbox Processing Metrics:**
-   - `outbox.messages.pending` (gauge)
-   - `outbox.messages.published` (count)
-   - `outbox.messages.failed` (count)
-   - `outbox.processing.lag` (gauge - time since oldest message)
+Phases 2 and 3 are independent of each other and could be built in parallel. Phase 4 requires both.
 
-4. **Price Data Metrics:**
-   - `price.cache.hit_rate` (gauge)
-   - `price.current` (gauge)
-   - `price.30d_high` (gauge)
-   - `price.200d_ma` (gauge)
+## Confidence Assessment
 
-**Implementation:**
-- Use OpenTelemetry metrics API
-- Export to Prometheus or Application Insights
-- Create dashboards for monitoring
-- Set up alerts for critical failures
+| Area | Confidence | Notes |
+|------|------------|-------|
+| MultiplierCalculator extraction | HIGH | Mechanical refactoring of existing code |
+| BacktestSimulator design | HIGH | Standard simulation pattern, pure computation |
+| Parallel sweep approach | HIGH | Well-understood .NET pattern (Parallel.ForEachAsync) |
+| Synchronous over async | HIGH | Performance math is clear: sub-second for realistic sweeps |
+| CoinGecko API specifics | MEDIUM | Based on training data; verify free tier endpoint availability and rate limits before implementation |
+| CoinGecko OHLC vs market_chart | MEDIUM | Free tier may not provide full OHLC; market_chart/range provides prices but may need OHLC derivation |
+| No-persist decision | HIGH | Correct for exploratory use case; easy to add persistence later if needed |
 
-## Testing Strategy
+## Open Questions
 
-**Unit Tests:**
-- MultiplierCalculator (pure logic, no dependencies)
-- Value objects (PriceAnalysis, MultiplierResult)
-- Domain events
+1. **CoinGecko free vs demo tier:** Does the free tier provide daily OHLC (open/high/low/close) or only closing prices? The `/coins/bitcoin/ohlc` endpoint may require a paid plan for ranges > 180 days. Verify during Phase 3 implementation.
 
-**Integration Tests:**
-- HyperliquidApiClient (hit testnet API)
-- ApplicationDbContext (in-memory SQLite or test PostgreSQL)
-- PriceDataService (with mock API client)
+2. **Sliding window efficiency:** For the 30-day rolling maximum, a naive approach is O(30) per day. A monotonic deque gives O(1) amortized. For 1,460 data points this is negligible, but worth noting for correctness.
 
-**End-to-End Tests:**
-- Full buy cycle with test Hyperliquid account
-- Verify Purchase entity persisted
-- Verify domain event published
-- Verify Telegram notification sent
+3. **Price data source consistency:** CoinGecko BTC prices may differ slightly from Hyperliquid spot prices (different exchanges, different timestamps). This means backtest results are an approximation, not exact. Document this limitation in API response metadata.
 
-**Manual Testing:**
-- Deploy to staging environment
-- Run daily cycle for 1 week
-- Monitor logs and notifications
-- Verify calculations are correct
-
-## Security Considerations
-
-1. **API Key Management:**
-   - Store Hyperliquid credentials in Azure Key Vault or AWS Secrets Manager
-   - Never commit to git
-   - Rotate keys periodically
-
-2. **Database Security:**
-   - Use connection string with minimal permissions (INSERT, SELECT on specific tables)
-   - Enable SSL/TLS for PostgreSQL connection
-   - Encrypt sensitive data at rest (if storing wallet private keys)
-
-3. **Telegram Security:**
-   - Restrict bot to specific chat ID (user's private chat)
-   - Validate Telegram webhook signatures (if using webhooks in future)
-
-4. **API Security:**
-   - If exposing API endpoints, add authentication (JWT, API keys)
-   - Currently CORS allows all origins (HIGH RISK for production)
-   - Restrict to internal network or disable public access
-
-## Next Steps After Architecture
-
-1. **Review and Approve Architecture**
-   - Validate component boundaries make sense
-   - Confirm build order is correct
-   - Identify any missing components
-
-2. **Set Up Development Environment**
-   - Configure Hyperliquid testnet account
-   - Set up PostgreSQL and Redis locally
-   - Configure Telegram bot for testing
-
-3. **Begin Phase 1: Foundation**
-   - Implement domain models
-   - Create ApplicationDbContext
-   - Run initial migration
-
-4. **Research Hyperliquid API Specifics**
-   - Authentication mechanism (API key vs. wallet signature)
-   - Spot buy order format
-   - Rate limits and best practices
-   - WebSocket for real-time price (optional optimization)
+4. **Warm-up period handling:** The first 200 days of price data are needed to compute 200-day SMA. The simulation should skip these days (or use available data with a warning). The `WarmupDays` parameter in `BacktestParameters` handles this, but the API should validate that the date range is long enough.
 
 ---
 
-**Architecture confidence: HIGH**
-
-This architecture leverages existing BuildingBlocks infrastructure effectively, maintains clear boundaries, and provides a solid foundation for reliable DCA execution. The suggested build order respects dependencies and enables incremental validation at each phase.
+*Architecture research: 2026-02-12*
+*Focus: Backtesting engine integration with existing BTC Smart DCA Bot*
