@@ -21,6 +21,13 @@
 
 **Research needed:** Yes — EIP-712 signing specifics, spot token indices, exact order format
 
+**Plans:** 2 plans
+
+Plans:
+
+- [ ] 01-01-PLAN.md — Configuration, domain models, persistence, and distributed lock foundation
+- [ ] 01-02-PLAN.md — Hyperliquid API client with EIP-712 signing and testnet verification
+
 ---
 
 ## Phase 2: Core DCA Engine
