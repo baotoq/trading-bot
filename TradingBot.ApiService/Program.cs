@@ -76,8 +76,14 @@ try
     // DCA execution service (scoped — uses DbContext)
     builder.Services.AddScoped<IDcaExecutionService, DcaExecutionService>();
 
+    // Price data service (scoped — uses DbContext)
+    builder.Services.AddScoped<IPriceDataService, PriceDataService>();
+
     // DCA scheduler (runs daily at configured time)
     builder.Services.AddHostedService<DcaSchedulerBackgroundService>();
+
+    // Price data refresh (runs daily at 00:05 UTC, bootstraps on startup)
+    builder.Services.AddHostedService<PriceDataRefreshService>();
 
     builder.AddRedisDistributedCache("redis");
 

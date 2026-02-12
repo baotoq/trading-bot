@@ -24,6 +24,7 @@ public class DcaExecutionService(
     IDistributedLock distributedLock,
     IPublisher publisher,
     IOptionsMonitor<DcaOptions> dcaOptions,
+    IPriceDataService priceDataService,
     ILogger<DcaExecutionService> logger) : IDcaExecutionService
 {
     private const decimal MinimumBalance = 1.0m;
@@ -81,8 +82,16 @@ public class DcaExecutionService(
             return;
         }
 
-        // Buy what we can if balance < target
-        var usdAmount = Math.Min(usdcBalance, options.BaseDailyAmount);
+        // Step 4: Get price and calculate smart multiplier
+        var currentPrice = await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct);
+        var multiplierResult = await CalculateMultiplierAsync(currentPrice, options, ct);
+
+        // Apply multiplier to base amount (capped by available balance)
+        var multipliedAmount = options.BaseDailyAmount * multiplierResult.TotalMultiplier;
+        var usdAmount = Math.Min(usdcBalance, multipliedAmount);
+
+        logger.LogInformation("Multiplied target: {MultipliedAmount} USD (base: {Base} * {Multiplier}x), available: {Balance}, will buy: {UsdAmount}",
+            multipliedAmount, options.BaseDailyAmount, multiplierResult.TotalMultiplier, usdcBalance, usdAmount);
 
         if (usdAmount < MinimumOrderValue)
         {
@@ -95,8 +104,7 @@ public class DcaExecutionService(
             return;
         }
 
-        // Step 4: Get price and calculate order size
-        var currentPrice = await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct);
+        // Step 5: Get metadata and calculate order size
         var meta = await hyperliquidClient.GetSpotMetadataAsync(ct);
         var btcAssetIndex = meta.Universe.FindIndex(u => u.Name == "BTC/USDC");
 
@@ -112,14 +120,18 @@ public class DcaExecutionService(
         logger.LogInformation("Placing order: {UsdAmount} USD -> {BtcQty} BTC at {Price}",
             usdAmount, roundedQuantity, currentPrice);
 
-        // Step 5: Create purchase record and place order
+        // Step 6: Create purchase record and place order
         var purchase = new Purchase
         {
             ExecutedAt = DateTimeOffset.UtcNow,
             Price = currentPrice,
             Quantity = 0, // Will be updated with actual fill
             Cost = 0, // Will be updated with actual cost
-            Multiplier = 1.0m, // Fixed 1x for Phase 2, smart multipliers in Phase 3
+            Multiplier = multiplierResult.TotalMultiplier,
+            MultiplierTier = multiplierResult.Tier,
+            DropPercentage = multiplierResult.DropPercentage,
+            High30Day = multiplierResult.High30Day,
+            Ma200Day = multiplierResult.Ma200Day,
             Status = PurchaseStatus.Pending
         };
 
@@ -186,13 +198,13 @@ public class DcaExecutionService(
             logger.LogError(ex, "Order placement failed: {Error}", ex.Message);
         }
 
-        // Step 6: Persist purchase record
+        // Step 7: Persist purchase record
         dbContext.Purchases.Add(purchase);
         await dbContext.SaveChangesAsync(ct);
 
         logger.LogInformation("Purchase persisted: {PurchaseId} with status {Status}", purchase.Id, purchase.Status);
 
-        // Step 7: Publish domain event AFTER database commit
+        // Step 8: Publish domain event AFTER database commit
         if (purchase.Status == PurchaseStatus.Filled || purchase.Status == PurchaseStatus.PartiallyFilled)
         {
             // Get updated balance for notification
@@ -223,4 +235,102 @@ public class DcaExecutionService(
             logger.LogWarning("Published PurchaseFailedEvent: {Reason}", purchase.FailureReason);
         }
     }
+
+    private async Task<MultiplierResult> CalculateMultiplierAsync(
+        decimal currentPrice, DcaOptions options, CancellationToken ct)
+    {
+        try
+        {
+            // Get price data for multiplier calculation
+            var high30Day = await priceDataService.Get30DayHighAsync("BTC", ct);
+            var ma200Day = await priceDataService.Get200DaySmaAsync("BTC", ct);
+
+            // Calculate dip tier multiplier
+            decimal dipMultiplier = 1.0m;
+            decimal dropPercent = 0m;
+            string tier = "None";
+
+            if (high30Day > 0)
+            {
+                // Calculate drop percentage from 30-day high
+                dropPercent = (high30Day - currentPrice) / high30Day * 100m;
+
+                // Find matching tier (ordered descending, first match wins)
+                var matchedTier = options.MultiplierTiers
+                    .OrderByDescending(t => t.DropPercentage)
+                    .FirstOrDefault(t => dropPercent >= t.DropPercentage);
+
+                if (matchedTier != null)
+                {
+                    dipMultiplier = matchedTier.Multiplier;
+                    tier = $">= {matchedTier.DropPercentage}%";
+                }
+            }
+            else
+            {
+                logger.LogWarning("30-day high unavailable (returned 0), using 1.0x dip multiplier");
+                tier = "N/A (no price data)";
+            }
+
+            // Calculate bear market boost
+            decimal bearMultiplier = 1.0m;
+
+            if (ma200Day > 0)
+            {
+                if (currentPrice < ma200Day)
+                {
+                    bearMultiplier = options.BearBoostFactor;
+                    logger.LogInformation("Bear market detected: price {Price} < MA200 {Ma200}, applying {Boost}x boost",
+                        currentPrice, ma200Day, bearMultiplier);
+                }
+            }
+            else
+            {
+                logger.LogWarning("200-day SMA unavailable (returned 0), skipping bear boost");
+            }
+
+            // Stack multiplicatively and apply cap
+            var totalMultiplier = dipMultiplier * bearMultiplier;
+            totalMultiplier = Math.Min(totalMultiplier, options.MaxMultiplierCap);
+
+            logger.LogInformation(
+                "Multiplier: dip={DipMult}x (tier: {Tier}, drop: {Drop:F2}%) * bear={BearMult}x = {Total:F2}x (cap: {Cap}x)",
+                dipMultiplier, tier, dropPercent, bearMultiplier, totalMultiplier, options.MaxMultiplierCap);
+
+            return new MultiplierResult(
+                TotalMultiplier: totalMultiplier,
+                DipMultiplier: dipMultiplier,
+                BearMultiplier: bearMultiplier,
+                Tier: tier,
+                DropPercentage: dropPercent,
+                High30Day: high30Day,
+                Ma200Day: ma200Day);
+        }
+        catch (Exception ex)
+        {
+            // Graceful degradation: fall back to 1.0x on any calculation failure
+            logger.LogError(ex, "Multiplier calculation failed, falling back to 1.0x");
+
+            return new MultiplierResult(
+                TotalMultiplier: 1.0m,
+                DipMultiplier: 1.0m,
+                BearMultiplier: 1.0m,
+                Tier: "Error (fallback)",
+                DropPercentage: 0m,
+                High30Day: 0m,
+                Ma200Day: 0m);
+        }
+    }
 }
+
+/// <summary>
+/// Result of multiplier calculation containing all components and metadata
+/// </summary>
+internal record MultiplierResult(
+    decimal TotalMultiplier,
+    decimal DipMultiplier,
+    decimal BearMultiplier,
+    string Tier,
+    decimal DropPercentage,
+    decimal High30Day,
+    decimal Ma200Day);
