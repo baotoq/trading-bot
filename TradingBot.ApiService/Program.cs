@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
+using TradingBot.ApiService.Application.BackgroundJobs;
+using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
@@ -70,6 +72,12 @@ try
 
     // Telegram notifications with MediatR
     builder.Services.AddTelegram(builder.Configuration);
+
+    // DCA execution service (scoped — uses DbContext)
+    builder.Services.AddScoped<IDcaExecutionService, DcaExecutionService>();
+
+    // DCA scheduler (runs daily at configured time)
+    builder.Services.AddHostedService<DcaSchedulerBackgroundService>();
 
     builder.AddRedisDistributedCache("redis");
 
