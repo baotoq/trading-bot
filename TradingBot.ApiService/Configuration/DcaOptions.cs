@@ -10,6 +10,7 @@ public class DcaOptions
     public int HighLookbackDays { get; set; } = 30;
     public int BearMarketMaPeriod { get; set; } = 200;
     public decimal BearBoostFactor { get; set; } = 1.5m;
+    public decimal MaxMultiplierCap { get; set; } = 4.5m;
     public bool DryRun { get; set; } = false;
     public List<MultiplierTier> MultiplierTiers { get; set; } = [];
 }
@@ -54,6 +55,16 @@ public class DcaOptionsValidator : IValidateOptions<DcaOptions>
         if (options.BearBoostFactor <= 0)
         {
             errors.Add("BearBoostFactor must be greater than 0");
+        }
+
+        if (options.MaxMultiplierCap <= 0)
+        {
+            errors.Add("MaxMultiplierCap must be greater than 0");
+        }
+
+        if (options.MaxMultiplierCap < 1)
+        {
+            errors.Add("MaxMultiplierCap must be at least 1.0 (no multiplier reduction)");
         }
 
         // Validate multiplier tiers
