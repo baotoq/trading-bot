@@ -6,14 +6,14 @@
 
 ## Current Phase
 
-**Phase 1: Foundation & Hyperliquid Client** — In Progress
+**Phase 2: Core DCA Engine** — In Progress
 
 ## Progress
 
 | Phase | Status | Notes |
 |-------|--------|-------|
-| Phase 1: Foundation & Hyperliquid Client | In Progress | Plan 01-01 complete ████░░░░░░ 1/3 plans |
-| Phase 2: Core DCA Engine | Not Started | Blocked by Phase 1 |
+| Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
+| Phase 2: Core DCA Engine | In Progress | Plan 02-01 complete ███░░░░░░░ 1/3 plans |
 | Phase 3: Smart Multipliers | Not Started | Blocked by Phase 2 |
 | Phase 4: Enhanced Notifications & Observability | Not Started | Blocked by Phase 3 |
 
@@ -31,6 +31,9 @@
 | PurchaseStatus enum for type safety | 2026-02-12 | Avoid string-based status bugs |
 | PostgreSQL advisory locks | 2026-02-12 | Replace Dapr stub with real locking |
 | EF Core auto-migration on startup | 2026-02-12 | Zero-touch database setup |
+| Telegram Markdown v1 (not v2) | 2026-02-12 | Simpler escaping for notifications |
+| Error-safe notification handlers | 2026-02-12 | Log errors but never throw |
+| Conditional balance display in skip events | 2026-02-12 | Cleaner messages when optional |
 
 ## Known Risks
 
@@ -40,13 +43,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 11:10:13 UTC
-**Stopped at:** Completed 01-01-PLAN.md
+**Last session:** 2026-02-12 12:10:46 UTC
+**Stopped at:** Completed 02-01-PLAN.md
 **Resume file:** None
 
 ## Next Action
 
-Continue Phase 1 with Plan 01-02 (Hyperliquid HTTP client)
+Continue Phase 2 with Plan 02-02 (DCA Execution Engine)
 
 ---
 *State updated: 2026-02-12*
