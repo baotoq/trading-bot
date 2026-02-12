@@ -6,15 +6,15 @@
 
 ## Current Phase
 
-**Phase 2: Core DCA Engine** — In Progress
+**Phase 2: Core DCA Engine** — Complete
 
 ## Progress
 
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 2: Core DCA Engine | In Progress | Plans 02-01, 02-02 complete ██████░░░░ 2/3 plans |
-| Phase 3: Smart Multipliers | Not Started | Blocked by Phase 2 |
+| Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
+| Phase 3: Smart Multipliers | Not Started | Ready to start |
 | Phase 4: Enhanced Notifications & Observability | Not Started | Blocked by Phase 3 |
 
 ## Key Decisions
@@ -40,6 +40,11 @@
 | Domain events AFTER SaveChangesAsync | 2026-02-12 | Transactional integrity |
 | Date-based distributed lock keys | 2026-02-12 | Daily purchase idempotency |
 | Fixed 1x multiplier in Phase 2 | 2026-02-12 | Smart multipliers deferred to Phase 3 |
+| 5-minute check interval with 10-minute execution window | 2026-02-12 | Balances responsiveness with retry window |
+| No catch-up buys if bot starts after window | 2026-02-12 | Prevents unintended late execution |
+| 3 retries with exponential backoff + jitter | 2026-02-12 | 2^n seconds with 0-500ms jitter |
+| 4xx errors fail immediately without retry | 2026-02-12 | Client errors won't resolve with retry |
+| IServiceScopeFactory for scoped service resolution | 2026-02-12 | Singleton BackgroundService needs scoped DbContext |
 
 ## Known Risks
 
@@ -49,13 +54,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 19:43:09 UTC
-**Stopped at:** Completed 02-02-PLAN.md
+**Last session:** 2026-02-12 12:21:20 UTC
+**Stopped at:** Completed 02-03-PLAN.md (Phase 2 complete)
 **Resume file:** None
 
 ## Next Action
 
-Continue Phase 2 with Plan 02-03 (Daily Scheduler)
+Phase 2 complete. Ready for Phase 3: Smart Multipliers
 
 ---
 *State updated: 2026-02-12*
