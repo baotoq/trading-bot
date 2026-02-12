@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-**Phase 2: Core DCA Engine** — Complete
+**Phase 3: Smart Multipliers** — In Progress
 
 ## Progress
 
@@ -14,7 +14,7 @@
 |-------|--------|-------|
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 3: Smart Multipliers | Not Started | Ready to start |
+| Phase 3: Smart Multipliers | In Progress | 1/3 plans complete ███░░░░░░░ |
 | Phase 4: Enhanced Notifications & Observability | Not Started | Blocked by Phase 3 |
 
 ## Key Decisions
@@ -45,6 +45,10 @@
 | 3 retries with exponential backoff + jitter | 2026-02-12 | 2^n seconds with 0-500ms jitter |
 | 4xx errors fail immediately without retry | 2026-02-12 | Client errors won't resolve with retry |
 | IServiceScopeFactory for scoped service resolution | 2026-02-12 | Singleton BackgroundService needs scoped DbContext |
+| DailyPrice composite key (Date, Symbol) | 2026-02-12 | Time-series data naturally partitioned, no UUIDv7 |
+| Non-nullable decimal for multiplier metadata | 2026-02-12 | 0 = "not calculated" for Phase 2 purchases |
+| CandleData intermediate type | 2026-02-12 | Separates API deserialization from domain entity |
+| OHLCV precision(18,8) | 2026-02-12 | Matches crypto exchange 8-decimal standard |
 
 ## Known Risks
 
@@ -54,13 +58,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 12:21:20 UTC
-**Stopped at:** Completed 02-03-PLAN.md (Phase 2 complete)
+**Last session:** 2026-02-12 15:17:02 UTC
+**Stopped at:** Completed 03-01-PLAN.md (Data Foundation for Smart Multipliers)
 **Resume file:** None
 
 ## Next Action
 
-Phase 2 complete. Ready for Phase 3: Smart Multipliers
+Phase 3 Plan 1 complete. Ready for Plan 2: Smart Multiplier Calculation Service
 
 ---
 *State updated: 2026-02-12*
