@@ -6,7 +6,7 @@
 
 ## Current Phase
 
-**Phase 4: Enhanced Notifications & Observability** — In Progress (1/3 plans complete)
+**Phase 4: Enhanced Notifications & Observability** — In Progress (2/3 plans complete)
 
 ## Progress
 
@@ -15,7 +15,7 @@
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 2: Core DCA Engine | Complete | All plans complete ██████████ 3/3 plans |
 | Phase 3: Smart Multipliers | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 4: Enhanced Notifications & Observability | In Progress | ███░░░░░░░ 1/3 plans |
+| Phase 4: Enhanced Notifications & Observability | In Progress | ██████░░░░ 2/3 plans |
 
 ## Key Decisions
 
@@ -61,6 +61,9 @@
 | Idempotency bypass in dry-run mode | 2026-02-12 | Allow repeated testing without interference, real-mode behavior unchanged |
 | IsDryRun defaults to false | 2026-02-12 | Backward compatibility: existing purchases treated as real (non-dry-run) |
 | All multiplier metadata in events | 2026-02-12 | PurchaseCompletedEvent carries 6 fields for rich notification formatting |
+| Running totals query excludes dry-run purchases | 2026-02-12 | WHERE !IsDryRun filter ensures accurate totals for real spending |
+| Natural language multiplier reasoning | 2026-02-12 | Transform multiplier metadata into readable explanations in notifications |
+| SIMULATION banner for dry-run notifications | 2026-02-12 | Warning emoji + clear text at top distinguishes simulations from real purchases |
 
 ## Known Risks
 
@@ -70,13 +73,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 16:03:22 UTC
-**Stopped at:** Completed 04-01-PLAN.md (Dry-Run Mode & Event Enrichment)
+**Last session:** 2026-02-12 16:08:26 UTC
+**Stopped at:** Completed 04-02-PLAN.md (Rich Notifications with Multiplier Reasoning)
 **Resume file:** None
 
 ## Next Action
 
-Phase 4 in progress (1/3 plans complete). Next: 04-02 (Rich Notifications with Multiplier Reasoning)
+Phase 4 in progress (2/3 plans complete). Next: 04-03 (Weekly Summary & Health Monitoring)
 
 ---
 *State updated: 2026-02-12*
