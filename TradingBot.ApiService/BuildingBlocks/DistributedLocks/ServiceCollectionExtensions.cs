@@ -1,5 +1,3 @@
-using Dapr.DistributedLock.Extensions;
-
 namespace TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 
 public static class ServiceCollectionExtensions
@@ -8,9 +6,7 @@ public static class ServiceCollectionExtensions
     {
         public IServiceCollection AddDistributedLock()
         {
-            services.AddDaprDistributedLock();
-            services.AddScoped<IDistributedLock, DaprDistributedLock>();
-
+            // Implementation will be registered from Infrastructure/Locking
             return services;
         }
     }
