@@ -1,14 +1,8 @@
-using TradingBot.ApiService;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
-using TradingBot.ApiService.Application;
-using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
-using TradingBot.ApiService.Endpoints;
-using TradingBot.ApiService.Infrastructure;
 using TradingBot.ServiceDefaults;
-using TradingBot.ApiService.Application.Options;
 using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 
 Log.Logger = new LoggerConfiguration()
@@ -52,13 +46,8 @@ try
     });
 
     builder.Services.AddDistributedLock();
-    builder.AddPubSubServices();
-    builder.AddApplicationOptions();
 
     builder.AddRedisDistributedCache("redis");
-
-    builder.AddApplicationServices();
-    builder.AddPersistentServices();
 
     var app = builder.Build();
 
@@ -75,12 +64,6 @@ try
 
     app.MapGet("/", () => "Trading Bot API service is running...");
     app.MapPubSub();
-
-    // Map all endpoints
-    app.MapTradingEndpoints();
-    app.MapMarketEndpoints();
-    app.MapBacktestEndpoints();
-    app.MapRealtimeEndpoints();
 
     app.MapDefaultEndpoints();
 

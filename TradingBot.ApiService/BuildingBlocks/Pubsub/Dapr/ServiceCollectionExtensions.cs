@@ -1,5 +1,4 @@
 using Dapr.Client;
-using TradingBot.ApiService.Application;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
