@@ -10,6 +10,7 @@ public class Purchase : BaseEntity
     public decimal Cost { get; set; }
     public decimal Multiplier { get; set; }
     public PurchaseStatus Status { get; set; } = PurchaseStatus.Pending;
+    public bool IsDryRun { get; set; }
     public string? OrderId { get; set; }
     public string? RawResponse { get; set; }
     public string? FailureReason { get; set; }

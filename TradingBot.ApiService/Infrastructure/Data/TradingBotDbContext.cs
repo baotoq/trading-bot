@@ -40,6 +40,9 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             entity.Property(e => e.FailureReason)
                 .HasMaxLength(500);
 
+            entity.Property(e => e.IsDryRun)
+                .HasDefaultValue(false);
+
             // Multiplier metadata fields
             entity.Property(e => e.MultiplierTier)
                 .HasMaxLength(50);

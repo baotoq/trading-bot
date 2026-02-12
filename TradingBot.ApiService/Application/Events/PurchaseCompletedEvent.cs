@@ -9,5 +9,12 @@ public record PurchaseCompletedEvent(
     decimal UsdSpent,
     decimal RemainingUsdc,
     decimal CurrentBtcBalance,
-    DateTimeOffset ExecutedAt
+    DateTimeOffset ExecutedAt,
+    // Multiplier metadata for rich notifications
+    decimal Multiplier,
+    string? MultiplierTier,
+    decimal DropPercentage,
+    decimal High30Day,
+    decimal Ma200Day,
+    bool IsDryRun
 ) : IDomainEvent;
