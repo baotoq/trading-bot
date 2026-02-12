@@ -56,31 +56,29 @@ Plans:
 
 ---
 
-## Phase 3: Smart Multipliers
+## Phase 3: Smart Multipliers ✓
 
 **Goal:** Bot adjusts buy amount based on dip severity (30-day high tiers) and bear market conditions (200-day MA), buying more aggressively during dips and downtrends.
 
 **Requirements:** FR-7, FR-8, FR-9
 
-**Why third:** Additive enhancement — the bot already works without multipliers. This layers on intelligence without breaking existing functionality. Pure calculation logic, lower risk.
+**Status:** Complete (2026-02-12)
 
 **Success criteria:**
-- [ ] 30-day high tracked from daily candle data
-- [ ] Dip tier multiplier correctly calculated (1x / 1.5x / 2x / 3x)
-- [ ] 200-day MA calculated from historical daily closes
-- [ ] Bear boost (1.5x) applied when price < 200-day MA
-- [ ] Multipliers stack correctly (e.g., 2x dip * 1.5x bear = 3x)
-- [ ] Each purchase records: multiplier, tier, 30d high, MA value, drop %
-- [ ] Stale data rejected (>24h old triggers fresh fetch)
+- [x] 30-day high tracked from daily candle data
+- [x] Dip tier multiplier correctly calculated (1x / 1.5x / 2x / 3x)
+- [x] 200-day MA calculated from historical daily closes
+- [x] Bear boost (1.5x) applied when price < 200-day MA
+- [x] Multipliers stack correctly (e.g., 2x dip * 1.5x bear = 3x)
+- [x] Each purchase records: multiplier, tier, 30d high, MA value, drop %
+- [x] Stale data policy: use last known values (CONTEXT.md override)
 
-**Research needed:** No — standard calculations, well-defined inputs
-
-**Plans:** 3 plans
+**Plans:** 3 plans (3 complete)
 
 Plans:
-- [ ] 03-01-PLAN.md — Data foundation: DailyPrice entity, candle API, Purchase metadata fields, DB migration
-- [ ] 03-02-PLAN.md — PriceDataService: bootstrap, daily refresh, 30-day high, 200-day SMA calculations
-- [ ] 03-03-PLAN.md — DCA integration: smart multiplier wiring, DI registration, graceful degradation
+- [x] 03-01-PLAN.md — Data foundation: DailyPrice entity, candle API, Purchase metadata fields, DB migration
+- [x] 03-02-PLAN.md — PriceDataService: bootstrap, daily refresh, 30-day high, 200-day SMA calculations
+- [x] 03-03-PLAN.md — DCA integration: smart multiplier wiring, DI registration, graceful degradation
 
 ---
 
@@ -124,9 +122,9 @@ Strictly sequential — each phase builds on the previous. No parallelization be
 | FR-4: Daily Schedule | 2 | Complete |
 | FR-5: Core DCA Execution | 2 | Complete |
 | FR-6: Basic Notifications | 2 | Complete |
-| FR-7: 30-Day High Tracking | 3 | Pending |
-| FR-8: Dip Multiplier Tiers | 3 | Pending |
-| FR-9: 200-Day MA Boost | 3 | Pending |
+| FR-7: 30-Day High Tracking | 3 | Complete |
+| FR-8: Dip Multiplier Tiers | 3 | Complete |
+| FR-9: 200-Day MA Boost | 3 | Complete |
 | FR-11: Rich Notifications | 4 | Pending |
 | FR-12: Health Check | 4 | Pending |
 | FR-13: Dry-Run Mode | 4 | Pending |
