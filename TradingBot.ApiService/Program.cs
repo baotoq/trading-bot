@@ -1,9 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.Configuration;
+using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Infrastructure.Locking;
 using TradingBot.ServiceDefaults;
-using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
@@ -45,11 +49,30 @@ try
         });
     });
 
-    builder.Services.AddDistributedLock();
+    // Configuration binding with validation
+    builder.Services.AddSingleton<IValidateOptions<DcaOptions>, DcaOptionsValidator>();
+    builder.Services.AddOptions<DcaOptions>()
+        .Bind(builder.Configuration.GetSection("DcaOptions"))
+        .ValidateOnStart();
+    builder.Services.AddOptions<HyperliquidOptions>()
+        .Bind(builder.Configuration.GetSection("Hyperliquid"));
+
+    // EF Core DbContext via Aspire
+    builder.AddNpgsqlDbContext<TradingBotDbContext>("tradingbotdb");
+
+    // PostgreSQL distributed lock
+    builder.Services.AddPostgresDistributedLock();
 
     builder.AddRedisDistributedCache("redis");
 
     var app = builder.Build();
+
+    // Run EF Core migrations
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<TradingBotDbContext>();
+        await dbContext.Database.MigrateAsync();
+    }
 
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
