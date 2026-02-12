@@ -13,7 +13,7 @@
 | Phase | Status | Notes |
 |-------|--------|-------|
 | Phase 1: Foundation & Hyperliquid Client | Complete | All plans complete ██████████ 3/3 plans |
-| Phase 2: Core DCA Engine | In Progress | Plan 02-01 complete ███░░░░░░░ 1/3 plans |
+| Phase 2: Core DCA Engine | In Progress | Plans 02-01, 02-02 complete ██████░░░░ 2/3 plans |
 | Phase 3: Smart Multipliers | Not Started | Blocked by Phase 2 |
 | Phase 4: Enhanced Notifications & Observability | Not Started | Blocked by Phase 3 |
 
@@ -34,6 +34,12 @@
 | Telegram Markdown v1 (not v2) | 2026-02-12 | Simpler escaping for notifications |
 | Error-safe notification handlers | 2026-02-12 | Log errors but never throw |
 | Conditional balance display in skip events | 2026-02-12 | Cleaner messages when optional |
+| IOC orders with 5% slippage tolerance | 2026-02-12 | Immediate fill with price protection |
+| Partial fill threshold at 95% | 2026-02-12 | Distinguish full vs partial fills |
+| 5-decimal BTC precision, round DOWN | 2026-02-12 | Avoid exceeding balance |
+| Domain events AFTER SaveChangesAsync | 2026-02-12 | Transactional integrity |
+| Date-based distributed lock keys | 2026-02-12 | Daily purchase idempotency |
+| Fixed 1x multiplier in Phase 2 | 2026-02-12 | Smart multipliers deferred to Phase 3 |
 
 ## Known Risks
 
@@ -43,13 +49,13 @@
 
 ## Session Continuity
 
-**Last session:** 2026-02-12 12:10:46 UTC
-**Stopped at:** Completed 02-01-PLAN.md
+**Last session:** 2026-02-12 19:43:09 UTC
+**Stopped at:** Completed 02-02-PLAN.md
 **Resume file:** None
 
 ## Next Action
 
-Continue Phase 2 with Plan 02-02 (DCA Execution Engine)
+Continue Phase 2 with Plan 02-03 (Daily Scheduler)
 
 ---
 *State updated: 2026-02-12*
