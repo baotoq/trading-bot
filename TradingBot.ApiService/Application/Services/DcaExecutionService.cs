@@ -267,7 +267,7 @@ public class DcaExecutionService(
         }
     }
 
-    private async Task<MultiplierResult> CalculateMultiplierAsync(
+    private async Task<OldMultiplierResult> CalculateMultiplierAsync(
         decimal currentPrice, DcaOptions options, CancellationToken ct)
     {
         try
@@ -328,7 +328,7 @@ public class DcaExecutionService(
                 "Multiplier: dip={DipMult}x (tier: {Tier}, drop: {Drop:F2}%) * bear={BearMult}x = {Total:F2}x (cap: {Cap}x)",
                 dipMultiplier, tier, dropPercent, bearMultiplier, totalMultiplier, options.MaxMultiplierCap);
 
-            return new MultiplierResult(
+            return new OldMultiplierResult(
                 TotalMultiplier: totalMultiplier,
                 DipMultiplier: dipMultiplier,
                 BearMultiplier: bearMultiplier,
@@ -342,7 +342,7 @@ public class DcaExecutionService(
             // Graceful degradation: fall back to 1.0x on any calculation failure
             logger.LogError(ex, "Multiplier calculation failed, falling back to 1.0x");
 
-            return new MultiplierResult(
+            return new OldMultiplierResult(
                 TotalMultiplier: 1.0m,
                 DipMultiplier: 1.0m,
                 BearMultiplier: 1.0m,
@@ -356,8 +356,9 @@ public class DcaExecutionService(
 
 /// <summary>
 /// Result of multiplier calculation containing all components and metadata
+/// (OLD - will be removed in refactor phase)
 /// </summary>
-internal record MultiplierResult(
+internal record OldMultiplierResult(
     decimal TotalMultiplier,
     decimal DipMultiplier,
     decimal BearMultiplier,
