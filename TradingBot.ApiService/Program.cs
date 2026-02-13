@@ -6,6 +6,7 @@ using Serilog.Templates.Themes;
 using TradingBot.ApiService.Application.BackgroundJobs;
 using TradingBot.ApiService.Application.Health;
 using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.Application.Services.Backtest;
 using TradingBot.ApiService.Application.Services.HistoricalData;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Configuration;
@@ -103,6 +104,9 @@ try
     builder.Services.AddScoped<GapDetectionService>();
     builder.Services.AddScoped<DataIngestionService>();
     builder.Services.AddHostedService<DataIngestionBackgroundService>();
+
+    // Parameter sweep service (scoped)
+    builder.Services.AddScoped<ParameterSweepService>();
 
     // Health checks
     builder.Services.AddHealthChecks()
