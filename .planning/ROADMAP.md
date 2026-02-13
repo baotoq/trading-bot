@@ -33,6 +33,7 @@
 **Milestone Goal:** Visual dashboard for monitoring portfolio, viewing purchase history, running backtests, managing configuration, and tracking live bot status.
 
 - [x] **Phase 9: Infrastructure & Aspire Integration** - Nuxt project setup and orchestration -- completed 2026-02-13
+- [ ] **Phase 9.1: Migrate Dashboard to Fresh Nuxt Setup** - Move API proxy & auth code to recreated Nuxt project (INSERTED)
 - [ ] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status
 - [ ] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison
 - [ ] **Phase 12: Configuration Management** - Editable config with server validation
@@ -58,6 +59,15 @@
 Plans:
 - [x] 09-01-PLAN.md — Nuxt 4 project creation + Aspire orchestration
 - [x] 09-02-PLAN.md — API proxy + API key authentication
+
+### Phase 09.1: Migrate Dashboard to Fresh Nuxt Setup (INSERTED)
+
+**Goal:** Move API proxy & auth code from old dashboard/ to fresh Nuxt 4 TradingBot.Dashboard/ project
+**Depends on:** Phase 9
+**Plans:** 1 plan
+
+Plans:
+- [ ] 09.1-01-PLAN.md — Migrate files, install deps, update AppHost path, remove old directory
 
 ### Phase 10: Dashboard Core
 
@@ -139,6 +149,7 @@ Plans:
 | 7. Historical Data Pipeline | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. API Endpoints & Parameter Sweep | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 9. Infrastructure & Aspire Integration | v1.2 | 2/2 | Complete | 2026-02-13 |
+| 9.1 Migrate Dashboard to Fresh Nuxt Setup | v1.2 | 0/1 | Not started | - |
 | 10. Dashboard Core | v1.2 | 0/TBD | Not started | - |
 | 11. Backtest Visualization | v1.2 | 0/TBD | Not started | - |
 | 12. Configuration Management | v1.2 | 0/TBD | Not started | - |
