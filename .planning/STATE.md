@@ -2,7 +2,7 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v1.1 Backtesting Engine
-**Updated:** 2026-02-13T08:27:37Z
+**Updated:** 2026-02-13T09:10:29Z
 
 ## Project Reference
 
@@ -13,19 +13,19 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 
 ## Current Position
 
-Phase: 7 of 8 (Historical Data Pipeline) -- COMPLETE
-Plan: Complete (2/2 plans finished)
-Status: Phase complete, verified -- ready for Phase 8
-Last activity: 2026-02-13 -- Phase 7 execution and verification complete
+Phase: 8 of 8 (API Endpoints & Parameter Sweep) -- IN PROGRESS
+Plan: 1 of 2 complete
+Status: Executing Phase 8 - single backtest endpoint complete
+Last activity: 2026-02-13 -- Plan 08-01 complete, ready for 08-02
 
-Progress: ██████████████████████ 37.5% (3/8 phases complete)
+Progress: ████████████████████████ 43.75% (3.5/8 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v1.1)
-- Average duration: 4.0 minutes
-- Total execution time: 20 minutes
+- Total plans completed: 6 (v1.1)
+- Average duration: 3.5 minutes
+- Total execution time: 21 minutes
 
 **By Phase:**
 
@@ -34,6 +34,7 @@ Progress: ██████████████████████ 37.
 | 05-multiplier-calculator-extraction | 1 | 8m | 8m |
 | 06-backtest-simulation-engine | 2 | 6m | 3m |
 | 07-historical-data-pipeline | 2 | 6m | 3m |
+| 08-api-endpoints-parameter-sweep | 1 | 1m | 1m |
 
 ## Accumulated Context
 
@@ -42,6 +43,9 @@ Progress: ██████████████████████ 37.
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [08-01]: All backtest request fields nullable - default to production DcaOptions when null
+- [08-01]: Default date range: last 2 years clamped to available data
+- [08-01]: Return 400 Bad Request for invalid date ranges or missing data
 - [07-01]: Use direct HttpClient instead of CoinGecko.Net library for API calls (better control, avoids version conflicts)
 - [07-01]: Use bounded Channel<T> with capacity=1 and DropWrite mode for job queue (single-job enforcement)
 - [07-01]: Auto-fill gaps after bulk insert by fetching individual missing dates (maximize completeness without failing job)
@@ -74,9 +78,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-13T08:27:37Z
-Stopped at: Completed 07-02-PLAN.md (Phase 7 complete)
-Resume file: .planning/phases/07-historical-data-pipeline/07-02-SUMMARY.md
+Last session: 2026-02-13T09:10:29Z
+Stopped at: Completed 08-01-PLAN.md (Phase 8 Plan 1 complete)
+Resume file: .planning/phases/08-api-endpoints-parameter-sweep/08-01-SUMMARY.md
 
 ---
-*State updated: 2026-02-13T08:27:37Z after completing Phase 07 Plan 02*
+*State updated: 2026-02-13T09:10:29Z after completing Phase 08 Plan 01*
