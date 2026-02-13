@@ -17,7 +17,7 @@
 
 - [x] **Phase 5: MultiplierCalculator Extraction** - Extract pure calculation logic from production DCA service for backtest reuse (completed 2026-02-13)
 - [x] **Phase 6: Backtest Simulation Engine** - Day-by-day DCA simulation with metrics and fixed-DCA comparison (completed 2026-02-13)
-- [ ] **Phase 7: Historical Data Pipeline** - CoinGecko ingestion, gap detection, and data status API
+- [x] **Phase 7: Historical Data Pipeline** - CoinGecko ingestion, gap detection, and data status API (completed 2026-02-13)
 - [ ] **Phase 8: API Endpoints & Parameter Sweep** - Backtest and sweep endpoints with walk-forward validation
 
 ## Phase Details
@@ -66,8 +66,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- CoinGeckoClient with chunked fetching, IngestionJob entity, GapDetectionService, DataIngestionService, job queue, and background service
-- [ ] 07-02-PLAN.md -- API endpoints (POST /ingest, GET /status, GET /ingest/{jobId}), response DTOs, DI wiring, and configuration
+- [x] 07-01-PLAN.md -- CoinGeckoClient with chunked fetching, IngestionJob entity, GapDetectionService, DataIngestionService, job queue, and background service
+- [x] 07-02-PLAN.md -- API endpoints (POST /ingest, GET /status, GET /ingest/{jobId}), response DTOs, DI wiring, and configuration
 
 ### Phase 8: API Endpoints & Parameter Sweep
 
@@ -105,8 +105,8 @@ Phases 6 and 7 are independent of each other and can be built in parallel after 
 |-------|-----------|----------------|--------|-----------|
 | 5. MultiplierCalculator Extraction | v1.1 | 1/1 | ✓ Complete | 2026-02-13 |
 | 6. Backtest Simulation Engine | v1.1 | 2/2 | ✓ Complete | 2026-02-13 |
-| 7. Historical Data Pipeline | v1.1 | 0/2 | Not started | - |
+| 7. Historical Data Pipeline | v1.1 | 2/2 | ✓ Complete | 2026-02-13 |
 | 8. API Endpoints & Parameter Sweep | v1.1 | 0/3 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after Phase 6 execution complete*
+*Roadmap updated: 2026-02-13 after Phase 7 execution complete*
