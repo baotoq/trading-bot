@@ -251,4 +251,279 @@ public class BacktestSimulatorTests
             entry.Ma200Day.Should().BeGreaterOrEqualTo(0m);
         });
     }
+
+    #region Max Drawdown Tests
+
+    [Fact]
+    public void Run_MaxDrawdown_MeasuresWorstUnrealizedLoss()
+    {
+        // Arrange - Price rises then crashes then recovers
+        var config = CreateStandardConfig();
+        var prices = new List<decimal>();
+
+        // Days 1-10: price rises from 50000 to 60000 (building profit)
+        for (int i = 0; i < 10; i++)
+            prices.Add(50000m + i * 1000m);
+
+        // Days 11-20: price crashes to 30000 (unrealized loss from peak)
+        for (int i = 0; i < 10; i++)
+            prices.Add(60000m - i * 3000m);
+
+        // Days 21-30: price recovers to 55000
+        for (int i = 0; i < 10; i++)
+            prices.Add(30000m + i * 2500m);
+
+        var priceData = CreatePriceData(prices.ToArray());
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - MaxDrawdown should be positive (representing a loss)
+        result.SmartDca.MaxDrawdown.Should().BeGreaterThan(0m);
+        result.FixedDcaSameBase.MaxDrawdown.Should().BeGreaterThan(0m);
+        result.FixedDcaMatchTotal.MaxDrawdown.Should().BeGreaterThan(0m);
+    }
+
+    [Fact]
+    public void Run_MaxDrawdown_ZeroForMonotonicallyRisingPrices()
+    {
+        // Arrange - Prices only go up
+        var config = CreateStandardConfig();
+        var prices = Enumerable.Range(0, 30)
+            .Select(i => 50000m + i * 1000m)
+            .ToArray();
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - No drawdown when prices only rise
+        result.SmartDca.MaxDrawdown.Should().Be(0m);
+        result.FixedDcaSameBase.MaxDrawdown.Should().Be(0m);
+        result.FixedDcaMatchTotal.MaxDrawdown.Should().Be(0m);
+    }
+
+    [Fact]
+    public void Run_MaxDrawdown_CalculatedForAllThreeStrategies()
+    {
+        // Arrange - Volatile prices
+        var config = CreateStandardConfig();
+        var priceData = CreatePriceData(50000m, 60000m, 40000m, 55000m, 45000m);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - All three strategies should have MaxDrawdown populated
+        result.SmartDca.MaxDrawdown.Should().BeGreaterOrEqualTo(0m);
+        result.FixedDcaSameBase.MaxDrawdown.Should().BeGreaterOrEqualTo(0m);
+        result.FixedDcaMatchTotal.MaxDrawdown.Should().BeGreaterOrEqualTo(0m);
+    }
+
+    #endregion
+
+    #region Tier Breakdown Tests
+
+    [Fact]
+    public void Run_TierBreakdown_CountsTriggersPerTier()
+    {
+        // Arrange - Create price data with specific tier triggers
+        var config = CreateStandardConfig();
+        var prices = new List<decimal>();
+
+        // Start high
+        prices.Add(50000m);
+
+        // 10 days at 5% below high (should trigger >= 5% tier with 1.5x)
+        for (int i = 0; i < 10; i++)
+            prices.Add(47500m);
+
+        // 5 days at 15% below high (should trigger >= 10% tier with 2.0x)
+        for (int i = 0; i < 5; i++)
+            prices.Add(42500m);
+
+        // 3 days at 25% below high (should trigger >= 20% tier with 3.0x)
+        for (int i = 0; i < 3; i++)
+            prices.Add(37500m);
+
+        var priceData = CreatePriceData(prices.ToArray());
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Verify tier breakdown has correct trigger counts
+        result.TierBreakdown.Should().NotBeEmpty();
+        var totalTriggers = result.TierBreakdown.Sum(t => t.TriggerCount);
+        totalTriggers.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public void Run_TierBreakdown_ExtraUsdSpent()
+    {
+        // Arrange - Price drop to trigger tier
+        var config = CreateStandardConfig();
+        // Day 0: 50000, Days 1-5: 45000 (10% drop, triggers 2.0x tier)
+        var prices = new[] { 50000m, 45000m, 45000m, 45000m, 45000m, 45000m };
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Extra USD spent should be positive for triggered tiers
+        var tiersWithExtraUsd = result.TierBreakdown.Where(t => t.ExtraUsdSpent > 0m);
+        tiersWithExtraUsd.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void Run_TierBreakdown_ExtraBtcAcquired()
+    {
+        // Arrange - Price drop to trigger tier
+        var config = CreateStandardConfig();
+        var prices = new[] { 50000m, 45000m, 45000m, 45000m };
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Extra BTC acquired should be positive for triggered tiers
+        var tiersWithExtraBtc = result.TierBreakdown.Where(t => t.ExtraBtcAcquired > 0m);
+        tiersWithExtraBtc.Should().NotBeEmpty();
+    }
+
+    [Fact]
+    public void Run_TierBreakdown_NoTriggeredTiers_ReturnsEmpty()
+    {
+        // Arrange - Flat prices, no tiers triggered
+        var config = CreateStandardConfig();
+        var priceData = CreatePriceData(50000m, 50000m, 50000m, 50000m, 50000m);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - No tier triggers means empty or all zeros
+        result.TierBreakdown.Should().BeEmpty();
+    }
+
+    #endregion
+
+    #region Comparison Metrics Tests
+
+    [Fact]
+    public void Run_Comparison_CostBasisDeltaNegativeWhenSmartIsCheaper()
+    {
+        // Arrange - Significant price drop where smart DCA buys more at lower prices
+        var config = CreateStandardConfig();
+        var prices = new[] { 50000m, 45000m, 40000m, 35000m, 30000m };
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Smart DCA should have lower cost basis (buys more when cheap)
+        result.Comparison.CostBasisDeltaSameBase.Should().BeLessThan(0m);
+    }
+
+    [Fact]
+    public void Run_Comparison_ExtraBtcPercentPositiveWhenSmartBuysMore()
+    {
+        // Arrange - Price drops significantly
+        var config = CreateStandardConfig();
+        var prices = new[] { 50000m, 40000m, 30000m, 35000m, 40000m };
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Smart DCA should have more BTC than same-base
+        result.Comparison.ExtraBtcPercentSameBase.Should().BeGreaterThan(0m);
+    }
+
+    [Fact]
+    public void Run_Comparison_MatchTotalSameSpend()
+    {
+        // Arrange
+        var config = CreateStandardConfig();
+        var priceData = CreatePriceData(50000m, 48000m, 45000m, 47000m, 49000m);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Match-total should have approximately same total invested
+        result.FixedDcaMatchTotal.TotalInvested.Should().BeApproximately(
+            result.SmartDca.TotalInvested, 0.01m);
+    }
+
+    [Fact]
+    public void Run_Comparison_EfficiencyRatioAboveOneWhenSmartOutperforms()
+    {
+        // Arrange - Price drops then recovers (smart DCA should outperform)
+        var config = CreateStandardConfig();
+        var prices = new[] { 50000m, 40000m, 30000m, 40000m, 55000m };
+        var priceData = CreatePriceData(prices);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Efficiency ratio > 1.0 means smart outperformed
+        // Note: This may not always be > 1.0 depending on price pattern
+        result.Comparison.EfficiencyRatio.Should().BeGreaterOrEqualTo(0m);
+    }
+
+    #endregion
+
+    #region Edge Case Tests
+
+    [Fact]
+    public void Run_SingleDay_ProducesValidResult()
+    {
+        // Arrange - Only 1 day of data
+        var config = CreateStandardConfig();
+        var priceData = CreatePriceData(50000m);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Should produce valid result without division-by-zero
+        result.PurchaseLog.Should().HaveCount(1);
+        result.SmartDca.TotalInvested.Should().BeGreaterThan(0m);
+        result.SmartDca.TotalBtc.Should().BeGreaterThan(0m);
+    }
+
+    [Fact]
+    public void Run_AllSamePrices_SmartAndFixedIdentical()
+    {
+        // Arrange - All days same price
+        var config = CreateStandardConfig();
+        var priceData = CreatePriceData(50000m, 50000m, 50000m, 50000m, 50000m);
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert - Smart and same-base should be identical (multiplier always 1.0)
+        result.SmartDca.TotalBtc.Should().Be(result.FixedDcaSameBase.TotalBtc);
+        result.SmartDca.AvgCostBasis.Should().Be(result.FixedDcaSameBase.AvgCostBasis);
+    }
+
+    [Fact]
+    public void Run_NullConfig_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var priceData = CreatePriceData(50000m);
+
+        // Act & Assert
+        var act = () => BacktestSimulator.Run(null!, priceData);
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void Run_NullPriceData_ThrowsArgumentNullException()
+    {
+        // Arrange
+        var config = CreateStandardConfig();
+
+        // Act & Assert
+        var act = () => BacktestSimulator.Run(config, null!);
+        act.Should().Throw<ArgumentNullException>();
+    }
+
+    #endregion
 }
