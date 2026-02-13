@@ -80,12 +80,11 @@ Plans:
   3. Sweep presets (conservative, full) provide ready-made parameter ranges for common use cases
   4. Walk-forward validation splits data into train/test periods and flags parameter sets that degrade out-of-sample
   5. Safety cap prevents runaway computation by limiting maximum parameter combinations
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 08-01: Single backtest endpoint and request/response DTOs
-- [ ] 08-02: Parameter sweep service with parallel execution and ranking
-- [ ] 08-03: Walk-forward validation, presets, and safety caps
+- [ ] 08-01-PLAN.md -- Single backtest endpoint with request/response DTOs, date range resolution, and DcaOptions defaults
+- [ ] 08-02-PLAN.md -- Parameter sweep service with cartesian product, parallel execution, ranking, presets, and walk-forward validation
 
 ## Phase Dependencies
 
@@ -106,7 +105,7 @@ Phases 6 and 7 are independent of each other and can be built in parallel after 
 | 5. MultiplierCalculator Extraction | v1.1 | 1/1 | ✓ Complete | 2026-02-13 |
 | 6. Backtest Simulation Engine | v1.1 | 2/2 | ✓ Complete | 2026-02-13 |
 | 7. Historical Data Pipeline | v1.1 | 2/2 | ✓ Complete | 2026-02-13 |
-| 8. API Endpoints & Parameter Sweep | v1.1 | 0/3 | Not started | - |
+| 8. API Endpoints & Parameter Sweep | v1.1 | 0/2 | Not started | - |
 
 ---
 *Roadmap updated: 2026-02-13 after Phase 7 execution complete*
