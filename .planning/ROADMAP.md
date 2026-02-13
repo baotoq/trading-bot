@@ -47,11 +47,11 @@ Plans:
   3. Multiplier tier breakdown shows how often each tier triggered and the extra spend attributed to each tier
   4. Max drawdown (unrealized loss vs total invested) is calculated and included in results
   5. Optional purchase log returns the full day-by-day simulation detail (date, price, multiplier, tier, amount spent, BTC bought)
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: BacktestSimulator core loop with sliding windows and fixed DCA baseline
-- [ ] 06-02: Metrics, tier breakdown, drawdown, and purchase log
+- [ ] 06-01-PLAN.md -- BacktestSimulator TDD: DTOs, core simulation loop (smart DCA + same-base + match-total), sliding windows, and foundational tests
+- [ ] 06-02-PLAN.md -- BacktestSimulator TDD: max drawdown, tier breakdown verification, comparison metrics, edge cases, and golden snapshot baseline
 
 ### Phase 7: Historical Data Pipeline
 
