@@ -41,14 +41,23 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 
 ### Active
 
-(None -- next milestone not yet defined)
+#### Current Milestone: v1.2 Web Dashboard
+
+**Goal:** Visual dashboard for monitoring portfolio, viewing purchase history, running backtests, managing configuration, and tracking live bot status.
+
+**Target features:**
+- Portfolio overview (total BTC, cost basis, current value, P&L)
+- Purchase history timeline with prices, multipliers, amounts
+- Backtest visualization with charts and parameter comparisons
+- Config management (edit DCA amount, schedule, multiplier tiers from UI)
+- Live status (current BTC price, next buy time, bot health)
 
 ### Out of Scope
 
 - Selling/take-profit logic -- this is accumulation only
 - Futures/perps trading -- spot only
 - Multi-asset support -- BTC only for now
-- Web dashboard -- logs, Telegram, and API are sufficient
+- ~~Web dashboard~~ -- moved to Active for v1.2
 - Monthly spending caps -- daily amount + multipliers are the only controls
 - Monte Carlo simulation -- DCA is deterministic given price data
 - Slippage / fee modeling -- for small spot orders ($10-45/day), fees are <0.1%
@@ -74,7 +83,7 @@ Shipped v1.1 Backtesting Engine (2026-02-13).
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0, existing BuildingBlocks infrastructure -- must build on current foundation
+- **Tech Stack**: .NET 10.0 backend + Nuxt frontend -- must build on current foundation
 - **Exchange**: Hyperliquid spot market only -- no other exchanges
 - **Asset**: BTC only -- single trading pair
 - **Direction**: Buy only -- no sell logic
@@ -99,6 +108,7 @@ Shipped v1.1 Backtesting Engine (2026-02-13).
 | BulkExtensions for data import | Efficient bulk upsert with composite key handling | ✓ Good |
 | Walk-forward 70/30 split | Industry standard for overfitting detection in parameter optimization | ✓ Good |
 | Safety cap on sweep combinations | Prevents runaway computation (default 1000, max 10000) | ✓ Good |
+| Nuxt for dashboard (not Blazor/Razor) | User preference, modern Vue ecosystem, SSR + SPA flexibility | — Pending |
 
 ---
-*Last updated: 2026-02-13 after v1.1 milestone*
+*Last updated: 2026-02-13 after v1.2 milestone start*

@@ -1,7 +1,7 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** v1.1 Backtesting Engine -- COMPLETE
+**Milestone:** v1.2 Web Dashboard
 **Updated:** 2026-02-13
 
 ## Project Reference
@@ -9,15 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for web dashboard
 
 ## Current Position
 
-Phase: 8 of 8 (API Endpoints & Parameter Sweep) -- COMPLETE
-Status: v1.1 milestone shipped and archived
-Last activity: 2026-02-13 -- Milestone v1.1 completed
-
-Progress: ████████████████████████████████ 100.0% (8/8 phases complete)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-13 — Milestone v1.2 started
 
 ## Milestones Shipped
 
@@ -32,7 +31,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Known Risks
 
-All resolved for v1.1.
+None yet for v1.2.
 
 ### Pending Todos
 
@@ -45,8 +44,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Milestone v1.1 archived
-Next step: `/gsd:new-milestone` to define next milestone
+Stopped at: Milestone v1.2 started, defining requirements
+Next step: Research → requirements → roadmap
 
 ---
-*State updated: 2026-02-13 after v1.1 milestone completion*
+*State updated: 2026-02-13 after v1.2 milestone start*
