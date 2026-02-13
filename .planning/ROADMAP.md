@@ -34,7 +34,7 @@
 
 - [x] **Phase 9: Infrastructure & Aspire Integration** - Nuxt project setup and orchestration -- completed 2026-02-13
 - [x] **Phase 9.1: Migrate Dashboard to Fresh Nuxt Setup** - Move API proxy & auth code to recreated Nuxt project (INSERTED) -- completed 2026-02-13
-- [ ] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status
+- [x] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status -- completed 2026-02-13
 - [ ] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison
 - [ ] **Phase 12: Configuration Management** - Editable config with server validation
 
@@ -89,9 +89,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 10-01-PLAN.md -- Backend dashboard API endpoints (portfolio, purchases, status, chart)
-- [ ] 10-02-PLAN.md -- Frontend types, composables, npm deps, and server proxy routes
-- [ ] 10-03-PLAN.md -- Dashboard UI components and main page assembly
+- [x] 10-01-PLAN.md -- Backend dashboard API endpoints (portfolio, purchases, status, chart)
+- [x] 10-02-PLAN.md -- Frontend types, composables, npm deps, and server proxy routes
+- [x] 10-03-PLAN.md -- Dashboard UI components and main page assembly
 
 ### Phase 11: Backtest Visualization
 
@@ -150,9 +150,9 @@ Plans:
 | 8. API Endpoints & Parameter Sweep | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 9. Infrastructure & Aspire Integration | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 9.1 Migrate Dashboard to Fresh Nuxt Setup | v1.2 | 1/1 | Complete | 2026-02-13 |
-| 10. Dashboard Core | v1.2 | 0/TBD | Not started | - |
+| 10. Dashboard Core | v1.2 | 3/3 | Complete | 2026-02-13 |
 | 11. Backtest Visualization | v1.2 | 0/TBD | Not started | - |
 | 12. Configuration Management | v1.2 | 0/TBD | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after Phase 9.1 completion*
+*Roadmap updated: 2026-02-13 after Phase 10 completion*
