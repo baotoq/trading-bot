@@ -1,3 +1,5 @@
+using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
@@ -55,6 +57,13 @@ try
             sidecar.WithReference(pubSub);
         })
         .WithHttpHealthCheck("/health");
+
+    // Dashboard (Nuxt 4)
+    var dashboard = builder.AddNodeApp("dashboard", "../dashboard", "dev")
+        .WithHttpEndpoint(port: 3000, env: "PORT")
+        .WithExternalHttpEndpoints()
+        .WithReference(apiService)
+        .WaitFor(apiService);
 
     builder.Build().Run();
 
