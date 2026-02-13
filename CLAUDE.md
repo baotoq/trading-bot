@@ -28,10 +28,17 @@ cd TradingBot.ApiService && dotnet ef migrations add <MigrationName>
 ## Architecture
 
 **Layered Structure:**
+- `Application/` - Business logic (background jobs, services, event handlers, health checks)
 - `BuildingBlocks/` - Reusable infrastructure (pub-sub, outbox, distributed locks, base entities)
 - `Configuration/` - Strongly-typed options classes bound from appsettings.json
+- `Endpoints/` - Minimal API endpoint definitions (backtest, data)
 - `Infrastructure/` - Database context, Hyperliquid client, external integrations
 - `Models/` - Domain entities with domain events
+
+**Projects:**
+- `TradingBot.ApiService` - Main API service
+- `TradingBot.AppHost` - Aspire orchestration (PostgreSQL, Redis, Dapr)
+- `TradingBot.ServiceDefaults` - Shared service configuration extensions
 
 **Key Patterns:**
 - Event-driven architecture with MediatR (in-process) and Dapr (cross-service)
@@ -70,6 +77,14 @@ _logger.LogInformation("Placing order for {Symbol} at {Price}", symbol, price);
 _logger.LogInformation($"Placing order for {symbol} at {price}");
 ```
 
+## Key Dependencies
+
+- **Binance.Net** - Price data source (not for trading)
+- **Telegram.Bot** - Notifications and weekly summaries
+- **Nethereum** - EIP-712 signing for Hyperliquid authentication
+- **Dapr** - Cross-service pub-sub messaging
+- **MessagePack** - Binary serialization for Redis caching
+
 ## Key Files
 
 - `TradingBot.ApiService/Program.cs` - Startup, DI configuration
@@ -96,14 +111,28 @@ dotnet user-secrets set "Hyperliquid:PrivateKey" "<key>"
 - FluentAssertions for assertions
 - Tests in `tests/TradingBot.ApiService.Tests/`
 
+```bash
+# Run specific test
+dotnet test --filter "FullyQualifiedName~TestClassName"
+```
+
 ## Planning Documents
 
 Detailed architecture and requirements are in `.planning/`:
 - `PROJECT.md` - Vision and scope
 - `REQUIREMENTS.md` - Functional requirements
 - `ROADMAP.md` - Phase breakdown
+- `STATE.md` - Current execution state
+- `MILESTONES.md` - Milestone tracking
 - `codebase/ARCHITECTURE.md` - Detailed architecture
 - `codebase/CONVENTIONS.md` - Full coding standards
+
+## Gotchas
+
+- Dapr sidecar must be running for pub-sub events to work (Aspire handles this automatically)
+- Hyperliquid testnet and mainnet use different API URLs — controlled via `HyperliquidOptions:IsTestnet`
+- EF migrations must be run from `TradingBot.ApiService/` directory
+- Advisory locks use PostgreSQL connection — if connection drops, lock is released automatically
 
 ## Other Notes
 
