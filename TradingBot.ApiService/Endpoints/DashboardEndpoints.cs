@@ -71,6 +71,7 @@ public static class DashboardEndpoints
         int pageSize = 20,
         DateOnly? startDate = null,
         DateOnly? endDate = null,
+        string? tier = null,
         CancellationToken ct = default)
     {
         var query = db.Purchases
@@ -87,6 +88,13 @@ public static class DashboardEndpoints
         {
             var endDateTime = endDate.Value.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
             query = query.Where(p => p.ExecutedAt <= endDateTime);
+        }
+
+        if (!string.IsNullOrEmpty(tier))
+        {
+            query = tier == "Base"
+                ? query.Where(p => p.MultiplierTier == null || p.MultiplierTier == "Base")
+                : query.Where(p => p.MultiplierTier == tier);
         }
 
         if (!string.IsNullOrEmpty(cursor))

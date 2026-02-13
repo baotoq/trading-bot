@@ -7,6 +7,7 @@ export function usePurchaseHistory() {
   const loading = ref(false)
   const startDate = ref<string | null>(null)
   const endDate = ref<string | null>(null)
+  const tier = ref<string | null>(null)
 
   const loadMore = async () => {
     // Guard: prevent duplicate loads
@@ -20,7 +21,8 @@ export function usePurchaseHistory() {
           cursor: cursor.value,
           pageSize: 20,
           startDate: startDate.value,
-          endDate: endDate.value
+          endDate: endDate.value,
+          tier: tier.value
         }
       })
 
@@ -52,6 +54,7 @@ export function usePurchaseHistory() {
     loadMore,
     startDate,
     endDate,
+    tier,
     resetAndLoad
   }
 }

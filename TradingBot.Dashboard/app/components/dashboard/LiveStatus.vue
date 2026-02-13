@@ -63,7 +63,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const nextBuyTime = computed(() => props.status?.nextBuyTime ?? null)
-const countdown = useCountdownTimer(nextBuyTime)
+const { remaining: countdown } = useCountdownTimer(nextBuyTime)
 
 const healthBadgeColor = computed(() => {
   if (!props.status) return 'gray'

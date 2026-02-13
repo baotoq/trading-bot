@@ -4,7 +4,7 @@
       <div class="space-y-4">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Purchase History</h2>
 
-        <!-- Date range filter -->
+        <!-- Filters -->
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -27,6 +27,20 @@
               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
               @change="handleFilterChange"
             />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Multiplier Tier
+            </label>
+            <select
+              :value="tier || ''"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:text-white"
+              @change="(e: Event) => { tier = (e.target as HTMLSelectElement).value || null; handleFilterChange() }"
+            >
+              <option v-for="opt in tierOptions" :key="opt.value" :value="opt.value">
+                {{ opt.label }}
+              </option>
+            </select>
           </div>
         </div>
       </div>
@@ -69,7 +83,15 @@
 <script setup lang="ts">
 import { useInfiniteScroll } from '@vueuse/core'
 
-const { purchases, loading, hasMore, loadMore, startDate, endDate, resetAndLoad } = usePurchaseHistory()
+const { purchases, loading, hasMore, loadMore, startDate, endDate, tier, resetAndLoad } = usePurchaseHistory()
+
+const tierOptions = [
+  { label: 'All Tiers', value: '' },
+  { label: 'Base', value: 'Base' },
+  { label: 'Tier 1', value: 'Tier1' },
+  { label: 'Tier 2', value: 'Tier2' },
+  { label: 'Tier 3', value: 'Tier3' }
+]
 
 const sentinel = ref<HTMLElement | null>(null)
 
