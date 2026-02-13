@@ -140,6 +140,7 @@ try
     app.MapDefaultEndpoints();
     app.MapDataEndpoints();
     app.MapBacktestEndpoints();
+    app.MapDashboardEndpoints();
 
     await app.RunAsync();
 

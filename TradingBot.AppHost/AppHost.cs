@@ -49,6 +49,8 @@ try
         pubSub.WithMetadata("redisPassword", redis.Resource.PasswordParameter);
     }
 
+    var dashboardApiKey = builder.AddParameter("dashboardApiKey", secret: true);
+
     var apiService = builder.AddProject<Projects.TradingBot_ApiService>("apiservice")
         .WithReference(postgresdb)
         .WithReference(redis)
@@ -56,12 +58,15 @@ try
         {
             sidecar.WithReference(pubSub);
         })
-        .WithHttpHealthCheck("/health");
+        .WithHttpHealthCheck("/health")
+        .WithEnvironment("Dashboard__ApiKey", dashboardApiKey);
 
     // Dashboard (Nuxt 4)
     var dashboard = builder.AddNodeApp("dashboard", "../dashboard", "dev")
         .WithHttpEndpoint(port: 3000, env: "PORT")
         .WithExternalHttpEndpoints()
+        .WithEnvironment("NUXT_PUBLIC_API_ENDPOINT", apiService.GetEndpoint("http"))
+        .WithEnvironment("NUXT_API_KEY", dashboardApiKey)
         .WithReference(apiService)
         .WaitFor(apiService);
 
