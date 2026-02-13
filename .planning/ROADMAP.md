@@ -15,7 +15,7 @@
 - Integer phases (5, 6, 7, 8): Planned milestone work
 - Decimal phases (e.g., 6.1): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 5: MultiplierCalculator Extraction** - Extract pure calculation logic from production DCA service for backtest reuse
+- [x] **Phase 5: MultiplierCalculator Extraction** - Extract pure calculation logic from production DCA service for backtest reuse (completed 2026-02-13)
 - [ ] **Phase 6: Backtest Simulation Engine** - Day-by-day DCA simulation with metrics and fixed-DCA comparison
 - [ ] **Phase 7: Historical Data Pipeline** - CoinGecko ingestion, gap detection, and data status API
 - [ ] **Phase 8: API Endpoints & Parameter Sweep** - Backtest and sweep endpoints with walk-forward validation
@@ -34,7 +34,7 @@
 **Plans:** 1 plan
 
 Plans:
-- [ ] 05-01-PLAN.md -- MultiplierCalculator TDD extraction with additive bear boost and regression tests
+- [x] 05-01-PLAN.md -- MultiplierCalculator TDD extraction with additive bear boost and regression tests
 
 ### Phase 6: Backtest Simulation Engine
 
@@ -103,10 +103,10 @@ Phases 6 and 7 are independent of each other and can be built in parallel after 
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 5. MultiplierCalculator Extraction | v1.1 | 0/1 | Not started | - |
+| 5. MultiplierCalculator Extraction | v1.1 | 1/1 | ✓ Complete | 2026-02-13 |
 | 6. Backtest Simulation Engine | v1.1 | 0/2 | Not started | - |
 | 7. Historical Data Pipeline | v1.1 | 0/2 | Not started | - |
 | 8. API Endpoints & Parameter Sweep | v1.1 | 0/3 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after v1.1 roadmap creation*
+*Roadmap updated: 2026-02-13 after Phase 5 execution complete*
