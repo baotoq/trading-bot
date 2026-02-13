@@ -86,12 +86,12 @@ Plans:
 6. User can see bot health status indicator (healthy/error/warning) and next scheduled buy time with countdown
 7. User can see connection status indicator showing connected/reconnecting/disconnected state
 
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 10-01: TBD
-- [ ] 10-02: TBD
-- [ ] 10-03: TBD
+- [ ] 10-01-PLAN.md -- Backend dashboard API endpoints (portfolio, purchases, status, chart)
+- [ ] 10-02-PLAN.md -- Frontend types, composables, npm deps, and server proxy routes
+- [ ] 10-03-PLAN.md -- Dashboard UI components and main page assembly
 
 ### Phase 11: Backtest Visualization
 
