@@ -7,6 +7,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
 {
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<DailyPrice> DailyPrices => Set<DailyPrice>();
+    public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -82,6 +83,21 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
 
             entity.Property(e => e.Volume)
                 .HasPrecision(18, 8);
+        });
+
+        modelBuilder.Entity<IngestionJob>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Status)
+                .HasMaxLength(30)
+                .HasConversion<string>();
+
+            entity.Property(e => e.ErrorMessage)
+                .HasMaxLength(2000);
+
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.CreatedAt);
         });
     }
 }

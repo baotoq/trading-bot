@@ -14,9 +14,10 @@
   <ItemGroup>
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.0.2" />
     <PackageReference Include="Binance.Net" Version="11.11.0" />
-    <PackageReference Include="CryptoExchange.Net" Version="9.13.0" />
+    <PackageReference Include="CryptoExchange.Net" Version="10.5.4" />
     <PackageReference Include="Dapr.AspNetCore" Version="1.16.1" />
     <PackageReference Include="DistributedLock.Postgres" Version="1.0.8" />
+    <PackageReference Include="EFCore.BulkExtensions" Version="10.0.0" />
     <PackageReference Include="MediatR" Version="13.1.0" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
