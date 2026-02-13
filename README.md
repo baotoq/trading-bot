@@ -115,6 +115,12 @@ trading-bot/
 dotnet test
 ```
 
+## Add Agent Skills
+
+```bash
+npx skills add baotoq/agent-skills
+```
+
 ## Development Roadmap
 
 | Phase | Description | Status |
