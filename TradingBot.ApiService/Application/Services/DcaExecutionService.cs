@@ -98,11 +98,11 @@ public class DcaExecutionService(
         var multiplierResult = await CalculateMultiplierAsync(currentPrice, options, ct);
 
         // Apply multiplier to base amount (capped by available balance)
-        var multipliedAmount = options.BaseDailyAmount * multiplierResult.TotalMultiplier;
+        var multipliedAmount = options.BaseDailyAmount * multiplierResult.Multiplier;
         var usdAmount = Math.Min(usdcBalance, multipliedAmount);
 
         logger.LogInformation("Multiplied target: {MultipliedAmount} USD (base: {Base} * {Multiplier}x), available: {Balance}, will buy: {UsdAmount}",
-            multipliedAmount, options.BaseDailyAmount, multiplierResult.TotalMultiplier, usdcBalance, usdAmount);
+            multipliedAmount, options.BaseDailyAmount, multiplierResult.Multiplier, usdcBalance, usdAmount);
 
         if (usdAmount < MinimumOrderValue)
         {
@@ -138,7 +138,7 @@ public class DcaExecutionService(
             Price = currentPrice,
             Quantity = 0, // Will be updated with actual fill
             Cost = 0, // Will be updated with actual cost
-            Multiplier = multiplierResult.TotalMultiplier,
+            Multiplier = multiplierResult.Multiplier,
             MultiplierTier = multiplierResult.Tier,
             DropPercentage = multiplierResult.DropPercentage,
             High30Day = multiplierResult.High30Day,
@@ -267,7 +267,7 @@ public class DcaExecutionService(
         }
     }
 
-    private async Task<OldMultiplierResult> CalculateMultiplierAsync(
+    private async Task<MultiplierResult> CalculateMultiplierAsync(
         decimal currentPrice, DcaOptions options, CancellationToken ct)
     {
         try
@@ -276,93 +276,44 @@ public class DcaExecutionService(
             var high30Day = await priceDataService.Get30DayHighAsync("BTC", ct);
             var ma200Day = await priceDataService.Get200DaySmaAsync("BTC", ct);
 
-            // Calculate dip tier multiplier
-            decimal dipMultiplier = 1.0m;
-            decimal dropPercent = 0m;
-            string tier = "None";
+            // Delegate to pure static calculator
+            var result = MultiplierCalculator.Calculate(
+                currentPrice,
+                options.BaseDailyAmount,
+                high30Day,
+                ma200Day,
+                options.MultiplierTiers,
+                options.BearBoostFactor,
+                options.MaxMultiplierCap);
 
-            if (high30Day > 0)
+            // Log the result
+            if (result.IsBearMarket)
             {
-                // Calculate drop percentage from 30-day high
-                dropPercent = (high30Day - currentPrice) / high30Day * 100m;
-
-                // Find matching tier (ordered descending, first match wins)
-                var matchedTier = options.MultiplierTiers
-                    .OrderByDescending(t => t.DropPercentage)
-                    .FirstOrDefault(t => dropPercent >= t.DropPercentage);
-
-                if (matchedTier != null)
-                {
-                    dipMultiplier = matchedTier.Multiplier;
-                    tier = $">= {matchedTier.DropPercentage}%";
-                }
+                logger.LogInformation(
+                    "Bear market detected: price {Price} < MA200 {Ma200}, applying +{Boost} boost",
+                    currentPrice, ma200Day, result.BearBoostApplied);
             }
-            else
-            {
-                logger.LogWarning("30-day high unavailable (returned 0), using 1.0x dip multiplier");
-                tier = "N/A (no price data)";
-            }
-
-            // Calculate bear market boost
-            decimal bearMultiplier = 1.0m;
-
-            if (ma200Day > 0)
-            {
-                if (currentPrice < ma200Day)
-                {
-                    bearMultiplier = options.BearBoostFactor;
-                    logger.LogInformation("Bear market detected: price {Price} < MA200 {Ma200}, applying {Boost}x boost",
-                        currentPrice, ma200Day, bearMultiplier);
-                }
-            }
-            else
-            {
-                logger.LogWarning("200-day SMA unavailable (returned 0), skipping bear boost");
-            }
-
-            // Stack multiplicatively and apply cap
-            var totalMultiplier = dipMultiplier * bearMultiplier;
-            totalMultiplier = Math.Min(totalMultiplier, options.MaxMultiplierCap);
 
             logger.LogInformation(
-                "Multiplier: dip={DipMult}x (tier: {Tier}, drop: {Drop:F2}%) * bear={BearMult}x = {Total:F2}x (cap: {Cap}x)",
-                dipMultiplier, tier, dropPercent, bearMultiplier, totalMultiplier, options.MaxMultiplierCap);
+                "Multiplier: tier={Tier} (drop: {Drop:F2}%) + bear={BearBoost} = {Total:F2}x (cap: {Cap}x)",
+                result.Tier, result.DropPercentage, result.BearBoostApplied, result.Multiplier, options.MaxMultiplierCap);
 
-            return new OldMultiplierResult(
-                TotalMultiplier: totalMultiplier,
-                DipMultiplier: dipMultiplier,
-                BearMultiplier: bearMultiplier,
-                Tier: tier,
-                DropPercentage: dropPercent,
-                High30Day: high30Day,
-                Ma200Day: ma200Day);
+            return result;
         }
         catch (Exception ex)
         {
             // Graceful degradation: fall back to 1.0x on any calculation failure
             logger.LogError(ex, "Multiplier calculation failed, falling back to 1.0x");
 
-            return new OldMultiplierResult(
-                TotalMultiplier: 1.0m,
-                DipMultiplier: 1.0m,
-                BearMultiplier: 1.0m,
-                Tier: "Error (fallback)",
-                DropPercentage: 0m,
-                High30Day: 0m,
-                Ma200Day: 0m);
+            return MultiplierCalculator.Calculate(
+                currentPrice,
+                options.BaseDailyAmount,
+                0m, // high30Day
+                0m, // ma200Day
+                Array.Empty<MultiplierTier>(),
+                options.BearBoostFactor,
+                options.MaxMultiplierCap);
         }
     }
 }
 
-/// <summary>
-/// Result of multiplier calculation containing all components and metadata
-/// (OLD - will be removed in refactor phase)
-/// </summary>
-internal record OldMultiplierResult(
-    decimal TotalMultiplier,
-    decimal DipMultiplier,
-    decimal BearMultiplier,
-    string Tier,
-    decimal DropPercentage,
-    decimal High30Day,
-    decimal Ma200Day);
