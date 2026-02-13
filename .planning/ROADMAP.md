@@ -63,11 +63,11 @@ Plans:
   2. Ingestion is incremental -- re-running only fetches dates not already in the database, respecting CoinGecko rate limits
   3. System detects and reports gaps (missing dates) in the stored price data
   4. GET /api/backtest/data/status returns the available date range, total days stored, and any detected gaps
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: CoinGeckoClient and data ingestion service
-- [ ] 07-02: Gap detection, data status endpoint, and ingest endpoint
+- [ ] 07-01-PLAN.md -- CoinGeckoClient with chunked fetching, IngestionJob entity, GapDetectionService, DataIngestionService, job queue, and background service
+- [ ] 07-02-PLAN.md -- API endpoints (POST /ingest, GET /status, GET /ingest/{jobId}), response DTOs, DI wiring, and configuration
 
 ### Phase 8: API Endpoints & Parameter Sweep
 
