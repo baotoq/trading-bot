@@ -8,26 +8,49 @@
 
 See: .planning/PROJECT.md (updated 2026-02-13)
 
-**Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting
-**Current focus:** Defining requirements for web dashboard
+**Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
+**Current focus:** Phase 9 - Infrastructure & Aspire Integration
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-13 — Milestone v1.2 started
+Phase: 9 of 12 (Infrastructure & Aspire Integration)
+Plan: Not yet planned
+Status: Ready to plan
+Last activity: 2026-02-13 — v1.2 milestone roadmap created with 4 phases
+
+Progress: [████████░░░░░░░░░░] 40% (8 phases complete out of estimated 20 total plans)
 
 ## Milestones Shipped
 
 - v1.0 Daily BTC Smart DCA (2026-02-12) -- 4 phases, 11 plans
 - v1.1 Backtesting Engine (2026-02-13) -- 4 phases, 7 plans, 53 tests
 
+## Performance Metrics
+
+**Velocity:**
+- Total plans completed: 18
+- v1.0 completion time: 1 day (2026-02-12)
+- v1.1 completion time: 1 day (2026-02-13)
+- v1.2: Starting now
+
+**By Milestone:**
+
+| Milestone | Phases | Plans | Status |
+|-----------|--------|-------|--------|
+| v1.0 | 1-4 | 11 | Complete |
+| v1.1 | 5-8 | 7 | Complete |
+| v1.2 | 9-12 | TBD | Not started |
+
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+Recent decisions affecting v1.2:
+- Nuxt 4 for dashboard (not Blazor/Razor) — User preference, modern Vue ecosystem
+- View-only transparency first, interactive management later — Research shows users need visibility before control
+- TanStack Query + lightweight-charts + Nuxt UI — Industry standard stack for financial dashboards
 
 ### Known Risks
 
@@ -44,8 +67,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: Milestone v1.2 started, defining requirements
-Next step: Research → requirements → roadmap
+Stopped at: v1.2 roadmap created with 4 phases (9-12) covering all 22 requirements
+Next step: /gsd:plan-phase 9
 
 ---
-*State updated: 2026-02-13 after v1.2 milestone start*
+*State updated: 2026-02-13 after v1.2 roadmap creation*

@@ -107,10 +107,10 @@ Deferred to v1.3 or later.
 | CONF-04 | Phase 12 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 22 total
-- Mapped to phases: 22
+- v1.2 requirements: 25 total
+- Mapped to phases: 25
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation*
