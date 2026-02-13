@@ -1,9 +1,16 @@
 ---
 name: vue-router-best-practices
 description: "Vue Router 4 patterns, navigation guards, route params, and route-component lifecycle interactions."
-version: 1.0.0
 license: MIT
-author: github.com/vuejs-ai
+metadata:
+  author: github.com/vuejs-ai
+  version: "1.0.0"
+  domain: frontend
+  triggers: Vue Router, navigation guard, beforeEach, route params, router-view, lazy loading routes, nested routes
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vue-pinia-best-practices, vue-debug-guides
 ---
 
 Vue Router best practices, common gotchas, and navigation patterns.

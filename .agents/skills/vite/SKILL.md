@@ -6,6 +6,12 @@ metadata:
   author: Anthony Fu
   version: "2026.1.31"
   source: Generated from https://github.com/vitejs/vite, scripts at https://github.com/antfu/skills
+  domain: frontend
+  triggers: Vite, vite.config, Rolldown, HMR, build tool, dev server, Vite plugin, SSR, library mode
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vitest, vue-best-practices, react-expert
 ---
 
 # Vite

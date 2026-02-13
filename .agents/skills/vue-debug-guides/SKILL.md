@@ -1,6 +1,15 @@
 ---
 name: vue-debug-guides
 description: Vue 3 debugging and error handling for runtime errors, warnings, async failures, and SSR/hydration issues. Use when diagnosing or fixing Vue issues.
+license: MIT
+metadata:
+  version: "1.0.0"
+  domain: frontend
+  triggers: Vue debug, Vue error, Vue warning, hydration mismatch, reactivity bug, Vue DevTools, SSR error, async error
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vue-router-best-practices, vue-pinia-best-practices
 ---
 
 Vue 3 debugging and error handling for runtime issues, warnings, async failures, and hydration bugs.

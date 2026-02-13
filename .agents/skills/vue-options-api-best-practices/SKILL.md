@@ -1,9 +1,16 @@
 ---
 name: vue-options-api-best-practices
 description: "Vue 3 Options API style (data(), methods, this context). Each reference shows Options API solution only."
-version: 2.0.0
 license: MIT
-author: github.com/vuejs-ai
+metadata:
+  author: github.com/vuejs-ai
+  version: "2.0.0"
+  domain: frontend
+  triggers: Options API, data(), methods, this context, defineComponent, mixins, Vue 2 migration
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vue-debug-guides
 ---
 
 Vue.js Options API best practices, TypeScript integration, and common gotchas.

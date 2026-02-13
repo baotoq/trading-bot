@@ -2,6 +2,14 @@
 name: nuxt
 description: Use when working on Nuxt 4+ projects - provides server routes, file-based routing, middleware patterns, Nuxt-specific composables, and configuration with latest docs. Covers h3 v1 helpers (validation, WebSocket, SSE) and nitropack v2 patterns. Updated for Nuxt 4.3+.
 license: MIT
+metadata:
+  version: "1.0.0"
+  domain: frontend
+  triggers: Nuxt, Nuxt 4, server routes, useFetch, useAsyncData, nitro, h3, file-based routing, Nuxt middleware, Nuxt plugin, auto-imports, Nuxt layers
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, nuxt-ui, vite, vue-router-best-practices, vue-pinia-best-practices
 ---
 
 # Nuxt 4+ Development

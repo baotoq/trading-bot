@@ -5,6 +5,12 @@ license: MIT
 metadata:
   author: github.com/vuejs-ai
   version: "18.0.0"
+  domain: frontend
+  triggers: Vue, Vue 3, Composition API, script setup, .vue, SFC, reactive, ref, computed, watch, defineProps, defineEmits
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-router-best-practices, vue-pinia-best-practices, vue-testing-best-practices, vueuse, vite
 ---
 
 # Vue Best Practices Workflow

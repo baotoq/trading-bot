@@ -2,6 +2,14 @@
 name: vitest
 description: Use when writing unit/integration tests for Vite projects - provides Vitest configuration, test APIs, mocking patterns, and coverage setup
 license: MIT
+metadata:
+  version: "1.0.0"
+  domain: tests
+  triggers: Vitest, vi.mock, vi.fn, test runner, unit test, coverage, mocking, describe, it, expect
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vite, vue-testing-best-practices
 ---
 
 # Vitest

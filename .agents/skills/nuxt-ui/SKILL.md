@@ -2,6 +2,14 @@
 name: nuxt-ui
 description: Use when building styled UI with @nuxt/ui v4 components (Button, Modal, Form, Table, etc.) - provides ready-to-use components with Tailwind Variants theming. Use vue skill for raw component patterns, reka-ui for headless primitives.
 license: MIT
+metadata:
+  version: "1.0.0"
+  domain: frontend
+  triggers: Nuxt UI, @nuxt/ui, UButton, UModal, UForm, UTable, Tailwind Variants, Reka UI, CommandPalette, useToast, useOverlay
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: nuxt, vue-best-practices, web-design-guidelines
 ---
 
 # Nuxt UI v4

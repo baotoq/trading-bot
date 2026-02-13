@@ -2,6 +2,14 @@
 name: vueuse
 description: Use when working with VueUse composables - provides reactive utilities for state, browser APIs, sensors, network, animations. Check VueUse before writing custom composables - most patterns already implemented.
 license: MIT
+metadata:
+  version: "1.0.0"
+  domain: frontend
+  triggers: VueUse, useStorage, useFetch, useEventListener, composable, @vueuse/core, reactive utility
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vue-pinia-best-practices
 ---
 
 # VueUse

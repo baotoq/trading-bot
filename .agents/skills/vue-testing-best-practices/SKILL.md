@@ -1,9 +1,16 @@
 ---
 name: vue-testing-best-practices
-version: 1.0.0
-license: MIT
-author: github.com/vuejs-ai
 description: Use for Vue.js testing. Covers Vitest, Vue Test Utils, component testing, mocking, testing patterns, and Playwright for E2E testing.
+license: MIT
+metadata:
+  author: github.com/vuejs-ai
+  version: "1.0.0"
+  domain: tests
+  triggers: Vue Test Utils, component testing, mount, shallowMount, Playwright, E2E, flushPromises, Vue testing
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vitest, vue-pinia-best-practices
 ---
 
 Vue.js testing best practices, patterns, and common gotchas.

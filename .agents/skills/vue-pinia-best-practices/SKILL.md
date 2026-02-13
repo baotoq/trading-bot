@@ -1,9 +1,16 @@
 ---
 name: vue-pinia-best-practices
 description: "Pinia stores, state management patterns, store setup, and reactivity with stores."
-version: 1.0.0
 license: MIT
-author: github.com/vuejs-ai
+metadata:
+  author: github.com/vuejs-ai
+  version: "1.0.0"
+  domain: frontend
+  triggers: Pinia, store, state management, defineStore, storeToRefs, getActivePinia, Vue state
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: vue-best-practices, vue-router-best-practices, vue-testing-best-practices
 ---
 
 Pinia best practices, common gotchas, and state management patterns.
