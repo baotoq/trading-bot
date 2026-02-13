@@ -62,7 +62,7 @@ try
         .WithEnvironment("Dashboard__ApiKey", dashboardApiKey);
 
     // Dashboard (Nuxt 4)
-    var dashboard = builder.AddNodeApp("dashboard", "../dashboard", "dev")
+    var dashboard = builder.AddNodeApp("dashboard", "../TradingBot.Dashboard", "dev")
         .WithHttpEndpoint(port: 3000, env: "PORT")
         .WithExternalHttpEndpoints()
         .WithEnvironment("NUXT_PUBLIC_API_ENDPOINT", apiService.GetEndpoint("http"))
