@@ -2,84 +2,83 @@
 
 ## What This Is
 
-A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy. It buys a configurable base amount daily, with multipliers that increase position size during dips — buying more when price drops further from recent highs, and even more aggressively when price is below the 200-day moving average. Rich Telegram notifications explain every buy decision with multiplier reasoning and running totals.
+A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for simulating strategies against historical price data, parameter sweeps for finding optimal configurations, and walk-forward validation to prevent overfitting.
 
 ## Core Value
 
-The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA.
+The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Event-driven architecture with MediatR domain events — existing
-- ✓ Outbox pattern for reliable message publishing — existing
-- ✓ Background service base class (TimeBackgroundService) — existing
-- ✓ Serilog structured logging — existing
-- ✓ PostgreSQL + EF Core persistence — existing
-- ✓ Redis distributed caching — existing
-- ✓ Aspire orchestration for local dev — existing
-- ✓ Telegram notification infrastructure — existing
-- ✓ Hyperliquid spot API integration (EIP-712 signing, prices, balances, orders) — v1.0
-- ✓ Smart DCA engine with configurable base amount and dip multipliers — v1.0
-- ✓ Drop-from-high calculation (30-day high tracking, tier-based multipliers: 1x/1.5x/2x/3x) — v1.0
-- ✓ 200-day MA bear market boost (1.5x additional multiplier below 200 MA) — v1.0
-- ✓ Configurable daily schedule (time of day for buy execution) — v1.0
-- ✓ Purchase history tracking (amount, price, multiplier used, timestamp) — v1.0
-- ✓ Telegram notifications on each buy (amount, price, multiplier, running totals) — v1.0
-- ✓ Detailed console/file logging of all decisions and executions — v1.0
-- ✓ Configuration management (base amount, schedule, multiplier tiers, all adjustable) — v1.0
-- ✓ Rich Telegram notifications with multiplier reasoning and weekly summaries — v1.0
-- ✓ Health check endpoint and missed purchase detection — v1.0
-- ✓ Dry-run simulation mode — v1.0
-- ✓ Distributed locking via PostgreSQL advisory locks — v1.0 (replaced Dapr stub)
+- ✓ Event-driven architecture with MediatR domain events -- v1.0
+- ✓ Outbox pattern for reliable message publishing -- v1.0
+- ✓ Background service base class (TimeBackgroundService) -- v1.0
+- ✓ Serilog structured logging -- v1.0
+- ✓ PostgreSQL + EF Core persistence -- v1.0
+- ✓ Redis distributed caching -- v1.0
+- ✓ Aspire orchestration for local dev -- v1.0
+- ✓ Telegram notification infrastructure -- v1.0
+- ✓ Hyperliquid spot API integration (EIP-712 signing, prices, balances, orders) -- v1.0
+- ✓ Smart DCA engine with configurable base amount and dip multipliers -- v1.0
+- ✓ Drop-from-high calculation (30-day high tracking, tier-based multipliers: 1x/1.5x/2x/3x) -- v1.0
+- ✓ 200-day MA bear market boost (additive +1.5x below 200 MA) -- v1.0 (updated to additive in v1.1)
+- ✓ Configurable daily schedule (time of day for buy execution) -- v1.0
+- ✓ Purchase history tracking (amount, price, multiplier used, timestamp) -- v1.0
+- ✓ Telegram notifications on each buy (amount, price, multiplier, running totals) -- v1.0
+- ✓ Rich Telegram notifications with multiplier reasoning and weekly summaries -- v1.0
+- ✓ Health check endpoint and missed purchase detection -- v1.0
+- ✓ Dry-run simulation mode -- v1.0
+- ✓ Distributed locking via PostgreSQL advisory locks -- v1.0
+- ✓ MultiplierCalculator as pure static class (zero dependencies, testable, reusable) -- v1.1
+- ✓ Day-by-day backtest simulation (smart DCA vs same-base and match-total fixed DCA) -- v1.1
+- ✓ Comprehensive backtest metrics (cost basis, total BTC, max drawdown, tier breakdown, efficiency) -- v1.1
+- ✓ CoinGecko historical data pipeline with incremental ingestion and gap detection -- v1.1
+- ✓ Parameter sweep with cartesian product, parallel execution, and ranked results -- v1.1
+- ✓ Walk-forward validation with 70/30 train/test split and overfitting detection -- v1.1
+- ✓ Backtest API endpoints (single backtest, sweep, data ingestion, data status) -- v1.1
 
 ### Active
 
-- [ ] Backtesting engine with historical price simulation
-- [ ] External price data source (CoinGecko) for 2-4 years of BTC history
-- [ ] Parameter sweep across multiplier tiers, thresholds, and base amounts
-- [ ] API endpoints returning structured JSON results
-- [ ] Comprehensive metrics: cost basis, total BTC, max drawdown, smart vs fixed DCA comparison
+(None -- next milestone not yet defined)
 
 ### Out of Scope
 
-- Selling/take-profit logic — this is accumulation only
-- Futures/perps trading — spot only
-- Multi-asset support — BTC only for now
-- Web dashboard — logs and Telegram are sufficient
-- ~~Backtesting~~ — moved to Active for v1.1
-- Monthly spending caps — daily amount + multipliers are the only controls
+- Selling/take-profit logic -- this is accumulation only
+- Futures/perps trading -- spot only
+- Multi-asset support -- BTC only for now
+- Web dashboard -- logs, Telegram, and API are sufficient
+- Monthly spending caps -- daily amount + multipliers are the only controls
+- Monte Carlo simulation -- DCA is deterministic given price data
+- Slippage / fee modeling -- for small spot orders ($10-45/day), fees are <0.1%
+- Genetic algorithm / ML optimization -- grid search is sufficient for ~5 DCA parameters
+- Backtest result persistence -- compute-on-fly is cheaper; user re-runs as needed
 
-## Current Milestone: v1.1 Backtesting Engine
+## Current State
 
-**Goal:** Add a backtesting engine that simulates DCA strategies against historical BTC price data, supports parameter sweeps, and exposes results via API.
+Shipped v1.1 Backtesting Engine (2026-02-13).
 
-**Target features:**
-- Historical price data ingestion from CoinGecko (2-4 years of BTC daily candles)
-- Strategy simulation engine reusing existing multiplier logic
-- Parameter sweep: automatically try many tier/multiplier combinations and rank by performance
-- API endpoints returning structured JSON with comprehensive metrics
-- Comparison metrics: smart DCA vs fixed DCA (cost basis, total BTC, drawdown, efficiency ratios)
+**Codebase:**
+- ~7,100 lines of C# across 8 phases (18 plans)
+- 53 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 1 existing)
+- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot
 
-## Context
-
-- .NET 10.0 codebase with solid infrastructure (MediatR, EF Core, outbox pattern, Aspire)
-- v1.0 shipped: 3,590 lines of C# across 4 phases, 11 plans
-- BuildingBlocks layer provides base entities, domain events, pub/sub, distributed locks, background services
-- Hyperliquid integration uses direct HTTP client with EIP-712 signing via Nethereum
-- PostgreSQL for persistence (Purchase + DailyPrice entities), auto-migrations on startup
-- 4 background services: DCA scheduler, price data refresh, weekly summary, missed purchase verification
-- Telegram notifications for all purchase outcomes with rich formatting
-- Existing MultiplierCalculator is pure stateless logic — ideal for reuse in backtesting
+**API Surface:**
+- POST /api/backtest -- single backtest with config overrides
+- POST /api/backtest/sweep -- parameter sweep with ranking and walk-forward validation
+- POST /api/backtest/data/ingest -- trigger CoinGecko historical data ingestion
+- GET /api/backtest/data/status -- check data coverage
+- GET /api/backtest/data/ingest/{jobId} -- poll ingestion job progress
+- GET /api/backtest/presets/{name} -- inspect sweep presets
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0, existing BuildingBlocks infrastructure — must build on current foundation
-- **Exchange**: Hyperliquid spot market only — no other exchanges
-- **Asset**: BTC only — single trading pair
-- **Direction**: Buy only — no sell logic
-- **Notifications**: Telegram + Serilog — both required for every purchase
+- **Tech Stack**: .NET 10.0, existing BuildingBlocks infrastructure -- must build on current foundation
+- **Exchange**: Hyperliquid spot market only -- no other exchanges
+- **Asset**: BTC only -- single trading pair
+- **Direction**: Buy only -- no sell logic
+- **Notifications**: Telegram + Serilog -- both required for every purchase
 
 ## Key Decisions
 
@@ -87,15 +86,19 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 |----------|-----------|---------|
 | Hyperliquid spot (not perps) | User wants actual BTC accumulation, not leveraged exposure | ✓ Good |
 | Smart DCA with drop-from-high tiers | Better average cost than fixed DCA, simple to implement and understand | ✓ Good |
-| 200-day MA as bear market indicator | Well-known, reliable signal for macro trend, adds 1.5x boost in downtrends | ✓ Good |
+| 200-day MA as bear market indicator | Well-known, reliable signal for macro trend | ✓ Good |
 | Configurable schedule + amounts | User wants flexibility to adjust strategy without code changes | ✓ Good |
-| No monthly spending cap | Daily amount + multipliers provide sufficient control | ✓ Good |
 | PostgreSQL advisory locks (not Dapr) | Dapr lock was stubbed; PostgreSQL advisory locks are real and reliable | ✓ Good |
 | IOC orders with 5% slippage | Immediate fill with price protection for spot market buys | ✓ Good |
-| Multiplicative multiplier stacking | Dip tier * bear boost with configurable cap (default 4.5x) | ✓ Good |
+| Additive bear boost (not multiplicative) | Makes bear market impact more predictable (+1.5 not *1.5) | ✓ Good |
 | Stale data policy: use last known | Better than falling back to 1x on transient refresh failures | ✓ Good |
 | Graceful degradation to 1.0x | Multiplier failure never prevents DCA purchase | ✓ Good |
-| Dry-run bypasses idempotency | Allows repeated safe testing without interference | ✓ Good |
+| Pure static MultiplierCalculator | Zero dependencies enables reuse in backtest without DI coupling | ✓ Good |
+| Direct HttpClient for CoinGecko | Better control than CoinGecko.Net library, matches existing patterns | ✓ Good |
+| Bounded Channel queue for ingestion | Single-job enforcement with DropWrite, simple and explicit | ✓ Good |
+| BulkExtensions for data import | Efficient bulk upsert with composite key handling | ✓ Good |
+| Walk-forward 70/30 split | Industry standard for overfitting detection in parameter optimization | ✓ Good |
+| Safety cap on sweep combinations | Prevents runaway computation (default 1000, max 10000) | ✓ Good |
 
 ---
-*Last updated: 2026-02-12 after v1.1 milestone start*
+*Last updated: 2026-02-13 after v1.1 milestone*

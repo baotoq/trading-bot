@@ -27,3 +27,33 @@
 **What's next:** Testing against Hyperliquid testnet, potential multi-asset support or backtesting
 
 ---
+
+## v1.1 Backtesting Engine (Shipped: 2026-02-13)
+
+**Delivered:** Historical backtesting engine that simulates DCA strategies against 2-4 years of BTC price data, with parameter sweeps and walk-forward validation to find optimal multiplier configurations.
+
+**Phases completed:** 5-8 (7 plans total)
+
+**Key accomplishments:**
+
+- Pure static MultiplierCalculator with additive bear boost, 24 unit tests, and golden snapshot baseline
+- Day-by-day BacktestSimulator with smart DCA vs fixed DCA comparison, max drawdown, and tier breakdown (28 tests)
+- CoinGecko historical data pipeline with chunked 90-day fetching, bulk upsert, gap detection, and incremental ingestion
+- Backtest and data pipeline API endpoints with async job pattern and config defaults from production DcaOptions
+- Parameter sweep service with cartesian product generation, parallel execution, ranked results, and preset configurations
+- Walk-forward validation with 70/30 train/test split and overfitting detection
+
+**Stats:**
+
+- 69 files created/modified
+- 3,509 lines of C# added
+- 4 phases, 7 plans, 37 commits
+- 1 day from start to ship (2026-02-13)
+- 53 tests passing (24 MultiplierCalculator + 28 BacktestSimulator + 1 existing)
+
+**Git range:** `cf066b8` → `6b2a350`
+
+**What's next:** Run backtests against real data, optimize multiplier parameters, potential advanced analytics or web dashboard
+
+---
+
