@@ -13,25 +13,26 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 
 ## Current Position
 
-Phase: 5 of 8 (MultiplierCalculator Extraction)
-Plan: 1 of 1 in current phase
-Status: Phase complete
-Last activity: 2026-02-13T03:13:44Z -- Completed 05-01-PLAN.md
+Phase: 6 of 8 (Backtest Simulation Engine)
+Plan: 2 of 2 in current phase
+Status: In progress
+Last activity: 2026-02-13T05:02:18Z -- Completed 06-01-PLAN.md
 
 Progress: ████████░░ 12.5% (1/8 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v1.1)
-- Average duration: 8 minutes
-- Total execution time: 8 minutes
+- Total plans completed: 2 (v1.1)
+- Average duration: 5.5 minutes
+- Total execution time: 11 minutes
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 05-multiplier-calculator-extraction | 1 | 8m | 8m |
+| 06-backtest-simulation-engine | 1 | 3m | 3m |
 
 ## Accumulated Context
 
@@ -40,6 +41,9 @@ Progress: ████████░░ 12.5% (1/8 phases complete)
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [06-01]: Sliding windows computed in-loop (not pre-computed) for clarity and memory efficiency
+- [06-01]: Warmup strategy: 30-day high uses partial window, MA200 returns 0 during warmup (conservative: no bear detection)
+- [06-01]: MultiplierTierConfig separate from Configuration.MultiplierTier to avoid coupling backtest DTOs to mutable configuration classes
 - [05-01]: Use ADDITIVE bear boost instead of MULTIPLICATIVE (tierMultiplier + bearBoost, not tierMultiplier * bearBoost) -- makes bear impact more predictable
 - [05-01]: Extract to pure static class with zero dependencies -- enables backtest reuse without infrastructure coupling
 - [v1.1 Roadmap]: MultiplierCalculator extraction is the only production code change -- all other backtest code lives in separate namespace
@@ -62,9 +66,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-13T03:13:44Z
-Stopped at: Completed 05-01-PLAN.md (MultiplierCalculator extraction)
-Resume file: .planning/phases/05-multiplier-calculator-extraction/05-01-SUMMARY.md
+Last session: 2026-02-13T05:02:18Z
+Stopped at: Completed 06-01-PLAN.md (BacktestSimulator core)
+Resume file: .planning/phases/06-backtest-simulation-engine/06-01-SUMMARY.md
 
 ---
-*State updated: 2026-02-13T03:13:44Z after completing Phase 5 Plan 01*
+*State updated: 2026-02-13T05:02:18Z after completing Phase 06 Plan 01*
