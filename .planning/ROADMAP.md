@@ -16,7 +16,7 @@
 - Decimal phases (e.g., 6.1): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 5: MultiplierCalculator Extraction** - Extract pure calculation logic from production DCA service for backtest reuse (completed 2026-02-13)
-- [ ] **Phase 6: Backtest Simulation Engine** - Day-by-day DCA simulation with metrics and fixed-DCA comparison
+- [x] **Phase 6: Backtest Simulation Engine** - Day-by-day DCA simulation with metrics and fixed-DCA comparison (completed 2026-02-13)
 - [ ] **Phase 7: Historical Data Pipeline** - CoinGecko ingestion, gap detection, and data status API
 - [ ] **Phase 8: API Endpoints & Parameter Sweep** - Backtest and sweep endpoints with walk-forward validation
 
@@ -50,8 +50,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- BacktestSimulator TDD: DTOs, core simulation loop (smart DCA + same-base + match-total), sliding windows, and foundational tests
-- [ ] 06-02-PLAN.md -- BacktestSimulator TDD: max drawdown, tier breakdown verification, comparison metrics, edge cases, and golden snapshot baseline
+- [x] 06-01-PLAN.md -- BacktestSimulator TDD: DTOs, core simulation loop (smart DCA + same-base + match-total), sliding windows, and foundational tests
+- [x] 06-02-PLAN.md -- BacktestSimulator TDD: max drawdown, tier breakdown verification, comparison metrics, edge cases, and golden snapshot baseline
 
 ### Phase 7: Historical Data Pipeline
 
@@ -104,9 +104,9 @@ Phases 6 and 7 are independent of each other and can be built in parallel after 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 5. MultiplierCalculator Extraction | v1.1 | 1/1 | ✓ Complete | 2026-02-13 |
-| 6. Backtest Simulation Engine | v1.1 | 0/2 | Not started | - |
+| 6. Backtest Simulation Engine | v1.1 | 2/2 | ✓ Complete | 2026-02-13 |
 | 7. Historical Data Pipeline | v1.1 | 0/2 | Not started | - |
 | 8. API Endpoints & Parameter Sweep | v1.1 | 0/3 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after Phase 5 execution complete*
+*Roadmap updated: 2026-02-13 after Phase 6 execution complete*
