@@ -39,7 +39,7 @@ public class MultiplierCalculatorTests
     {
         // Arrange
         const decimal high30Day = 100000m;
-        const decimal ma200Day = 200000m; // Above price, so no bear market
+        const decimal ma200Day = 40000m; // Below all test prices, so no bear market
 
         // Act
         var result = MultiplierCalculator.Calculate(
@@ -113,7 +113,7 @@ public class MultiplierCalculatorTests
         // Arrange - scenario where uncapped would be 4.5 but cap is 3.0
         const decimal currentPrice = 75000m; // 25% drop
         const decimal high30Day = 100000m;
-        const decimal ma200Day = 50000m; // Bear market (75000 > 50000, so bear applies)
+        const decimal ma200Day = 80000m; // Bear market (75000 < 80000)
         const decimal maxCap = 3.0m; // Lower cap
         // Without cap: 3.0 (tier) + 1.5 (bear) = 4.5, with cap = 3.0
 
@@ -143,7 +143,7 @@ public class MultiplierCalculatorTests
     public void Calculate_Ma200DayZero_TreatsAsNonBearMarket()
     {
         // Arrange
-        const decimal currentPrice = 80000m; // Would be bear if ma200Day was valid
+        const decimal currentPrice = 90000m; // 10% drop - would be bear if ma200Day was valid
         const decimal high30Day = 100000m;
         const decimal ma200Day = 0m; // Invalid MA200
 
@@ -170,7 +170,7 @@ public class MultiplierCalculatorTests
         // Arrange
         const decimal currentPrice = 80000m;
         const decimal high30Day = 0m; // Invalid high
-        const decimal ma200Day = 90000m;
+        const decimal ma200Day = 70000m; // Below current price, no bear market
 
         // Act
         var result = MultiplierCalculator.Calculate(
@@ -195,7 +195,7 @@ public class MultiplierCalculatorTests
         // Arrange
         const decimal currentPrice = 80000m;
         const decimal high30Day = 100000m;
-        const decimal ma200Day = 200000m;
+        const decimal ma200Day = 50000m; // Below current price, no bear market
         var emptyTiers = new List<MultiplierTier>().AsReadOnly();
 
         // Act
@@ -217,10 +217,10 @@ public class MultiplierCalculatorTests
     [Fact]
     public void Calculate_NegativeDrop_ReturnsBaseMultiplier()
     {
-        // Arrange - current price above 30-day high
+        // Arrange - current price above 30-day high (new high, no bear market)
         const decimal currentPrice = 110000m;
         const decimal high30Day = 100000m;
-        const decimal ma200Day = 200000m;
+        const decimal ma200Day = 90000m; // Below current price, no bear market
 
         // Act
         var result = MultiplierCalculator.Calculate(

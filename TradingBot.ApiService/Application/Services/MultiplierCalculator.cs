@@ -17,16 +17,52 @@ public static class MultiplierCalculator
         decimal bearBoostFactor,
         decimal maxCap)
     {
-        // Stub implementation - returns wrong values to ensure RED phase
+        // Calculate drop percentage from 30-day high
+        decimal dropPercentage = 0m;
+        if (high30Day > 0)
+        {
+            dropPercentage = (high30Day - currentPrice) / high30Day * 100m;
+        }
+
+        // Find matching tier (descending order, first match wins)
+        decimal tierMultiplier = 1.0m;
+        string tier = "Base";
+
+        if (high30Day > 0 && tiers.Count > 0)
+        {
+            var matchedTier = tiers
+                .OrderByDescending(t => t.DropPercentage)
+                .FirstOrDefault(t => dropPercentage >= t.DropPercentage);
+
+            if (matchedTier != null)
+            {
+                tierMultiplier = matchedTier.Multiplier;
+                tier = $">= {matchedTier.DropPercentage}%";
+            }
+        }
+
+        // Detect bear market
+        bool isBearMarket = ma200Day > 0 && currentPrice < ma200Day;
+        decimal bearBoostApplied = isBearMarket ? bearBoostFactor : 0m;
+
+        // ADDITIVE bear boost (NOT multiplicative - this is the key change from old code)
+        decimal uncappedMultiplier = tierMultiplier + bearBoostApplied;
+
+        // Apply max cap
+        decimal finalMultiplier = Math.Min(uncappedMultiplier, maxCap);
+
+        // Calculate final amount
+        decimal finalAmount = baseAmount * finalMultiplier;
+
         return new MultiplierResult(
-            Multiplier: 0m,
-            Tier: "",
-            IsBearMarket: false,
-            BearBoostApplied: 0m,
-            DropPercentage: 0m,
-            High30Day: 0m,
-            Ma200Day: 0m,
-            FinalAmount: 0m);
+            Multiplier: finalMultiplier,
+            Tier: tier,
+            IsBearMarket: isBearMarket,
+            BearBoostApplied: bearBoostApplied,
+            DropPercentage: dropPercentage,
+            High30Day: high30Day,
+            Ma200Day: ma200Day,
+            FinalAmount: finalAmount);
     }
 }
 
