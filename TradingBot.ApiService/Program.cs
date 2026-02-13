@@ -6,8 +6,11 @@ using Serilog.Templates.Themes;
 using TradingBot.ApiService.Application.BackgroundJobs;
 using TradingBot.ApiService.Application.Health;
 using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.Application.Services.HistoricalData;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
 using TradingBot.ApiService.Configuration;
+using TradingBot.ApiService.Endpoints;
+using TradingBot.ApiService.Infrastructure.CoinGecko;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Locking;
@@ -92,6 +95,15 @@ try
     // Missed purchase verification (runs every 30 minutes)
     builder.Services.AddHostedService<MissedPurchaseVerificationService>();
 
+    // CoinGecko API client for historical price data
+    builder.Services.AddCoinGecko(builder.Configuration);
+
+    // Historical data pipeline
+    builder.Services.AddSingleton<IngestionJobQueue>();
+    builder.Services.AddScoped<GapDetectionService>();
+    builder.Services.AddScoped<DataIngestionService>();
+    builder.Services.AddHostedService<DataIngestionBackgroundService>();
+
     // Health checks
     builder.Services.AddHealthChecks()
         .AddCheck<DcaHealthCheck>("dca-service");
@@ -122,6 +134,7 @@ try
     app.MapPubSub();
 
     app.MapDefaultEndpoints();
+    app.MapDataEndpoints();
 
     await app.RunAsync();
 
