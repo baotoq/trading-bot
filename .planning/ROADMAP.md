@@ -31,10 +31,10 @@
   1. MultiplierCalculator is a pure static class that computes multiplier from (currentPrice, high30Day, ma200Day, tiers, bearBoost, maxCap) without any async calls, DI, or database access
   2. DcaExecutionService delegates to MultiplierCalculator and produces identical behavior to pre-extraction code
   3. Unit tests verify MultiplierCalculator against known input/output pairs for each tier and bear boost combination
-**Plans:** TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 05-01: MultiplierCalculator extraction and regression tests
+- [ ] 05-01-PLAN.md -- MultiplierCalculator TDD extraction with additive bear boost and regression tests
 
 ### Phase 6: Backtest Simulation Engine
 
