@@ -32,7 +32,7 @@
 
 **Milestone Goal:** Visual dashboard for monitoring portfolio, viewing purchase history, running backtests, managing configuration, and tracking live bot status.
 
-- [ ] **Phase 9: Infrastructure & Aspire Integration** - Nuxt project setup and orchestration
+- [x] **Phase 9: Infrastructure & Aspire Integration** - Nuxt project setup and orchestration -- completed 2026-02-13
 - [ ] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status
 - [ ] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison
 - [ ] **Phase 12: Configuration Management** - Editable config with server validation
@@ -56,8 +56,8 @@
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Nuxt 4 project creation + Aspire orchestration
-- [ ] 09-02-PLAN.md — API proxy + API key authentication
+- [x] 09-01-PLAN.md — Nuxt 4 project creation + Aspire orchestration
+- [x] 09-02-PLAN.md — API proxy + API key authentication
 
 ### Phase 10: Dashboard Core
 
@@ -138,10 +138,10 @@ Plans:
 | 6. Backtest Simulation Engine | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 7. Historical Data Pipeline | v1.1 | 2/2 | Complete | 2026-02-13 |
 | 8. API Endpoints & Parameter Sweep | v1.1 | 2/2 | Complete | 2026-02-13 |
-| 9. Infrastructure & Aspire Integration | v1.2 | 0/2 | Planned | - |
+| 9. Infrastructure & Aspire Integration | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 10. Dashboard Core | v1.2 | 0/TBD | Not started | - |
 | 11. Backtest Visualization | v1.2 | 0/TBD | Not started | - |
 | 12. Configuration Management | v1.2 | 0/TBD | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after v1.2 milestone start*
+*Roadmap updated: 2026-02-13 after Phase 9 completion*
