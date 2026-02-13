@@ -1,4 +1,5 @@
 using FluentAssertions;
+using Snapper;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Services.Backtest;
 
@@ -34,6 +35,37 @@ public class BacktestSimulatorTests
             Low: close * 0.99m,
             Close: close,
             Volume: 100m
+        )).ToList();
+    }
+
+    private static IReadOnlyList<DailyPriceData> CreateRealisticPriceData()
+    {
+        var prices = new List<decimal>();
+        var startDate = new DateOnly(2024, 1, 1);
+
+        // Days 1-15: 60000 -> 58000 (slight decline, minor tier triggers)
+        for (int i = 0; i < 15; i++)
+            prices.Add(60000m - i * 133.33m);
+
+        // Days 16-30: 58000 -> 48000 (bear market, 20%+ tier triggers)
+        for (int i = 0; i < 15; i++)
+            prices.Add(58000m - i * 666.67m);
+
+        // Days 31-45: 48000 -> 52000 (recovery)
+        for (int i = 0; i < 15; i++)
+            prices.Add(48000m + i * 266.67m);
+
+        // Days 46-60: 52000 -> 65000 (bull run)
+        for (int i = 0; i < 15; i++)
+            prices.Add(52000m + i * 866.67m);
+
+        return prices.Select((close, index) => new DailyPriceData(
+            Date: startDate.AddDays(index),
+            Open: close,
+            High: close * 1.01m,
+            Low: close * 0.99m,
+            Close: close,
+            Volume: 100m + index * 10m
         )).ToList();
     }
 
@@ -523,6 +555,25 @@ public class BacktestSimulatorTests
         // Act & Assert
         var act = () => BacktestSimulator.Run(config, null!);
         act.Should().Throw<ArgumentNullException>();
+    }
+
+    #endregion
+
+    #region Golden Snapshot Test
+
+    [Fact]
+    public void Run_GoldenScenario_MatchSnapshot()
+    {
+        // Arrange: 60 days of realistic price movement
+        // Start at 60000, dip to 48000 (bear + tier triggers), recover to 65000
+        var config = CreateStandardConfig();
+        var priceData = CreateRealisticPriceData();
+
+        // Act
+        var result = BacktestSimulator.Run(config, priceData);
+
+        // Assert: snapshot captures full result structure for regression detection
+        result.ShouldMatchSnapshot();
     }
 
     #endregion

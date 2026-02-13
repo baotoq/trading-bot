@@ -185,20 +185,28 @@ public static class BacktestSimulator
         // Calculate metrics for each strategy
         decimal finalPrice = priceData[^1].Close;
 
+        // Calculate max drawdown for each strategy using the accumulated data
+        var smartMaxDrawdown = CalculateMaxDrawdown(smartData, priceData);
+        var sameBaseMaxDrawdown = CalculateMaxDrawdown(sameBaseData, priceData);
+        var matchTotalMaxDrawdown = CalculateMaxDrawdown(matchTotalData, priceData);
+
         var smartMetrics = CalculateMetrics(
             smartCumulativeUsd,
             smartCumulativeBtc,
-            finalPrice);
+            finalPrice,
+            smartMaxDrawdown);
 
         var sameBaseMetrics = CalculateMetrics(
             sameBaseCumulativeUsd,
             sameBaseCumulativeBtc,
-            finalPrice);
+            finalPrice,
+            sameBaseMaxDrawdown);
 
         var matchTotalMetrics = CalculateMetrics(
             matchTotalCumulativeUsd,
             matchTotalCumulativeBtc,
-            finalPrice);
+            finalPrice,
+            matchTotalMaxDrawdown);
 
         // Calculate comparison metrics
         var comparison = new ComparisonMetrics(
@@ -237,7 +245,8 @@ public static class BacktestSimulator
     private static DcaMetrics CalculateMetrics(
         decimal totalInvested,
         decimal totalBtc,
-        decimal finalPrice)
+        decimal finalPrice,
+        decimal maxDrawdown)
     {
         decimal avgCostBasis = totalBtc > 0 ? totalInvested / totalBtc : 0m;
         decimal portfolioValue = totalBtc * finalPrice;
@@ -251,7 +260,40 @@ public static class BacktestSimulator
             AvgCostBasis: avgCostBasis,
             PortfolioValue: portfolioValue,
             ReturnPercent: returnPercent,
-            MaxDrawdown: 0m); // Placeholder - will be implemented in Plan 02
+            MaxDrawdown: maxDrawdown);
+    }
+
+    /// <summary>
+    /// Calculates maximum drawdown as the worst unrealized loss from peak PnL relative to total invested.
+    /// </summary>
+    /// <param name="data">Day-by-day data with cumulative USD and BTC.</param>
+    /// <param name="priceData">Price data for portfolio valuation.</param>
+    /// <returns>Maximum drawdown as a positive percentage (0 if no drawdown occurred).</returns>
+    private static decimal CalculateMaxDrawdown(IReadOnlyList<DayData> data, IReadOnlyList<DailyPriceData> priceData)
+    {
+        decimal maxDrawdown = 0m;
+        decimal peakUnrealizedPnL = 0m;
+
+        for (int i = 0; i < data.Count; i++)
+        {
+            var day = data[i];
+            var portfolioValue = day.CumulativeBtc * priceData[i].Close;
+            var unrealizedPnL = portfolioValue - day.CumulativeUsd;
+
+            // Track peak unrealized PnL
+            if (unrealizedPnL > peakUnrealizedPnL)
+                peakUnrealizedPnL = unrealizedPnL;
+
+            // Calculate drawdown from peak (only after we've had some profit)
+            if (peakUnrealizedPnL > 0 && day.CumulativeUsd > 0)
+            {
+                var drawdown = (unrealizedPnL - peakUnrealizedPnL) / day.CumulativeUsd * 100m;
+                if (drawdown < maxDrawdown)
+                    maxDrawdown = drawdown;
+            }
+        }
+
+        return Math.Abs(maxDrawdown); // Return as positive percentage
     }
 
     private record DayData(
