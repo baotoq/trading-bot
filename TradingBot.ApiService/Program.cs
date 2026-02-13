@@ -135,6 +135,7 @@ try
 
     app.MapDefaultEndpoints();
     app.MapDataEndpoints();
+    app.MapBacktestEndpoints();
 
     await app.RunAsync();
 
