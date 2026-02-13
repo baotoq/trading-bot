@@ -13,19 +13,19 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 
 ## Current Position
 
-Phase: 6 of 8 (Backtest Simulation Engine)
-Plan: Complete (2/2 plans finished)
-Status: Phase complete - ready for Phase 7
-Last activity: 2026-02-13T05:09:15Z -- Completed 06-02-PLAN.md
+Phase: 7 of 8 (Historical Data Pipeline)
+Plan: 1 of 2 (07-01 complete, 07-02 pending)
+Status: In progress - Phase 7
+Last activity: 2026-02-13T08:21:50Z -- Completed 07-01-PLAN.md
 
-Progress: ██████████████░░ 25% (2/8 phases complete)
+Progress: ████████████████░ 31% (2.5/8 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3 (v1.1)
-- Average duration: 4.7 minutes
-- Total execution time: 14 minutes
+- Total plans completed: 4 (v1.1)
+- Average duration: 4.8 minutes
+- Total execution time: 19 minutes
 
 **By Phase:**
 
@@ -33,6 +33,7 @@ Progress: ██████████████░░ 25% (2/8 phases compl
 |-------|-------|-------|----------|
 | 05-multiplier-calculator-extraction | 1 | 8m | 8m |
 | 06-backtest-simulation-engine | 2 | 6m | 3m |
+| 07-historical-data-pipeline | 1 | 5m | 5m |
 
 ## Accumulated Context
 
@@ -41,6 +42,10 @@ Progress: ██████████████░░ 25% (2/8 phases compl
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
+- [07-01]: Use direct HttpClient instead of CoinGecko.Net library for API calls (better control, avoids version conflicts)
+- [07-01]: Use bounded Channel<T> with capacity=1 and DropWrite mode for job queue (single-job enforcement)
+- [07-01]: Auto-fill gaps after bulk insert by fetching individual missing dates (maximize completeness without failing job)
+- [07-01]: Set Open=High=Low=Close to match free tier limitation (CoinGecko doesn't provide true OHLC on free tier)
 - [06-02]: Max drawdown calculated as peak-to-trough unrealized PnL relative to total invested (positive percentage)
 - [06-02]: Drawdown only calculated after achieving positive unrealized PnL (avoids spurious drawdowns during initial accumulation)
 - [06-02]: Golden snapshot uses 60 days of realistic price movement to exercise all tiers and market conditions
@@ -69,9 +74,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-13T05:09:15Z
-Stopped at: Completed 06-02-PLAN.md - Phase 6 complete
-Resume file: .planning/phases/06-backtest-simulation-engine/06-02-SUMMARY.md
+Last session: 2026-02-13T08:21:50Z
+Stopped at: Completed 07-01-PLAN.md
+Resume file: .planning/phases/07-historical-data-pipeline/07-01-SUMMARY.md
 
 ---
-*State updated: 2026-02-13T05:09:15Z after completing Phase 06 Plan 02 (Phase 6 complete)*
+*State updated: 2026-02-13T08:21:50Z after completing Phase 07 Plan 01*
