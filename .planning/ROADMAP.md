@@ -35,7 +35,7 @@
 - [x] **Phase 9: Infrastructure & Aspire Integration** - Nuxt project setup and orchestration -- completed 2026-02-13
 - [x] **Phase 9.1: Migrate Dashboard to Fresh Nuxt Setup** - Move API proxy & auth code to recreated Nuxt project (INSERTED) -- completed 2026-02-13
 - [x] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status -- completed 2026-02-13
-- [ ] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison
+- [x] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison -- completed 2026-02-14
 - [ ] **Phase 12: Configuration Management** - Editable config with server validation
 
 ## Phase Details
@@ -112,10 +112,10 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 11-01-PLAN.md -- Backend config endpoint, proxy routes, TypeScript types, composable
-- [ ] 11-02-PLAN.md -- BacktestForm, BacktestChart, BacktestMetrics, backtest page
-- [ ] 11-03-PLAN.md -- SweepForm, SweepResultsTable, tabbed page layout
-- [ ] 11-04-PLAN.md -- BacktestComparison with session storage, Add to Compare integration
+- [x] 11-01-PLAN.md -- Backend config endpoint, proxy routes, TypeScript types, composable
+- [x] 11-02-PLAN.md -- BacktestForm, BacktestChart, BacktestMetrics, backtest page
+- [x] 11-03-PLAN.md -- SweepForm, SweepResultsTable, tabbed page layout
+- [x] 11-04-PLAN.md -- BacktestComparison with session storage, Add to Compare integration
 
 ### Phase 12: Configuration Management
 
@@ -153,8 +153,8 @@ Plans:
 | 9. Infrastructure & Aspire Integration | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 9.1 Migrate Dashboard to Fresh Nuxt Setup | v1.2 | 1/1 | Complete | 2026-02-13 |
 | 10. Dashboard Core | v1.2 | 3/3 | Complete | 2026-02-13 |
-| 11. Backtest Visualization | v1.2 | 0/4 | Not started | - |
+| 11. Backtest Visualization | v1.2 | 4/4 | Complete | 2026-02-14 |
 | 12. Configuration Management | v1.2 | 0/TBD | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-13 after Phase 10 completion*
+*Roadmap updated: 2026-02-14 after Phase 11 completion*
