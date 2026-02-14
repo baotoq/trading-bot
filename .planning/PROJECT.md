@@ -47,7 +47,15 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 
 ### Active
 
-(None -- planning next milestone)
+<!-- v2.0 DDD Foundation -->
+- [ ] Rich aggregate roots with encapsulated behavior and invariant enforcement
+- [ ] Value objects for domain primitives (Money, Quantity, Price, Multiplier)
+- [ ] Domain event dispatch from aggregate roots (entity raises events, not services)
+- [ ] Domain-to-integration event bridge (domain events automatically produce integration events)
+- [ ] Strongly-typed IDs replacing raw Guid usage
+- [ ] Result pattern for explicit error handling in domain operations
+- [ ] Specification pattern for reusable query composition
+- [ ] Improved base entity hierarchy with aggregate root marker
 
 ### Out of Scope
 
@@ -63,6 +71,19 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Mobile app -- web dashboard is responsive, no native app needed
 - Real-time order book -- not relevant for DCA spot purchases
 - Manual buy/sell buttons -- bot is fully automated
+
+## Current Milestone: v2.0 DDD Foundation
+
+**Goal:** Upgrade building blocks and domain model to proper DDD tactical patterns — rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
+
+**Target features:**
+- Rich aggregate roots with behavior encapsulation
+- Value objects for domain primitives
+- Domain event dispatch from entities
+- Domain-to-integration event bridge
+- Strongly-typed IDs
+- Result pattern + Specification pattern
+- Improved base entity hierarchy
 
 ## Current State
 
@@ -135,4 +156,4 @@ Shipped v1.2 Web Dashboard (2026-02-14).
 | IOptionsMonitor cache invalidation | Immediate config effect after DB update without app restart | ✓ Good |
 
 ---
-*Last updated: 2026-02-14 after v1.2 milestone*
+*Last updated: 2026-02-14 after v2.0 milestone start*

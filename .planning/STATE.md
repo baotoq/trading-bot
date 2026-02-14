@@ -1,7 +1,7 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** (Planning next)
+**Milestone:** v2.0 DDD Foundation
 **Updated:** 2026-02-14
 
 ## Project Reference
@@ -9,13 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Planning next milestone
+**Current focus:** DDD tactical patterns — rich aggregates, value objects, event dispatch
 
 ## Current Position
 
-Phase: All complete through v1.2
-Status: Between milestones
-Last activity: 2026-02-14 -- Completed v1.2 Web Dashboard milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-14 — Milestone v2.0 started
 
 ## Milestones Shipped
 
@@ -47,7 +48,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Known Risks
 
-None.
+- Refactoring aggregate roots may require EF Core migration adjustments
+- Value objects need careful EF Core mapping (owned types or value conversions)
 
 ### Pending Todos
 
@@ -60,8 +62,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed v1.2 milestone archival
-Next step: /gsd:new-milestone for v1.3
+Stopped at: Starting v2.0 DDD Foundation milestone
+Next step: Research → Requirements → Roadmap
 
 ---
-*State updated: 2026-02-14 after v1.2 milestone completion*
+*State updated: 2026-02-14 after v2.0 milestone start*
