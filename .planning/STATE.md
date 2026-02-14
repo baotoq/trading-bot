@@ -14,11 +14,11 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Phase: 11 of 12 (Backtest Visualization)
-Plan: 1 complete
+Plan: 2 complete
 Status: In Progress
-Last activity: 2026-02-14 — Completed 11-01-PLAN.md (backtest API layer)
+Last activity: 2026-02-14 — Completed 11-02-PLAN.md (single backtest UI)
 
-Progress: [██████████░░░░░░░░] 55% (25 plans complete out of estimated 45 total plans)
+Progress: [██████████░░░░░░░░] 56% (26 plans complete out of estimated 45 total plans)
 
 ## Milestones Shipped
 
@@ -28,10 +28,10 @@ Progress: [██████████░░░░░░░░] 55% (25 plans
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
+- Total plans completed: 26
 - v1.0 completion time: 1 day (2026-02-12)
 - v1.1 completion time: 1 day (2026-02-13)
-- v1.2: In progress (6 plans complete)
+- v1.2: In progress (8 plans complete)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [██████████░░░░░░░░] 55% (25 plans
 |-----------|--------|-------|--------|
 | v1.0 | 1-4 | 11 | Complete |
 | v1.1 | 5-8 | 7 | Complete |
-| v1.2 | 9-12 | 6/TBD | In progress |
+| v1.2 | 9-12 | 8/TBD | In progress |
 
 **Recent Plan Metrics:**
 
@@ -52,6 +52,7 @@ Progress: [██████████░░░░░░░░] 55% (25 plans
 | 10 | 02 | 2 min | 2 | 11 |
 | 10 | 03 | 3 min | 2 | 8 |
 | 11 | 01 | 2 min | 2 | 7 |
+| 11 | 02 | 3 min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting v1.2:
 - [Phase 10-03]: Derive connection status from portfolioError/statusError states for single source of truth
 - [Phase 11-01]: Simulated progress bars (0-90% in 2s, jump to 100% on complete) for backtest UX
 - [Phase 11-01]: All date fields as strings in TypeScript (ISO format from backend)
+- [Phase 11-02]: Tier colors: Base=gray, Tier1=green, Tier2=blue, Tier3=purple, BearBoost=red
+- [Phase 11-02]: Purchase markers only for multiplied purchases (smartMultiplier > 1) to reduce visual clutter
+- [Phase 11-02]: Efficiency ratio as hero metric (prominently displayed in large card)
 
 ### Roadmap Evolution
 
@@ -95,8 +99,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 11-01-PLAN.md (backtest API layer)
-Next step: Continue Phase 11 - Backtest Visualization (plan 02: UI components)
+Stopped at: Completed 11-02-PLAN.md (single backtest UI)
+Next step: Continue Phase 11 - Backtest Visualization (plan 03: parameter sweep UI)
 
 ---
-*State updated: 2026-02-14 after completing 11-01-PLAN.md*
+*State updated: 2026-02-14 after completing 11-02-PLAN.md*
