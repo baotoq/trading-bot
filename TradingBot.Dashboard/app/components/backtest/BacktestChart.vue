@@ -1,27 +1,7 @@
 <template>
   <UCard>
     <template #header>
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Equity Curve</h2>
-
-        <!-- Y-axis toggle -->
-        <div class="flex gap-2">
-          <UButton
-            size="sm"
-            :variant="yAxisMode === 'usd' ? 'solid' : 'soft'"
-            @click="yAxisMode = 'usd'"
-          >
-            USD
-          </UButton>
-          <UButton
-            size="sm"
-            :variant="yAxisMode === 'btc' ? 'solid' : 'soft'"
-            @click="yAxisMode = 'btc'"
-          >
-            BTC
-          </UButton>
-        </div>
-      </div>
+      <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Equity Curve</h2>
     </template>
 
     <ClientOnly>
@@ -61,11 +41,10 @@ ChartJS.register(
 
 interface Props {
   result: BacktestResult | null
+  yAxisMode: 'usd' | 'btc'
 }
 
 const props = defineProps<Props>()
-
-const yAxisMode = ref<'usd' | 'btc'>('usd')
 
 // Tier color mapping
 const tierColors = {
@@ -88,11 +67,11 @@ const chartData = computed<ChartData<'line'>>(() => {
   const labels = props.result.purchaseLog.map(p => p.date)
 
   const smartData = props.result.purchaseLog.map(p =>
-    yAxisMode.value === 'usd' ? p.smartCumulativeUsd : p.smartCumulativeBtc
+    props.yAxisMode === 'usd' ? p.smartCumulativeUsd : p.smartCumulativeBtc
   )
 
   const fixedData = props.result.purchaseLog.map(p =>
-    yAxisMode.value === 'usd' ? p.fixedSameBaseCumulativeUsd : p.fixedSameBaseCumulativeBtc
+    props.yAxisMode === 'usd' ? p.fixedSameBaseCumulativeUsd : p.fixedSameBaseCumulativeBtc
   )
 
   const priceData = props.result.purchaseLog.map(p => p.price)
@@ -147,7 +126,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
   const multipliedPurchases = props.result.purchaseLog.filter(p => p.smartMultiplier > 1)
 
   multipliedPurchases.forEach((purchase, index) => {
-    const yValue = yAxisMode.value === 'usd'
+    const yValue = props.yAxisMode === 'usd'
       ? purchase.smartCumulativeUsd
       : purchase.smartCumulativeBtc
 
@@ -168,7 +147,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
     }
   })
 
-  const yAxisLabel = yAxisMode.value === 'usd' ? 'Portfolio Value' : 'BTC Accumulated'
+  const yAxisLabel = props.yAxisMode === 'usd' ? 'Portfolio Value' : 'BTC Accumulated'
 
   return {
     responsive: true,
@@ -193,7 +172,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
               return `${label}: $${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             }
 
-            if (yAxisMode.value === 'usd') {
+            if (props.yAxisMode === 'usd') {
               return `${label}: $${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
             } else {
               return `${label}: ${value.toFixed(4)} BTC`
@@ -216,7 +195,7 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
         },
         ticks: {
           callback: (value) => {
-            if (yAxisMode.value === 'usd') {
+            if (props.yAxisMode === 'usd') {
               return `$${Number(value).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
             } else {
               return Number(value).toFixed(4)
