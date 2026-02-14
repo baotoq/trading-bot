@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 11 - Backtest Visualization
+**Current focus:** Phase 12 - Configuration Management
 
 ## Current Position
 
-Phase: 11 of 12 (Backtest Visualization)
-Plan: 4 complete
-Status: Complete
-Last activity: 2026-02-14 — Completed 11-04-PLAN.md (backtest comparison panel)
+Phase: 12 of 12 (Configuration Management)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-14 — Completed 12-01-PLAN.md (backend configuration API)
 
-Progress: [███████████░░░░░░░] 62% (28 plans complete out of estimated 45 total plans)
+Progress: [███████████░░░░░░░] 64% (29 plans complete out of estimated 45 total plans)
 
 ## Milestones Shipped
 
@@ -28,10 +28,10 @@ Progress: [███████████░░░░░░░] 62% (28 plans
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 28
+- Total plans completed: 29
 - v1.0 completion time: 1 day (2026-02-12)
 - v1.1 completion time: 1 day (2026-02-13)
-- v1.2: In progress (10 plans complete)
+- v1.2: In progress (11 plans complete)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████░░░░░░░] 62% (28 plans
 |-----------|--------|-------|--------|
 | v1.0 | 1-4 | 11 | Complete |
 | v1.1 | 5-8 | 7 | Complete |
-| v1.2 | 9-12 | 10/TBD | In progress |
+| v1.2 | 9-12 | 11/TBD | In progress |
 
 **Recent Plan Metrics:**
 
@@ -55,6 +55,7 @@ Progress: [███████████░░░░░░░] 62% (28 plans
 | 11 | 02 | 3 min | 2 | 5 |
 | 11 | 03 | 3 min | 2 | 4 |
 | 11 | 04 | 2 min | 2 | 3 |
+| 12 | 01 | 4 min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -87,6 +88,10 @@ Recent decisions affecting v1.2:
 - [Phase 11-03]: Efficiency ratio default sort column descending (hero metric first)
 - [Phase 11-04]: Session storage for summary only, memory cache for purchaseLog to avoid quota issues
 - [Phase 11-04]: Best value highlighting in metrics table (bold green for optimal values per metric)
+- [Phase 12-01]: Singleton entity pattern with fixed GUID for DCA configuration (enforced via CHECK constraint)
+- [Phase 12-01]: JSONB storage for MultiplierTiers array (flexible schema without migrations)
+- [Phase 12-01]: IOptionsMonitor cache invalidation pattern for immediate config effect
+- [Phase 12-01]: Separate ConfigResponse and DcaConfigResponse DTOs (backward compatibility for backtest form)
 
 ### Roadmap Evolution
 
@@ -107,8 +112,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 11-04-PLAN.md (backtest comparison panel)
-Next step: Phase 11 complete — ready for Phase 12 (Dashboard Polish & Final Integration)
+Stopped at: Completed 12-01-PLAN.md (backend configuration API)
+Next step: Execute 12-02-PLAN.md (dashboard configuration management UI)
 
 ---
-*State updated: 2026-02-14 after completing 11-04-PLAN.md*
+*State updated: 2026-02-14 after completing 12-01-PLAN.md*
