@@ -52,3 +52,14 @@ public record PriceChartResponse(
 public record PricePointDto(string Date, decimal Price);
 
 public record PurchaseMarkerDto(string Date, decimal Price, decimal BtcAmount, string Tier);
+
+// DCA config for backtest form pre-fill
+public record DcaConfigResponse(
+    decimal BaseDailyAmount,
+    int HighLookbackDays,
+    int BearMarketMaPeriod,
+    decimal BearBoostFactor,
+    decimal MaxMultiplierCap,
+    List<MultiplierTierDto> Tiers);
+
+public record MultiplierTierDto(decimal DropPercentage, decimal Multiplier);

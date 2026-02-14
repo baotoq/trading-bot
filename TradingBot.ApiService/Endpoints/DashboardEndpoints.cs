@@ -15,6 +15,7 @@ public static class DashboardEndpoints
         group.MapGet("/purchases", GetPurchaseHistoryAsync);
         group.MapGet("/status", GetLiveStatusAsync);
         group.MapGet("/chart", GetPriceChartAsync);
+        group.MapGet("/config", GetConfigAsync);
 
         return app;
     }
@@ -247,6 +248,24 @@ public static class DashboardEndpoints
         );
 
         return Results.Ok(response);
+    }
+
+    private static Task<IResult> GetConfigAsync(
+        IOptionsMonitor<DcaOptions> dcaOptions)
+    {
+        var options = dcaOptions.CurrentValue;
+        var response = new DcaConfigResponse(
+            BaseDailyAmount: options.BaseDailyAmount,
+            HighLookbackDays: options.HighLookbackDays,
+            BearMarketMaPeriod: options.BearMarketMaPeriod,
+            BearBoostFactor: options.BearBoostFactor,
+            MaxMultiplierCap: options.MaxMultiplierCap,
+            Tiers: options.MultiplierTiers
+                .Select(t => new MultiplierTierDto(t.DropPercentage, t.Multiplier))
+                .ToList()
+        );
+
+        return Task.FromResult(Results.Ok(response));
     }
 }
 
