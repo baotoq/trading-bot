@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for simulating strategies against historical price data, parameter sweeps for finding optimal configurations, and walk-forward validation to prevent overfitting.
+A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Nuxt 4 web dashboard for portfolio monitoring, backtest visualization, and configuration management.
 
 ## Core Value
 
-The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically.
+The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically. The dashboard provides real-time visibility and control.
 
 ## Requirements
 
@@ -38,40 +38,41 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - ✓ Parameter sweep with cartesian product, parallel execution, and ranked results -- v1.1
 - ✓ Walk-forward validation with 70/30 train/test split and overfitting detection -- v1.1
 - ✓ Backtest API endpoints (single backtest, sweep, data ingestion, data status) -- v1.1
+- ✓ Nuxt 4 dashboard with Aspire orchestration, API key auth, server-to-server proxy -- v1.2
+- ✓ Portfolio overview with live BTC price, stats cards, interactive price chart -- v1.2
+- ✓ Purchase history with infinite scroll, cursor pagination, date/tier filtering -- v1.2
+- ✓ Backtest visualization with equity curves, parameter sweep, side-by-side comparison -- v1.2
+- ✓ DCA configuration management with server-validated forms and cache invalidation -- v1.2
+- ✓ Live bot status with health badge, countdown timer, connection indicators -- v1.2
 
 ### Active
 
-#### Current Milestone: v1.2 Web Dashboard
-
-**Goal:** Visual dashboard for monitoring portfolio, viewing purchase history, running backtests, managing configuration, and tracking live bot status.
-
-**Target features:**
-- Portfolio overview (total BTC, cost basis, current value, P&L)
-- Purchase history timeline with prices, multipliers, amounts
-- Backtest visualization with charts and parameter comparisons
-- Config management (edit DCA amount, schedule, multiplier tiers from UI)
-- Live status (current BTC price, next buy time, bot health)
+(None -- planning next milestone)
 
 ### Out of Scope
 
 - Selling/take-profit logic -- this is accumulation only
 - Futures/perps trading -- spot only
 - Multi-asset support -- BTC only for now
-- ~~Web dashboard~~ -- moved to Active for v1.2
 - Monthly spending caps -- daily amount + multipliers are the only controls
 - Monte Carlo simulation -- DCA is deterministic given price data
 - Slippage / fee modeling -- for small spot orders ($10-45/day), fees are <0.1%
 - Genetic algorithm / ML optimization -- grid search is sufficient for ~5 DCA parameters
 - Backtest result persistence -- compute-on-fly is cheaper; user re-runs as needed
+- Multi-user authentication -- single-user bot, API key auth is sufficient
+- Mobile app -- web dashboard is responsive, no native app needed
+- Real-time order book -- not relevant for DCA spot purchases
+- Manual buy/sell buttons -- bot is fully automated
 
 ## Current State
 
-Shipped v1.1 Backtesting Engine (2026-02-13).
+Shipped v1.2 Web Dashboard (2026-02-14).
 
 **Codebase:**
-- ~7,100 lines of C# across 8 phases (18 plans)
+- ~7,100 lines of C# (backend, 12 phases, 30 plans)
+- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard)
 - 53 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 1 existing)
-- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot
+- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot, Nuxt 4, @nuxt/ui v4, Tailwind CSS v4, Chart.js, VueUse
 
 **API Surface:**
 - POST /api/backtest -- single backtest with config overrides
@@ -80,10 +81,26 @@ Shipped v1.1 Backtesting Engine (2026-02-13).
 - GET /api/backtest/data/status -- check data coverage
 - GET /api/backtest/data/ingest/{jobId} -- poll ingestion job progress
 - GET /api/backtest/presets/{name} -- inspect sweep presets
+- GET /api/dashboard/portfolio -- portfolio stats with live price
+- GET /api/dashboard/purchases -- paginated purchase history
+- GET /api/dashboard/status -- bot health and next buy time
+- GET /api/dashboard/chart -- price chart with purchase markers
+- GET /api/dashboard/config -- DCA config for backtest pre-fill
+- GET /api/config -- full DCA configuration
+- PUT /api/config -- update DCA configuration with validation
+- GET /api/config/defaults -- appsettings.json default values
+
+**Dashboard Features:**
+- Portfolio overview (total BTC, cost, P&L, live price)
+- Interactive price chart (6 timeframes, purchase markers, avg cost line)
+- Purchase history (infinite scroll, cursor pagination, date/tier filters)
+- Backtest visualization (equity curves, metrics, parameter sweep, comparison)
+- Configuration management (view/edit, tiers table, server validation)
+- Live status (health badge, countdown timer, connection indicator)
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0 backend + Nuxt frontend -- must build on current foundation
+- **Tech Stack**: .NET 10.0 backend + Nuxt 4 frontend -- must build on current foundation
 - **Exchange**: Hyperliquid spot market only -- no other exchanges
 - **Asset**: BTC only -- single trading pair
 - **Direction**: Buy only -- no sell logic
@@ -108,7 +125,14 @@ Shipped v1.1 Backtesting Engine (2026-02-13).
 | BulkExtensions for data import | Efficient bulk upsert with composite key handling | ✓ Good |
 | Walk-forward 70/30 split | Industry standard for overfitting detection in parameter optimization | ✓ Good |
 | Safety cap on sweep combinations | Prevents runaway computation (default 1000, max 10000) | ✓ Good |
-| Nuxt for dashboard (not Blazor/Razor) | User preference, modern Vue ecosystem, SSR + SPA flexibility | — Pending |
+| Nuxt 4 for dashboard (not Blazor/Razor) | User preference, modern Vue ecosystem, SSR + SPA flexibility | ✓ Good |
+| Server-to-server auth (Nuxt → .NET) | API key stays on server, browser doesn't need credentials | ✓ Good |
+| /proxy/api/** prefix for CORS | Avoids Nuxt /api/** routing conflict, clean proxy pattern | ✓ Good |
+| Cursor-based pagination | Avoids drift from offset pagination, efficient for large datasets | ✓ Good |
+| vue-chartjs (not raw Chart.js) | Proper Vue lifecycle integration, automatic cleanup on unmount | ✓ Good |
+| Session storage for comparison | Survives refresh but not tab close, avoids localStorage quota issues | ✓ Good |
+| Singleton DcaConfiguration entity | Single-row constraint via CHECK, JSONB for tiers flexibility | ✓ Good |
+| IOptionsMonitor cache invalidation | Immediate config effect after DB update without app restart | ✓ Good |
 
 ---
-*Last updated: 2026-02-13 after v1.2 milestone start*
+*Last updated: 2026-02-14 after v1.2 milestone*

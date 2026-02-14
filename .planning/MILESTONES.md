@@ -57,3 +57,31 @@
 
 ---
 
+## v1.2 Web Dashboard (Shipped: 2026-02-14)
+
+**Delivered:** Full-featured web dashboard for monitoring portfolio, running backtests with visualization, and managing DCA configuration -- built with Nuxt 4, integrated into .NET Aspire orchestration.
+
+**Phases completed:** 9-12 (5 phases, 12 plans total)
+
+**Key accomplishments:**
+
+- Nuxt 4 web dashboard integrated into Aspire orchestration with API key authentication and server-to-server auth pattern
+- Portfolio overview with live BTC price (10s polling), stats cards, and interactive price chart with 6 timeframe presets
+- Purchase history with infinite scroll, cursor pagination, date/tier filtering, and chart purchase markers
+- Backtest visualization with equity curves, metrics KPIs, parameter sweep tables, and side-by-side comparison (up to 3 configs)
+- DCA configuration management with server-validated edit forms, multiplier tier editor, and IOptionsMonitor cache invalidation
+- Live bot status monitoring with health badge, countdown timer, and connection indicators
+
+**Stats:**
+
+- 511 files created/modified
+- 4,141 lines of TypeScript/Vue/CSS (TradingBot.Dashboard)
+- 5 phases, 12 plans, 23 feature commits
+- 2 days from start to ship (2026-02-13 → 2026-02-14)
+- 53 tests passing (unchanged from v1.1)
+
+**Git range:** `3309fcf` → `23918f4`
+
+**What's next:** Runtime testing, advanced analytics, notifications, CSV export
+
+---
