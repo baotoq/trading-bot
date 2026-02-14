@@ -63,3 +63,26 @@ public record DcaConfigResponse(
     List<MultiplierTierDto> Tiers);
 
 public record MultiplierTierDto(decimal DropPercentage, decimal Multiplier);
+
+// Configuration management (full config with all fields)
+public record ConfigResponse(
+    decimal BaseDailyAmount,
+    int DailyBuyHour,
+    int DailyBuyMinute,
+    int HighLookbackDays,
+    bool DryRun,
+    int BearMarketMaPeriod,
+    decimal BearBoostFactor,
+    decimal MaxMultiplierCap,
+    List<MultiplierTierDto> Tiers);
+
+public record UpdateConfigRequest(
+    decimal BaseDailyAmount,
+    int DailyBuyHour,
+    int DailyBuyMinute,
+    int HighLookbackDays,
+    bool DryRun,
+    int BearMarketMaPeriod,
+    decimal BearBoostFactor,
+    decimal MaxMultiplierCap,
+    List<MultiplierTierDto> Tiers);

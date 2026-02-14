@@ -84,6 +84,9 @@ try
     // Price data service (scoped — uses DbContext)
     builder.Services.AddScoped<IPriceDataService, PriceDataService>();
 
+    // Configuration service (scoped — uses DbContext)
+    builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
+
     // DCA scheduler (runs daily at configured time)
     builder.Services.AddHostedService<DcaSchedulerBackgroundService>();
 
@@ -141,6 +144,7 @@ try
     app.MapDataEndpoints();
     app.MapBacktestEndpoints();
     app.MapDashboardEndpoints();
+    app.MapConfigurationEndpoints();
 
     await app.RunAsync();
 
