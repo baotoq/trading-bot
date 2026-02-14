@@ -33,24 +33,37 @@
       </header>
 
       <!-- Main content -->
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <!-- Section 1: Portfolio Stats -->
-        <DashboardPortfolioStats
-          :portfolio="portfolio"
-          :pending="portfolioPending"
-        />
+      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tabs -->
+        <UTabs :items="tabs">
+          <template #dashboard>
+            <div class="space-y-8 pt-6">
+              <!-- Section 1: Portfolio Stats -->
+              <DashboardPortfolioStats
+                :portfolio="portfolio"
+                :pending="portfolioPending"
+              />
 
-        <!-- Section 2: Price Chart -->
-        <DashboardPriceChart />
+              <!-- Section 2: Price Chart -->
+              <DashboardPriceChart />
 
-        <!-- Section 3: Live Status -->
-        <DashboardLiveStatus
-          :status="status"
-          :pending="statusPending"
-        />
+              <!-- Section 3: Live Status -->
+              <DashboardLiveStatus
+                :status="status"
+                :pending="statusPending"
+              />
 
-        <!-- Section 4: Purchase History -->
-        <DashboardPurchaseHistory />
+              <!-- Section 4: Purchase History -->
+              <DashboardPurchaseHistory />
+            </div>
+          </template>
+
+          <template #config>
+            <div class="pt-6">
+              <ConfigPanel />
+            </div>
+          </template>
+        </UTabs>
       </main>
     </div>
   </UApp>
@@ -58,6 +71,20 @@
 
 <script setup lang="ts">
 const { portfolio, status, portfolioPending, statusPending, portfolioError, statusError } = useDashboard()
+
+// Tab items
+const tabs = [
+  {
+    key: 'dashboard',
+    label: 'Dashboard',
+    slot: 'dashboard'
+  },
+  {
+    key: 'config',
+    label: 'Configuration',
+    slot: 'config'
+  }
+]
 
 // Connection status derived from data fetch state
 const connectionState = computed(() => {
