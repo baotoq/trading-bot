@@ -2,23 +2,23 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v1.2 Web Dashboard
-**Updated:** 2026-02-13
+**Updated:** 2026-02-14
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 10 - Dashboard Core (Complete)
+**Current focus:** Phase 11 - Backtest Visualization
 
 ## Current Position
 
-Phase: 10 of 12 (Dashboard Core)
-Plan: 3 of 3 complete
-Status: Complete
-Last activity: 2026-02-13 — Completed Phase 10: Dashboard Core (all 3 plans + gap fixes)
+Phase: 11 of 12 (Backtest Visualization)
+Plan: 1 complete
+Status: In Progress
+Last activity: 2026-02-14 — Completed 11-01-PLAN.md (backtest API layer)
 
-Progress: [█████████░░░░░░░░░] 53% (24 plans complete out of estimated 45 total plans)
+Progress: [██████████░░░░░░░░] 55% (25 plans complete out of estimated 45 total plans)
 
 ## Milestones Shipped
 
@@ -51,6 +51,7 @@ Progress: [█████████░░░░░░░░░] 53% (24 plans
 | 10 | 01 | 1 min | 1 | 2 |
 | 10 | 02 | 2 min | 2 | 11 |
 | 10 | 03 | 3 min | 2 | 8 |
+| 11 | 01 | 2 min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting v1.2:
 - [Phase 10-01]: Calculate average cost basis from all purchases for consistent chart baseline
 - [Phase 10-03]: Use vue-chartjs Line component (not raw Chart.js) for proper Vue lifecycle integration
 - [Phase 10-03]: Derive connection status from portfolioError/statusError states for single source of truth
+- [Phase 11-01]: Simulated progress bars (0-90% in 2s, jump to 100% on complete) for backtest UX
+- [Phase 11-01]: All date fields as strings in TypeScript (ISO format from backend)
 
 ### Roadmap Evolution
 
@@ -91,9 +94,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-13
-Stopped at: Completed Phase 10 - Dashboard Core (3 plans + verification gap fixes)
-Next step: Phase 11 - Backtest Visualization
+Last session: 2026-02-14
+Stopped at: Completed 11-01-PLAN.md (backtest API layer)
+Next step: Continue Phase 11 - Backtest Visualization (plan 02: UI components)
 
 ---
-*State updated: 2026-02-13 after Phase 10 completion*
+*State updated: 2026-02-14 after completing 11-01-PLAN.md*
