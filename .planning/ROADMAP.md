@@ -109,11 +109,13 @@ Plans:
 5. User can run parameter sweep and view ranked results sorted by efficiency or return
 6. User can compare multiple backtest configurations side-by-side with visual overlays
 
-**Plans:** TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 11-01: TBD
-- [ ] 11-02: TBD
+- [ ] 11-01-PLAN.md -- Backend config endpoint, proxy routes, TypeScript types, composable
+- [ ] 11-02-PLAN.md -- BacktestForm, BacktestChart, BacktestMetrics, backtest page
+- [ ] 11-03-PLAN.md -- SweepForm, SweepResultsTable, tabbed page layout
+- [ ] 11-04-PLAN.md -- BacktestComparison with session storage, Add to Compare integration
 
 ### Phase 12: Configuration Management
 
@@ -151,7 +153,7 @@ Plans:
 | 9. Infrastructure & Aspire Integration | v1.2 | 2/2 | Complete | 2026-02-13 |
 | 9.1 Migrate Dashboard to Fresh Nuxt Setup | v1.2 | 1/1 | Complete | 2026-02-13 |
 | 10. Dashboard Core | v1.2 | 3/3 | Complete | 2026-02-13 |
-| 11. Backtest Visualization | v1.2 | 0/TBD | Not started | - |
+| 11. Backtest Visualization | v1.2 | 0/4 | Not started | - |
 | 12. Configuration Management | v1.2 | 0/TBD | Not started | - |
 
 ---
