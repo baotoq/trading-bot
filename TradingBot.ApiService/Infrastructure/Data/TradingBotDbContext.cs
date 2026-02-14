@@ -8,6 +8,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<DailyPrice> DailyPrices => Set<DailyPrice>();
     public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
+    public DbSet<DcaConfiguration> DcaConfigurations => Set<DcaConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -98,6 +99,26 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
 
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.CreatedAt);
+        });
+
+        modelBuilder.Entity<DcaConfiguration>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.BaseDailyAmount)
+                .HasPrecision(18, 2);
+
+            entity.Property(e => e.BearBoostFactor)
+                .HasPrecision(4, 2);
+
+            entity.Property(e => e.MaxMultiplierCap)
+                .HasPrecision(4, 2);
+
+            entity.Property(e => e.MultiplierTiers)
+                .HasColumnType("jsonb");
+
+            // Enforce single-row constraint
+            entity.ToTable(t => t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid"));
         });
     }
 }
