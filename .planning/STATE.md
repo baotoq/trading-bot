@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 12 - Configuration Management
+**Current focus:** Phase 12 - Configuration Management (Complete)
 
 ## Current Position
 
 Phase: 12 of 12 (Configuration Management)
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-02-14 — Completed 12-01-PLAN.md (backend configuration API)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-02-14 — Completed 12-02-PLAN.md (frontend configuration management UI)
 
-Progress: [███████████░░░░░░░] 64% (29 plans complete out of estimated 45 total plans)
+Progress: [██████████████████] 100% (30 plans complete out of 30 total plans)
 
 ## Milestones Shipped
 
@@ -28,10 +28,10 @@ Progress: [███████████░░░░░░░] 64% (29 plans
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 29
+- Total plans completed: 30
 - v1.0 completion time: 1 day (2026-02-12)
 - v1.1 completion time: 1 day (2026-02-13)
-- v1.2: In progress (11 plans complete)
+- v1.2: In progress (12 plans complete)
 
 **By Milestone:**
 
@@ -39,7 +39,7 @@ Progress: [███████████░░░░░░░] 64% (29 plans
 |-----------|--------|-------|--------|
 | v1.0 | 1-4 | 11 | Complete |
 | v1.1 | 5-8 | 7 | Complete |
-| v1.2 | 9-12 | 11/TBD | In progress |
+| v1.2 | 9-12 | 12/12 | In progress |
 
 **Recent Plan Metrics:**
 
@@ -56,6 +56,7 @@ Progress: [███████████░░░░░░░] 64% (29 plans
 | 11 | 03 | 3 min | 2 | 4 |
 | 11 | 04 | 2 min | 2 | 3 |
 | 12 | 01 | 4 min | 2 | 7 |
+| 12 | 02 | 4 min | 2 | 9 |
 
 ## Accumulated Context
 
@@ -92,6 +93,10 @@ Recent decisions affecting v1.2:
 - [Phase 12-01]: JSONB storage for MultiplierTiers array (flexible schema without migrations)
 - [Phase 12-01]: IOptionsMonitor cache invalidation pattern for immediate config effect
 - [Phase 12-01]: Separate ConfigResponse and DcaConfigResponse DTOs (backward compatibility for backtest form)
+- [Phase 12-02]: Zod for frontend validation matching DcaOptionsValidator rules
+- [Phase 12-02]: View/edit toggle pattern (read-only default, Edit button enables fields)
+- [Phase 12-02]: Confirmation dialog for critical fields (BaseDailyAmount, schedule, DryRun)
+- [Phase 12-02]: Config always fetched fresh from server (no session storage needed)
 
 ### Roadmap Evolution
 
@@ -112,8 +117,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Completed 12-01-PLAN.md (backend configuration API)
-Next step: Execute 12-02-PLAN.md (dashboard configuration management UI)
+Stopped at: Completed 12-02-PLAN.md (frontend configuration management UI)
+Next step: Phase 12 complete — ready for verification
 
 ---
-*State updated: 2026-02-14 after completing 12-01-PLAN.md*
+*State updated: 2026-02-14 after completing 12-02-PLAN.md*
