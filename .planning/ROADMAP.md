@@ -36,7 +36,7 @@
 - [x] **Phase 9.1: Migrate Dashboard to Fresh Nuxt Setup** - Move API proxy & auth code to recreated Nuxt project (INSERTED) -- completed 2026-02-13
 - [x] **Phase 10: Dashboard Core** - Portfolio overview, purchase history, live status -- completed 2026-02-13
 - [x] **Phase 11: Backtest Visualization** - Equity curves and parameter comparison -- completed 2026-02-14
-- [ ] **Phase 12: Configuration Management** - Editable config with server validation
+- [x] **Phase 12: Configuration Management** - Editable config with server validation -- completed 2026-02-14
 
 ## Phase Details
 
@@ -135,8 +135,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 12-01-PLAN.md — Backend: DB entity, ConfigurationService, API endpoints
-- [ ] 12-02-PLAN.md — Frontend: Config tab UI with form, tiers table, validation
+- [x] 12-01-PLAN.md — Backend: DB entity, ConfigurationService, API endpoints
+- [x] 12-02-PLAN.md — Frontend: Config tab UI with form, tiers table, validation
 
 ## Progress
 
@@ -154,7 +154,7 @@ Plans:
 | 9.1 Migrate Dashboard to Fresh Nuxt Setup | v1.2 | 1/1 | Complete | 2026-02-13 |
 | 10. Dashboard Core | v1.2 | 3/3 | Complete | 2026-02-13 |
 | 11. Backtest Visualization | v1.2 | 4/4 | Complete | 2026-02-14 |
-| 12. Configuration Management | v1.2 | 0/2 | Not started | - |
+| 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
 
 ---
-*Roadmap updated: 2026-02-14 after Phase 12 planning*
+*Roadmap updated: 2026-02-14 after Phase 12 execution*
