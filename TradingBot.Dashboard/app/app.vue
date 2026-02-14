@@ -8,15 +8,25 @@
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
               BTC Smart DCA Dashboard
             </h1>
-            <!-- Connection status dot -->
-            <div class="flex items-center gap-2">
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ connectionLabel }}
-              </span>
-              <span
-                class="w-2.5 h-2.5 rounded-full"
-                :class="connectionDotClass"
-              />
+            <div class="flex items-center gap-4">
+              <!-- Backtest link -->
+              <UButton
+                icon="i-lucide-bar-chart-2"
+                variant="soft"
+                to="/backtest"
+              >
+                Backtest
+              </UButton>
+              <!-- Connection status dot -->
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ connectionLabel }}
+                </span>
+                <span
+                  class="w-2.5 h-2.5 rounded-full"
+                  :class="connectionDotClass"
+                />
+              </div>
             </div>
           </div>
         </div>
