@@ -37,7 +37,6 @@
     "commit-commands@claude-plugins-official": true,
 
     "csharp-lsp@claude-plugins-official": true,
-    "gopls-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,

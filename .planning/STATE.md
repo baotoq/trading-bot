@@ -9,14 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** DDD tactical patterns — rich aggregates, value objects, event dispatch
+**Current focus:** Phase 13 -- Strongly-Typed IDs (first phase of v2.0 DDD Foundation)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-14 — Milestone v2.0 started
+Phase: 13 of 18 (Strongly-Typed IDs)
+Plan: 0 of ? in current phase
+Status: Ready to plan
+Last activity: 2026-02-14 -- Roadmap created for v2.0 DDD Foundation (6 phases, 18 requirements)
+
+Progress: [||||||||||||||||||||||..........] 63% (30/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -28,9 +30,9 @@ Last activity: 2026-02-14 — Milestone v2.0 started
 
 **Velocity:**
 - Total plans completed: 30
-- v1.0 completion time: 1 day (2026-02-12)
-- v1.1 completion time: 1 day (2026-02-13)
-- v1.2 completion time: 2 days (2026-02-13 → 2026-02-14)
+- v1.0: 1 day (11 plans)
+- v1.1: 1 day (7 plans)
+- v1.2: 2 days (12 plans)
 
 **By Milestone:**
 
@@ -39,17 +41,24 @@ Last activity: 2026-02-14 — Milestone v2.0 started
 | v1.0 | 1-4 | 11 | Complete |
 | v1.1 | 5-8 | 7 | Complete |
 | v1.2 | 9-12 | 12 | Complete |
+| v2.0 | 13-18 | TBD | In progress |
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+Recent for v2.0:
+- Vogen 8.0.4 for source-generated value objects and strongly-typed IDs (zero runtime overhead)
+- ErrorOr 2.0.1 for Result pattern (zero allocation, .NET 10 optimized)
+- Ardalis.Specification.EntityFrameworkCore 9.3.1 for query encapsulation
+- Domain events dispatch AFTER SaveChanges via SaveChangesInterceptor (not before -- critical pitfall)
 
 ### Known Risks
 
-- Refactoring aggregate roots may require EF Core migration adjustments
-- Value objects need careful EF Core mapping (owned types or value conversions)
+- Domain event dispatch timing: SaveChangesInterceptor.SavedChangesAsync (after commit), NOT SaveChangesAsync override (before commit)
+- Value objects need careful EF Core converter registration in ConfigureConventions
+- Rich aggregate refactoring touches all entity creation/mutation sites
 
 ### Pending Todos
 
@@ -62,8 +71,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-14
-Stopped at: Starting v2.0 DDD Foundation milestone
-Next step: Research → Requirements → Roadmap
+Stopped at: Roadmap created for v2.0 DDD Foundation
+Next step: Plan Phase 13 (Strongly-Typed IDs)
 
 ---
-*State updated: 2026-02-14 after v2.0 milestone start*
+*State updated: 2026-02-14 after v2.0 roadmap creation*

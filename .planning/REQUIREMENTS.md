@@ -1,7 +1,7 @@
-# Requirements: BTC Smart DCA Bot — v2.0 DDD Foundation
+# Requirements: BTC Smart DCA Bot -- v2.0 DDD Foundation
 
 **Defined:** 2026-02-14
-**Core Value:** Upgrade building blocks and domain model to proper DDD tactical patterns — rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
+**Core Value:** Upgrade building blocks and domain model to proper DDD tactical patterns -- rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
 
 ## v1 Requirements
 
@@ -19,7 +19,7 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 - [ ] **DM-01**: Base entity hierarchy includes AggregateRoot base class with domain event collection
 - [ ] **DM-02**: Purchase aggregate enforces invariants (price > 0, quantity > 0, valid symbol) via factory method
 - [ ] **DM-03**: DcaConfiguration aggregate enforces invariants (tiers ascending, daily amount > 0, valid schedule) via encapsulated behavior methods
-- [ ] **DM-04**: Entities use private setters — state changes only through domain methods
+- [ ] **DM-04**: Entities use private setters -- state changes only through domain methods
 
 ### Domain Events
 
@@ -56,12 +56,12 @@ Explicitly excluded. Documented to prevent scope creep.
 
 | Feature | Reason |
 |---------|--------|
-| Generic Repository<T> | EF Core DbContext is already unit of work — adds no value |
+| Generic Repository<T> | EF Core DbContext is already unit of work -- adds no value |
 | Event Sourcing | Massive complexity, not needed for DCA bot state-based persistence |
 | Separate domain/persistence models | Over-engineering for this domain size |
 | Domain events via message bus (Dapr) | Domain events are in-process (MediatR); integration events use Dapr |
 | Reflection-based value object libraries | Vogen source generation has zero runtime overhead |
-| Cross-aggregate transactions | Violates DDD boundaries — use domain events for eventual consistency |
+| Cross-aggregate transactions | Violates DDD boundaries -- use domain events for eventual consistency |
 
 ## Traceability
 
@@ -69,30 +69,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TS-01 | — | Pending |
-| TS-02 | — | Pending |
-| TS-03 | — | Pending |
-| TS-04 | — | Pending |
-| DM-01 | — | Pending |
-| DM-02 | — | Pending |
-| DM-03 | — | Pending |
-| DM-04 | — | Pending |
-| DE-01 | — | Pending |
-| DE-02 | — | Pending |
-| DE-03 | — | Pending |
-| DE-04 | — | Pending |
-| EH-01 | — | Pending |
-| EH-02 | — | Pending |
-| EH-03 | — | Pending |
-| QP-01 | — | Pending |
-| QP-02 | — | Pending |
-| QP-03 | — | Pending |
+| TS-01 | Phase 13: Strongly-Typed IDs | Pending |
+| TS-02 | Phase 14: Value Objects | Pending |
+| TS-03 | Phase 14: Value Objects | Pending |
+| TS-04 | Phase 14: Value Objects | Pending |
+| DM-01 | Phase 15: Rich Aggregate Roots | Pending |
+| DM-02 | Phase 15: Rich Aggregate Roots | Pending |
+| DM-03 | Phase 15: Rich Aggregate Roots | Pending |
+| DM-04 | Phase 15: Rich Aggregate Roots | Pending |
+| DE-01 | Phase 17: Domain Event Dispatch | Pending |
+| DE-02 | Phase 17: Domain Event Dispatch | Pending |
+| DE-03 | Phase 17: Domain Event Dispatch | Pending |
+| DE-04 | Phase 17: Domain Event Dispatch | Pending |
+| EH-01 | Phase 16: Result Pattern | Pending |
+| EH-02 | Phase 16: Result Pattern | Pending |
+| EH-03 | Phase 16: Result Pattern | Pending |
+| QP-01 | Phase 18: Specification Pattern | Pending |
+| QP-02 | Phase 18: Specification Pattern | Pending |
+| QP-03 | Phase 18: Specification Pattern | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️ (awaiting roadmap creation)
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-14*
-*Last updated: 2026-02-14 after initial definition*
+*Last updated: 2026-02-14 after roadmap creation (traceability complete)*
