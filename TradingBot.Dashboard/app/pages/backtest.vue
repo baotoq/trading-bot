@@ -63,6 +63,18 @@
                 </div>
 
                 <template v-else>
+                  <!-- Add to Compare Button -->
+                  <div class="flex justify-end">
+                    <UButton
+                      variant="soft"
+                      icon="i-lucide-plus"
+                      :disabled="!canAdd"
+                      @click="onAddToComparison(backtestResult)"
+                    >
+                      {{ addButtonText }}
+                    </UButton>
+                  </div>
+
                   <!-- Metrics Cards -->
                   <BacktestMetrics :result="backtestResult.result" />
 
@@ -107,6 +119,18 @@
 
                   <!-- Detail content -->
                   <template v-else>
+                    <!-- Add to Compare Button -->
+                    <div class="flex justify-end mb-4">
+                      <UButton
+                        variant="soft"
+                        icon="i-lucide-plus"
+                        :disabled="!canAdd"
+                        @click="onAddToComparisonFromSweep()"
+                      >
+                        {{ addButtonText }}
+                      </UButton>
+                    </div>
+
                     <BacktestMetrics :result="selectedSweepDetail" />
                     <BacktestChart :result="selectedSweepDetail" :y-axis-mode="yAxisMode" class="mt-6" />
                   </template>
@@ -115,6 +139,11 @@
             </div>
           </template>
         </UTabs>
+
+        <!-- Comparison Panel (Below tabs) -->
+        <div v-if="comparedBacktests.length > 0" class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+          <BacktestComparison />
+        </div>
       </main>
     </div>
   </UApp>
@@ -131,6 +160,8 @@ import type {
 } from '~/types/backtest'
 
 const { config, loadConfig } = useBacktest()
+const { addToComparison, comparedBacktests, canAdd } = useBacktestComparison()
+const toast = useToast()
 
 // Tab state
 const activeTab = ref(0)
@@ -159,6 +190,14 @@ const loadingSweepDetail = ref(false)
 // Shared chart state
 const yAxisMode = ref<'usd' | 'btc'>('usd')
 
+// Comparison button state
+const addButtonText = computed(() => {
+  if (!canAdd.value) {
+    return 'Max 3 Comparisons'
+  }
+  return 'Add to Compare'
+})
+
 // Load config on mount
 onMounted(() => {
   loadConfig()
@@ -172,6 +211,79 @@ function onSweepComplete(result: SweepResponse) {
   sweepResults.value = result
   selectedSweepEntry.value = null
   selectedSweepDetail.value = null
+}
+
+function onAddToComparison(result: BacktestResponse) {
+  const label = `Base $${result.config.baseDailyAmount}, ${result.config.highLookbackDays}d lookback`
+  const success = addToComparison(result, label)
+
+  if (success) {
+    toast.add({
+      title: 'Added to comparison',
+      description: label,
+      color: 'green',
+      timeout: 2000
+    })
+  } else {
+    if (!canAdd.value) {
+      toast.add({
+        title: 'Maximum 3 comparisons',
+        description: 'Remove an entry to add a new one',
+        color: 'orange',
+        timeout: 3000
+      })
+    } else {
+      toast.add({
+        title: 'Already in comparison',
+        description: 'This configuration is already added',
+        color: 'orange',
+        timeout: 3000
+      })
+    }
+  }
+}
+
+function onAddToComparisonFromSweep() {
+  if (!selectedSweepEntry.value || !selectedSweepDetail.value || !sweepResults.value) {
+    return
+  }
+
+  // Build a BacktestResponse-like object for sweep detail
+  const sweepAsBacktestResponse: BacktestResponse = {
+    config: selectedSweepEntry.value.config,
+    startDate: sweepResults.value.startDate,
+    endDate: sweepResults.value.endDate,
+    totalDays: sweepResults.value.totalDays,
+    result: selectedSweepDetail.value
+  }
+
+  const label = `Sweep #${selectedSweepEntry.value.rank}: Base $${selectedSweepEntry.value.config.baseDailyAmount}`
+  const success = addToComparison(sweepAsBacktestResponse, label)
+
+  if (success) {
+    toast.add({
+      title: 'Added to comparison',
+      description: label,
+      color: 'green',
+      timeout: 2000
+    })
+  } else {
+    if (!canAdd.value) {
+      toast.add({
+        title: 'Maximum 3 comparisons',
+        description: 'Remove an entry to add a new one',
+        color: 'orange',
+        timeout: 3000
+      })
+    } else {
+      toast.add({
+        title: 'Already in comparison',
+        description: 'This configuration is already added',
+        color: 'orange',
+        timeout: 3000
+      })
+    }
+  }
 }
 
 async function onSelectConfig(entry: SweepResultEntry) {
