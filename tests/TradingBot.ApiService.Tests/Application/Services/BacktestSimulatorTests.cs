@@ -2,6 +2,7 @@ using FluentAssertions;
 using Snapper;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Services.Backtest;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Tests.Application.Services;
 
@@ -12,16 +13,16 @@ public class BacktestSimulatorTests
     private static BacktestConfig CreateStandardConfig()
     {
         return new BacktestConfig(
-            BaseDailyAmount: 10m,
+            BaseDailyAmount: UsdAmount.From(10m),
             HighLookbackDays: 30,
             BearMarketMaPeriod: 200,
-            BearBoostFactor: 1.5m,
-            MaxMultiplierCap: 4.5m,
+            BearBoostFactor: Multiplier.From(1.5m),
+            MaxMultiplierCap: Multiplier.From(4.5m),
             Tiers: new List<MultiplierTierConfig>
             {
-                new(DropPercentage: 5m, Multiplier: 1.5m),
-                new(DropPercentage: 10m, Multiplier: 2.0m),
-                new(DropPercentage: 20m, Multiplier: 3.0m)
+                new(DropPercentage: Percentage.From(0.05m), Multiplier: Multiplier.From(1.5m)),
+                new(DropPercentage: Percentage.From(0.10m), Multiplier: Multiplier.From(2.0m)),
+                new(DropPercentage: Percentage.From(0.20m), Multiplier: Multiplier.From(3.0m))
             });
     }
 
@@ -103,7 +104,7 @@ public class BacktestSimulatorTests
         // Assert
         result.PurchaseLog.Should().AllSatisfy(entry =>
         {
-            entry.SmartAmountUsd.Should().Be(config.BaseDailyAmount);
+            entry.SmartAmountUsd.Should().Be(config.BaseDailyAmount.Value);
             entry.SmartMultiplier.Should().Be(1.0m);
         });
     }
@@ -122,7 +123,7 @@ public class BacktestSimulatorTests
         // Assert - Day 2 should have 2.0x multiplier (10% drop tier)
         var day2 = result.PurchaseLog[2];
         day2.SmartMultiplier.Should().Be(2.0m);
-        day2.SmartAmountUsd.Should().Be(config.BaseDailyAmount * 2.0m);
+        day2.SmartAmountUsd.Should().Be(config.BaseDailyAmount.Value * 2.0m);
     }
 
     [Fact]
@@ -138,7 +139,7 @@ public class BacktestSimulatorTests
         // Assert - Fixed same-base always uses base amount regardless of price movement
         result.PurchaseLog.Should().AllSatisfy(entry =>
         {
-            entry.FixedSameBaseAmountUsd.Should().Be(config.BaseDailyAmount);
+            entry.FixedSameBaseAmountUsd.Should().Be(config.BaseDailyAmount.Value);
         });
     }
 
@@ -155,8 +156,8 @@ public class BacktestSimulatorTests
 
         // Assert
         var lastEntry = result.PurchaseLog[^1];
-        var expectedTotalUsd = 5 * config.BaseDailyAmount; // 5 days * 10 USD = 50 USD
-        var expectedTotalBtc = expectedTotalUsd / price;   // 50 USD / 50000 = 0.001 BTC
+        var expectedTotalUsd = 5 * config.BaseDailyAmount.Value; // 5 days * 10 USD = 50 USD
+        var expectedTotalBtc = expectedTotalUsd / price;          // 50 USD / 50000 = 0.001 BTC
 
         lastEntry.SmartCumulativeUsd.Should().Be(expectedTotalUsd);
         lastEntry.SmartCumulativeBtc.Should().BeApproximately(expectedTotalBtc, 0.00000001m);

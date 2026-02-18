@@ -11,6 +11,7 @@ using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Hyperliquid.Models;
 using TradingBot.ApiService.Models;
 using TradingBot.ApiService.Models.Ids;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -89,23 +90,24 @@ public class DcaExecutionService(
             await publisher.Publish(new PurchaseSkippedEvent(
                 "Insufficient balance",
                 usdcBalance,
-                options.BaseDailyAmount,
+                options.BaseDailyAmount.Value,
                 DateTimeOffset.UtcNow), ct);
             return;
         }
 
         // Step 4: Get price and calculate smart multiplier
-        var currentPrice = await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct);
+        var currentPriceDecimal = await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct);
+        var currentPrice = Price.From(currentPriceDecimal);
         var multiplierResult = await CalculateMultiplierAsync(currentPrice, options, ct);
 
         // Apply multiplier to base amount (capped by available balance)
         var multipliedAmount = options.BaseDailyAmount * multiplierResult.Multiplier;
-        var usdAmount = Math.Min(usdcBalance, multipliedAmount);
+        var usdAmount = UsdAmount.From(Math.Min(usdcBalance, multipliedAmount.Value));
 
         logger.LogInformation("Multiplied target: {MultipliedAmount} USD (base: {Base} * {Multiplier}x), available: {Balance}, will buy: {UsdAmount}",
             multipliedAmount, options.BaseDailyAmount, multiplierResult.Multiplier, usdcBalance, usdAmount);
 
-        if (usdAmount < MinimumOrderValue)
+        if (usdAmount.Value < MinimumOrderValue)
         {
             logger.LogWarning("Amount {Amount} below minimum order {Min}", usdAmount, MinimumOrderValue);
             await publisher.Publish(new PurchaseSkippedEvent(
@@ -126,11 +128,11 @@ public class DcaExecutionService(
         }
 
         // Calculate BTC quantity and round DOWN to avoid exceeding balance
-        var btcQuantity = usdAmount / currentPrice;
+        var btcQuantity = usdAmount.Value / currentPriceDecimal;
         var roundedQuantity = Math.Round(btcQuantity, BtcDecimals, MidpointRounding.ToZero);
 
         logger.LogInformation("Placing order: {UsdAmount} USD -> {BtcQty} BTC at {Price}",
-            usdAmount, roundedQuantity, currentPrice);
+            usdAmount, roundedQuantity, currentPriceDecimal);
 
         // Step 6: Create purchase record and place order
         var purchase = new Purchase
@@ -138,8 +140,8 @@ public class DcaExecutionService(
             Id = PurchaseId.New(),
             ExecutedAt = DateTimeOffset.UtcNow,
             Price = currentPrice,
-            Quantity = 0, // Will be updated with actual fill
-            Cost = 0, // Will be updated with actual cost
+            Quantity = Quantity.From(0), // Will be updated with actual fill
+            Cost = UsdAmount.From(usdAmount.Value), // Intended spend; updated on fill
             Multiplier = multiplierResult.Multiplier,
             MultiplierTier = multiplierResult.Tier,
             DropPercentage = multiplierResult.DropPercentage,
@@ -153,10 +155,10 @@ public class DcaExecutionService(
         {
             if (options.DryRun)
             {
-                logger.LogInformation("[DRY RUN] Simulating order: {Quantity} BTC at {Price}", roundedQuantity, currentPrice);
-                purchase.Quantity = roundedQuantity;
+                logger.LogInformation("[DRY RUN] Simulating order: {Quantity} BTC at {Price}", roundedQuantity, currentPriceDecimal);
+                purchase.Quantity = Quantity.From(roundedQuantity);
                 purchase.Price = currentPrice;
-                purchase.Cost = roundedQuantity * currentPrice;
+                purchase.Cost = UsdAmount.From(roundedQuantity * currentPriceDecimal);
                 purchase.Status = PurchaseStatus.Filled;
                 purchase.OrderId = $"DRY-RUN-{Guid.NewGuid():N}";
                 purchase.IsDryRun = true;
@@ -164,7 +166,7 @@ public class DcaExecutionService(
             else
             {
                 // Use 5% slippage tolerance for IOC (immediate-or-cancel) order
-                var limitPrice = currentPrice * 1.05m;
+                var limitPrice = currentPriceDecimal * 1.05m;
                 var orderResponse = await hyperliquidClient.PlaceSpotOrderAsync(
                     btcAssetIndex,
                     true, // isBuy
@@ -182,9 +184,9 @@ public class DcaExecutionService(
                 var filledQty = decimal.Parse(filled.TotalSz, CultureInfo.InvariantCulture);
                 var avgPrice = decimal.Parse(filled.AvgPx, CultureInfo.InvariantCulture);
 
-                purchase.Quantity = filledQty;
-                purchase.Price = avgPrice;
-                purchase.Cost = filledQty * avgPrice;
+                purchase.Quantity = Quantity.From(filledQty);
+                purchase.Price = Price.From(avgPrice);
+                purchase.Cost = UsdAmount.From(filledQty * avgPrice);
                 purchase.OrderId = filled.Oid.ToString();
 
                 // Consider filled if >= 95% of requested quantity
@@ -270,7 +272,7 @@ public class DcaExecutionService(
     }
 
     private async Task<MultiplierResult> CalculateMultiplierAsync(
-        decimal currentPrice, DcaOptions options, CancellationToken ct)
+        Price currentPrice, DcaOptions options, CancellationToken ct)
     {
         try
         {
@@ -297,7 +299,7 @@ public class DcaExecutionService(
             }
 
             logger.LogInformation(
-                "Multiplier: tier={Tier} (drop: {Drop:F2}%) + bear={BearBoost} = {Total:F2}x (cap: {Cap}x)",
+                "Multiplier: tier={Tier} (drop: {Drop:F4}) + bear={BearBoost} = {Total:F2}x (cap: {Cap}x)",
                 result.Tier, result.DropPercentage, result.BearBoostApplied, result.Multiplier, options.MaxMultiplierCap);
 
             return result;
@@ -307,15 +309,16 @@ public class DcaExecutionService(
             // Graceful degradation: fall back to 1.0x on any calculation failure
             logger.LogError(ex, "Multiplier calculation failed, falling back to 1.0x");
 
-            return MultiplierCalculator.Calculate(
-                currentPrice,
-                options.BaseDailyAmount,
-                0m, // high30Day
-                0m, // ma200Day
-                Array.Empty<MultiplierTier>(),
-                options.BearBoostFactor,
-                options.MaxMultiplierCap);
+            // Construct fallback result directly to avoid 0-sentinel path
+            return new MultiplierResult(
+                Multiplier: Multiplier.From(1.0m),
+                Tier: "Base",
+                IsBearMarket: false,
+                BearBoostApplied: 0m,
+                DropPercentage: Percentage.From(0m),
+                High30Day: 0m,
+                Ma200Day: 0m,
+                FinalAmount: options.BaseDailyAmount);
         }
     }
 }
-

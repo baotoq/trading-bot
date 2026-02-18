@@ -3,66 +3,66 @@
     {
       "Name": "Normal day - no drop",
       "Result": {
-        "Multiplier": 1.0,
+        "Multiplier": "1.0",
         "Tier": "Base",
         "IsBearMarket": false,
         "BearBoostApplied": 0.0,
-        "DropPercentage": 0.0,
+        "DropPercentage": "0",
         "High30Day": 100000.0,
         "Ma200Day": 90000.0,
-        "FinalAmount": 10.0
+        "FinalAmount": "10.00"
       }
     },
     {
       "Name": "5% dip - no bear",
       "Result": {
-        "Multiplier": 1.5,
-        "Tier": ">= 5%",
+        "Multiplier": "1.5",
+        "Tier": ">= 5.0%",
         "IsBearMarket": false,
         "BearBoostApplied": 0.0,
-        "DropPercentage": 5.0,
+        "DropPercentage": "0.05",
         "High30Day": 100000.0,
         "Ma200Day": 90000.0,
-        "FinalAmount": 15.0
+        "FinalAmount": "15.00"
       }
     },
     {
       "Name": "10% dip - bear market",
       "Result": {
-        "Multiplier": 3.5,
-        "Tier": ">= 10%",
+        "Multiplier": "3.5",
+        "Tier": ">= 10.0%",
         "IsBearMarket": true,
         "BearBoostApplied": 1.5,
-        "DropPercentage": 15.0,
+        "DropPercentage": "0.15",
         "High30Day": 100000.0,
         "Ma200Day": 90000.0,
-        "FinalAmount": 35.0
+        "FinalAmount": "35.00"
       }
     },
     {
       "Name": "20% dip - bear market - capped",
       "Result": {
-        "Multiplier": 4.5,
-        "Tier": ">= 20%",
+        "Multiplier": "4.5",
+        "Tier": ">= 20.0%",
         "IsBearMarket": true,
         "BearBoostApplied": 1.5,
-        "DropPercentage": 25.0,
+        "DropPercentage": "0.25",
         "High30Day": 100000.0,
         "Ma200Day": 90000.0,
-        "FinalAmount": 45.0
+        "FinalAmount": "45.00"
       }
     },
     {
       "Name": "Extreme dip - bear market - heavily capped",
       "Result": {
-        "Multiplier": 4.5,
-        "Tier": ">= 20%",
+        "Multiplier": "4.5",
+        "Tier": ">= 20.0%",
         "IsBearMarket": true,
         "BearBoostApplied": 1.5,
-        "DropPercentage": 50.0,
+        "DropPercentage": "0.5",
         "High30Day": 100000.0,
         "Ma200Day": 90000.0,
-        "FinalAmount": 45.0
+        "FinalAmount": "45.00"
       }
     }
   ]

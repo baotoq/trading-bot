@@ -45,10 +45,10 @@ public class PurchaseCompletedHandler(
             var message = $"""
                 {simulationBanner}*{titlePrefix}BTC Purchase Successful*
 
-                *Price:* `${notification.Price:N2}`
-                *Bought:* `{notification.BtcAmount:F5}` BTC
-                *Cost:* `${notification.UsdSpent:F2}`
-                *Multiplier:* `{notification.Multiplier:F1}x`
+                *Price:* `${notification.Price.Value:N2}`
+                *Bought:* `{notification.BtcAmount.Value:F5}` BTC
+                *Cost:* `${notification.UsdSpent.Value:F2}`
+                *Multiplier:* `{notification.Multiplier.Value:F1}x`
 
                 {reasoning}
 
@@ -58,7 +58,7 @@ public class PurchaseCompletedHandler(
                 Avg Cost: `${avgCost:N2}`
 
                 *Balances*
-                BTC: `{notification.CurrentBtcBalance:F5}` BTC
+                BTC: `{notification.CurrentBtcBalance.Value:F5}` BTC
                 USDC: `${notification.RemainingUsdc:F2}`
 
                 _{notification.ExecutedAt:yyyy-MM-dd HH:mm:ss} UTC_
@@ -75,7 +75,7 @@ public class PurchaseCompletedHandler(
     private string BuildMultiplierReasoning(PurchaseCompletedEvent e)
     {
         // Standard buy (no multiplier applied)
-        if (e.Multiplier == 1.0m && (string.IsNullOrEmpty(e.MultiplierTier) || e.MultiplierTier == "None"))
+        if (e.Multiplier.Value == 1.0m && (string.IsNullOrEmpty(e.MultiplierTier) || e.MultiplierTier == "None"))
         {
             return "Standard buy (no dip detected)";
         }
@@ -83,20 +83,20 @@ public class PurchaseCompletedHandler(
         // Multiplier calculation had errors or limited data
         if (e.MultiplierTier?.Contains("Error") == true || e.MultiplierTier?.Contains("N/A") == true)
         {
-            return $"Multiplier calculation had limited data, using {e.Multiplier:F1}x";
+            return $"Multiplier calculation had limited data, using {e.Multiplier.Value:F1}x";
         }
 
         // Build natural language explanation for multiplier
         var parts = new List<string>();
 
-        // Dip component
-        if (e.DropPercentage > 0 && e.High30Day > 0)
+        // Dip component (DropPercentage is in 0-1 format, multiply by 100 for display)
+        if (e.DropPercentage.Value > 0 && e.High30Day > 0)
         {
-            parts.Add($"BTC is {e.DropPercentage:F1}% below 30-day high (${e.High30Day:N0})");
+            parts.Add($"BTC is {e.DropPercentage.Value * 100:F1}% below 30-day high (${e.High30Day:N0})");
         }
 
         // Bear market boost component
-        if (e.Ma200Day > 0 && e.Price < e.Ma200Day)
+        if (e.Ma200Day > 0 && e.Price.Value < e.Ma200Day)
         {
             parts.Add($"price below 200-day MA (${e.Ma200Day:N0}), bear boost active");
         }
@@ -104,10 +104,10 @@ public class PurchaseCompletedHandler(
         if (parts.Count > 0)
         {
             var explanation = string.Join(" and ", parts);
-            return $"Buying {e.Multiplier:F1}x: {explanation}";
+            return $"Buying {e.Multiplier.Value:F1}x: {explanation}";
         }
 
         // Fallback if multiplier > 1 but no clear reason
-        return $"Buying {e.Multiplier:F1}x (tier: {e.MultiplierTier ?? "unknown"})";
+        return $"Buying {e.Multiplier.Value:F1}x (tier: {e.MultiplierTier ?? "unknown"})";
     }
 }

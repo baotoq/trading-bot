@@ -1,5 +1,6 @@
 using TradingBot.ApiService.Application.Services.Backtest;
 using TradingBot.ApiService.Configuration;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -28,6 +29,7 @@ public static class BacktestSimulator
         }
 
         // Convert MultiplierTierConfig to MultiplierTier for MultiplierCalculator compatibility
+        // Both value objects, direct assignment (both Percentage and Multiplier)
         var multiplierTiers = config.Tiers
             .Select(t => new MultiplierTier { DropPercentage = t.DropPercentage, Multiplier = t.Multiplier })
             .ToList();
@@ -64,9 +66,9 @@ public static class BacktestSimulator
                     .Average(d => d.Close);
             }
 
-            // Calculate smart DCA multiplier
+            // Calculate smart DCA multiplier (wrap close price in Price value object at call boundary)
             var multiplierResult = MultiplierCalculator.Calculate(
-                currentPrice: day.Close,
+                currentPrice: Price.From(day.Close),
                 baseAmount: config.BaseDailyAmount,
                 high30Day: high30Day,
                 ma200Day: ma200Day,
@@ -74,8 +76,8 @@ public static class BacktestSimulator
                 bearBoostFactor: config.BearBoostFactor,
                 maxCap: config.MaxMultiplierCap);
 
-            // Smart DCA purchase
-            decimal smartAmountUsd = multiplierResult.FinalAmount;
+            // Extract raw decimals for DayData (stays raw for accumulation)
+            decimal smartAmountUsd = multiplierResult.FinalAmount.Value;
             decimal smartBtcBought = smartAmountUsd / day.Close;
             smartCumulativeUsd += smartAmountUsd;
             smartCumulativeBtc += smartBtcBought;
@@ -84,7 +86,7 @@ public static class BacktestSimulator
             smartData.Add(new DayData(
                 Date: day.Date,
                 Price: day.Close,
-                Multiplier: multiplierResult.Multiplier,
+                Multiplier: multiplierResult.Multiplier.Value,
                 Tier: multiplierResult.Tier,
                 AmountUsd: smartAmountUsd,
                 BtcBought: smartBtcBought,
@@ -95,7 +97,7 @@ public static class BacktestSimulator
                 Ma200Day: ma200Day));
 
             // Same-base fixed DCA purchase
-            decimal sameBaseAmountUsd = config.BaseDailyAmount;
+            decimal sameBaseAmountUsd = config.BaseDailyAmount.Value;
             decimal sameBaseBtcBought = sameBaseAmountUsd / day.Close;
             sameBaseCumulativeUsd += sameBaseAmountUsd;
             sameBaseCumulativeBtc += sameBaseBtcBought;
@@ -229,8 +231,8 @@ public static class BacktestSimulator
             .Select(g => new TierBreakdownEntry(
                 TierName: g.Key,
                 TriggerCount: g.Count(),
-                ExtraUsdSpent: g.Sum(d => d.AmountUsd - config.BaseDailyAmount),
-                ExtraBtcAcquired: g.Sum(d => d.BtcBought - (config.BaseDailyAmount / d.Price))))
+                ExtraUsdSpent: g.Sum(d => d.AmountUsd - config.BaseDailyAmount.Value),
+                ExtraBtcAcquired: g.Sum(d => d.BtcBought - (config.BaseDailyAmount.Value / d.Price))))
             .ToList();
 
         return new BacktestResult(

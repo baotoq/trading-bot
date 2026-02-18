@@ -1,3 +1,5 @@
+using TradingBot.ApiService.Models.Values;
+
 namespace TradingBot.ApiService.Application.Services.Backtest;
 
 /// <summary>
@@ -5,11 +7,11 @@ namespace TradingBot.ApiService.Application.Services.Backtest;
 /// Mirrors DcaOptions multiplier fields without schedule/infrastructure fields.
 /// </summary>
 public record BacktestConfig(
-    decimal BaseDailyAmount,
+    UsdAmount BaseDailyAmount,
     int HighLookbackDays,
     int BearMarketMaPeriod,
-    decimal BearBoostFactor,
-    decimal MaxMultiplierCap,
+    Multiplier BearBoostFactor,
+    Multiplier MaxMultiplierCap,
     IReadOnlyList<MultiplierTierConfig> Tiers);
 
 /// <summary>
@@ -17,5 +19,5 @@ public record BacktestConfig(
 /// Separate from Configuration.MultiplierTier to avoid coupling backtest DTOs to mutable configuration classes.
 /// </summary>
 public record MultiplierTierConfig(
-    decimal DropPercentage,
-    decimal Multiplier);
+    Percentage DropPercentage,
+    Multiplier Multiplier);
