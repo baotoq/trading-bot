@@ -76,7 +76,10 @@ Plans:
   2. Value objects persist via EF Core converters registered in ConfigureConventions (no manual mapping per property)
   3. All API endpoints serialize/deserialize value objects correctly in JSON (round-trip: send value, receive same value)
   4. Existing tests pass with value objects replacing raw decimal/string fields
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 14-01-PLAN.md -- Value object definitions (Price, UsdAmount, Quantity, Multiplier, Percentage, Symbol) + entity application + EF Core converters + dashboard branded types
+- [ ] 14-02-PLAN.md -- Apply value objects to DcaOptions, MultiplierCalculator, BacktestSimulator, services, handlers + test refresh
 
 ### Phase 15: Rich Aggregate Roots
 **Goal**: Aggregates own their state changes and enforce business rules -- no external code can put an aggregate into an invalid state
@@ -142,7 +145,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 11. Backtest Visualization | v1.2 | 4/4 | Complete | 2026-02-14 |
 | 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
 | 13. Strongly-Typed IDs | 2/2 | Complete    | 2026-02-18 | - |
-| 14. Value Objects | v2.0 | 0/? | Not started | - |
+| 14. Value Objects | v2.0 | 0/2 | Not started | - |
 | 15. Rich Aggregate Roots | v2.0 | 0/? | Not started | - |
 | 16. Result Pattern | v2.0 | 0/? | Not started | - |
 | 17. Domain Event Dispatch | v2.0 | 0/? | Not started | - |
