@@ -9,7 +9,7 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 
 ### Type Safety
 
-- [x] **TS-01**: All entity IDs use strongly-typed wrappers (PurchaseId, DailyPriceId, IngestionJobId, DcaConfigurationId) instead of raw Guid
+- [x] **TS-01**: All entity IDs use strongly-typed wrappers (PurchaseId, IngestionJobId, DcaConfigurationId) instead of raw Guid -- DailyPrice excluded (composite key, no Guid PK)
 - [ ] **TS-02**: Domain primitives use value objects with validation (Price, Quantity, Multiplier, UsdAmount, Symbol)
 - [ ] **TS-03**: Value objects persist via auto-generated EF Core converters registered in ConfigureConventions
 - [ ] **TS-04**: Value objects serialize/deserialize correctly in all API endpoints (JSON round-trip)

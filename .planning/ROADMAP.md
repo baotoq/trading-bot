@@ -54,18 +54,18 @@
 ## Phase Details
 
 ### Phase 13: Strongly-Typed IDs
-**Goal**: Entity IDs are type-safe -- impossible to pass a PurchaseId where a DailyPriceId is expected
+**Goal**: Entity IDs are type-safe -- impossible to pass a PurchaseId where an IngestionJobId is expected
 **Depends on**: Nothing (first phase of v2.0)
 **Requirements**: TS-01
 **Success Criteria** (what must be TRUE):
-  1. All entities use strongly-typed ID wrappers (PurchaseId, DailyPriceId, IngestionJobId, DcaConfigurationId) instead of raw Guid
+  1. All entities with Guid PKs use strongly-typed ID wrappers (PurchaseId, IngestionJobId, DcaConfigurationId) instead of raw Guid -- DailyPrice excluded (composite key, no Guid PK)
   2. EF Core persists and loads entities with typed IDs without schema changes (Guid columns unchanged in database)
   3. All API endpoints serialize/deserialize typed IDs as plain GUIDs in JSON responses (dashboard unaffected)
   4. All existing tests pass with typed IDs (no behavioral regression)
 **Plans**: 2 plans
 Plans:
-- [ ] 13-01-PLAN.md -- Vogen setup + typed ID definitions + generic BaseEntity<TId> + EF Core converter registration
-- [ ] 13-02-PLAN.md -- Apply typed IDs to all entities + update all callers + dashboard branded types
+- [x] 13-01-PLAN.md -- Vogen setup + typed ID definitions + generic BaseEntity<TId> + EF Core converter registration
+- [x] 13-02-PLAN.md -- Apply typed IDs to all entities + update all callers + dashboard branded types
 
 ### Phase 14: Value Objects
 **Goal**: Domain primitives enforce their own validity -- invalid prices, quantities, or amounts cannot exist at runtime
