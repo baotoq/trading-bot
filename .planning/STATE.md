@@ -84,9 +84,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 13-02-PLAN.md (apply typed IDs to all entities and callers -- Phase 13 complete)
-Resume file: .planning/phases/13-strongly-typed-ids/13-02-SUMMARY.md
-Next step: Execute Phase 14 (Value Objects)
+Stopped at: Phase 14 context gathered
+Resume file: .planning/phases/14-value-objects/14-CONTEXT.md
+Next step: Plan Phase 14 (Value Objects)
 
 ---
-*State updated: 2026-02-18 after completing 13-02*
+*State updated: 2026-02-18 after phase 14 context gathered*
