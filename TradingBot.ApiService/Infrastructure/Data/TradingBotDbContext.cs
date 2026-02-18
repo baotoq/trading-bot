@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Models;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Infrastructure.Data;
 
@@ -9,6 +10,21 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<DailyPrice> DailyPrices => Set<DailyPrice>();
     public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
     public DbSet<DcaConfiguration> DcaConfigurations => Set<DcaConfiguration>();
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+        // Register Vogen EF Core value converters globally for all typed ID properties.
+        // Vogen generates EfCoreValueConverter + EfCoreValueComparer inner classes per ID type.
+        // Using ConfigureConventions ensures all properties of these types get converters automatically
+        // across the entire model — no per-property registration needed in OnModelCreating.
+        configurationBuilder.Properties<PurchaseId>()
+            .HaveConversion<PurchaseId.EfCoreValueConverter, PurchaseId.EfCoreValueComparer>();
+        configurationBuilder.Properties<IngestionJobId>()
+            .HaveConversion<IngestionJobId.EfCoreValueConverter, IngestionJobId.EfCoreValueComparer>();
+        configurationBuilder.Properties<DcaConfigurationId>()
+            .HaveConversion<DcaConfigurationId.EfCoreValueConverter, DcaConfigurationId.EfCoreValueComparer>();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
