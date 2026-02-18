@@ -45,7 +45,7 @@
 **Milestone Goal:** Upgrade building blocks and domain model to proper DDD tactical patterns -- rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
 
 - [x] **Phase 13: Strongly-Typed IDs** - Replace raw Guid IDs with source-generated typed wrappers (completed 2026-02-18)
-- [ ] **Phase 14: Value Objects** - Domain primitives with encapsulated validation
+- [ ] **Phase 14: Value Objects** - Domain primitives with encapsulated validation (1/2 plans complete)
 - [ ] **Phase 15: Rich Aggregate Roots** - Base entity hierarchy, factory methods, and invariant enforcement
 - [ ] **Phase 16: Result Pattern** - Explicit error handling replacing exceptions in domain operations
 - [ ] **Phase 17: Domain Event Dispatch** - Aggregate-raised events dispatched after SaveChanges
@@ -78,7 +78,7 @@ Plans:
   4. Existing tests pass with value objects replacing raw decimal/string fields
 **Plans**: 2 plans
 Plans:
-- [ ] 14-01-PLAN.md -- Value object definitions (Price, UsdAmount, Quantity, Multiplier, Percentage, Symbol) + entity application + EF Core converters + dashboard branded types
+- [x] 14-01-PLAN.md -- Value object definitions (Price, UsdAmount, Quantity, Multiplier, Percentage, Symbol) + entity application + EF Core converters + dashboard branded types
 - [ ] 14-02-PLAN.md -- Apply value objects to DcaOptions, MultiplierCalculator, BacktestSimulator, services, handlers + test refresh
 
 ### Phase 15: Rich Aggregate Roots
@@ -145,11 +145,11 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 11. Backtest Visualization | v1.2 | 4/4 | Complete | 2026-02-14 |
 | 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
 | 13. Strongly-Typed IDs | 2/2 | Complete    | 2026-02-18 | - |
-| 14. Value Objects | v2.0 | 0/2 | Not started | - |
+| 14. Value Objects | v2.0 | 1/2 | In progress | - |
 | 15. Rich Aggregate Roots | v2.0 | 0/? | Not started | - |
 | 16. Result Pattern | v2.0 | 0/? | Not started | - |
 | 17. Domain Event Dispatch | v2.0 | 0/? | Not started | - |
 | 18. Specification Pattern | v2.0 | 0/? | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-14 after v2.0 DDD Foundation roadmap creation*
+*Roadmap updated: 2026-02-18 after 14-01 (value object definitions and entity application)*

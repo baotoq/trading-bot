@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 13 of 18 (Strongly-Typed IDs -- COMPLETE)
-Plan: 2 of 2 in current phase (13-02 complete)
+Phase: 14 of 18 (Value Objects -- In Progress)
+Plan: 1 of 2 in current phase (14-01 complete)
 Status: In Progress
-Last activity: 2026-02-18 -- Completed 13-02 (apply typed IDs to all entities and callers)
+Last activity: 2026-02-18 -- Completed 14-01 (value object definitions and entity application)
 
-Progress: [||||||||||||||||||||||||........] 67% (32/~48 plans estimated)
+Progress: [|||||||||||||||||||||||||.......] 69% (33/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -50,6 +50,7 @@ Progress: [||||||||||||||||||||||||........] 67% (32/~48 plans estimated)
 |-------|------|----------|-------|-------|
 | 13-strongly-typed-ids | 01 | 6min | 2 | 6 |
 | 13-strongly-typed-ids | 02 | 4min | 2 | 13 |
+| 14-value-objects | 01 | 5min | 2 | 14 |
 
 ## Accumulated Context
 
@@ -66,6 +67,10 @@ Recent for v2.0:
 - [Phase 13-strongly-typed-ids]: DailyPriceId excluded: composite key (Date, Symbol) with no Guid column - schema unchanged constraint
 - [Phase 13-strongly-typed-ids]: DashboardDtos.cs: PurchaseDto.Id stays as Guid (API surface stability) -- implicit Vogen cast from PurchaseId handles LINQ Select projection
 - [Phase 13-strongly-typed-ids]: FindAsync replaced with FirstOrDefaultAsync for reliable type-safe LINQ on value-converted EF Core keys
+- [Phase 14-value-objects]: Symbol EfCoreValueConverter registered (not skipped) so DailyPrice composite PK key works correctly
+- [Phase 14-value-objects]: Multiplier sanity cap 20x (not 10x); operational cap remains MaxMultiplierCap in config
+- [Phase 14-value-objects]: High30Day/Ma200Day/RemainingUsdc stay decimal (0 sentinel for data unavailable; value objects reject 0)
+- [Phase 14-value-objects]: MultiplierTierData inside jsonb keeps raw decimal (avoid EF Core jsonb/STJ serialization complexity)
 
 ### Known Risks
 
@@ -84,9 +89,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Phase 14 context gathered
-Resume file: .planning/phases/14-value-objects/14-CONTEXT.md
-Next step: Plan Phase 14 (Value Objects)
+Stopped at: Completed 14-01-PLAN.md
+Resume file: .planning/phases/14-value-objects/14-01-SUMMARY.md
+Next step: Execute 14-02 (apply value objects to services, DcaOptions config, backtest)
 
 ---
-*State updated: 2026-02-18 after phase 14 context gathered*
+*State updated: 2026-02-18 after 14-01 (value object definitions and entity application)*

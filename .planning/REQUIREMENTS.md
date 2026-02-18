@@ -10,9 +10,9 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 ### Type Safety
 
 - [x] **TS-01**: All entity IDs use strongly-typed wrappers (PurchaseId, IngestionJobId, DcaConfigurationId) instead of raw Guid -- DailyPrice excluded (composite key, no Guid PK)
-- [ ] **TS-02**: Domain primitives use value objects with validation (Price, Quantity, Multiplier, UsdAmount, Symbol)
-- [ ] **TS-03**: Value objects persist via auto-generated EF Core converters registered in ConfigureConventions
-- [ ] **TS-04**: Value objects serialize/deserialize correctly in all API endpoints (JSON round-trip)
+- [x] **TS-02**: Domain primitives use value objects with validation (Price, Quantity, Multiplier, UsdAmount, Symbol)
+- [x] **TS-03**: Value objects persist via auto-generated EF Core converters registered in ConfigureConventions
+- [x] **TS-04**: Value objects serialize/deserialize correctly in all API endpoints (JSON round-trip)
 
 ### Domain Model
 
@@ -70,9 +70,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | TS-01 | Phase 13: Strongly-Typed IDs | Complete |
-| TS-02 | Phase 14: Value Objects | Pending |
-| TS-03 | Phase 14: Value Objects | Pending |
-| TS-04 | Phase 14: Value Objects | Pending |
+| TS-02 | Phase 14: Value Objects | Complete |
+| TS-03 | Phase 14: Value Objects | Complete |
+| TS-04 | Phase 14: Value Objects | Complete |
 | DM-01 | Phase 15: Rich Aggregate Roots | Pending |
 | DM-02 | Phase 15: Rich Aggregate Roots | Pending |
 | DM-03 | Phase 15: Rich Aggregate Roots | Pending |
@@ -95,4 +95,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-14*
-*Last updated: 2026-02-14 after roadmap creation (traceability complete)*
+*Last updated: 2026-02-18 after 14-01 (TS-02, TS-03, TS-04 marked complete)*
