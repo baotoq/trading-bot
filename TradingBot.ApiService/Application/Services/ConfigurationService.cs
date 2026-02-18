@@ -5,6 +5,7 @@ using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Models;
 using TradingBot.ApiService.Models.Ids;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -89,8 +90,8 @@ public class ConfigurationService(
             MultiplierTiers = entity.MultiplierTiers
                 .Select(t => new MultiplierTier
                 {
-                    DropPercentage = t.DropPercentage,
-                    Multiplier = t.Multiplier
+                    DropPercentage = Percentage.From(t.DropPercentage),
+                    Multiplier = Multiplier.From(t.Multiplier)
                 })
                 .ToList()
         };
@@ -107,7 +108,7 @@ public class ConfigurationService(
         entity.BearBoostFactor = options.BearBoostFactor;
         entity.MaxMultiplierCap = options.MaxMultiplierCap;
         entity.MultiplierTiers = options.MultiplierTiers
-            .Select(t => new MultiplierTierData(t.DropPercentage, t.Multiplier))
+            .Select(t => new MultiplierTierData(t.DropPercentage.Value, t.Multiplier.Value))
             .ToList();
     }
 }
