@@ -62,7 +62,10 @@
   2. EF Core persists and loads entities with typed IDs without schema changes (Guid columns unchanged in database)
   3. All API endpoints serialize/deserialize typed IDs as plain GUIDs in JSON responses (dashboard unaffected)
   4. All existing tests pass with typed IDs (no behavioral regression)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 13-01-PLAN.md -- Vogen setup + typed ID definitions + generic BaseEntity<TId> + EF Core converter registration
+- [ ] 13-02-PLAN.md -- Apply typed IDs to all entities + update all callers + dashboard branded types
 
 ### Phase 14: Value Objects
 **Goal**: Domain primitives enforce their own validity -- invalid prices, quantities, or amounts cannot exist at runtime
