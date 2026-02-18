@@ -1,19 +1,21 @@
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Models.Ids;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Models;
 
 public class DcaConfiguration : BaseEntity<DcaConfigurationId>
 {
 
-    public decimal BaseDailyAmount { get; set; }
+    public UsdAmount BaseDailyAmount { get; set; }
     public int DailyBuyHour { get; set; }
     public int DailyBuyMinute { get; set; }
     public int HighLookbackDays { get; set; }
     public bool DryRun { get; set; }
     public int BearMarketMaPeriod { get; set; }
-    public decimal BearBoostFactor { get; set; }
-    public decimal MaxMultiplierCap { get; set; }
+    public Multiplier BearBoostFactor { get; set; }
+    public Multiplier MaxMultiplierCap { get; set; }
+    // Stored as jsonb -- keep raw decimals per research (Pitfall 3: jsonb STJ serialization)
     public List<MultiplierTierData> MultiplierTiers { get; set; } = [];
 }
 

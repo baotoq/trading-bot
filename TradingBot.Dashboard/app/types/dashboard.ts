@@ -1,12 +1,20 @@
 // Branded types for type-safe IDs (mirrors backend strongly-typed IDs)
 export type PurchaseId = string & { readonly __brand: 'PurchaseId' }
 
+// Branded types for type-safe value objects (mirrors backend domain primitives)
+export type Price = number & { readonly __brand: 'Price' }
+export type UsdAmount = number & { readonly __brand: 'UsdAmount' }
+export type Quantity = number & { readonly __brand: 'Quantity' }
+export type BtcMultiplier = number & { readonly __brand: 'Multiplier' }
+export type Percentage = number & { readonly __brand: 'Percentage' }
+export type TradingSymbol = string & { readonly __brand: 'Symbol' }
+
 // Portfolio overview (matches PortfolioResponse)
 export interface PortfolioResponse {
-  totalBtc: number
-  totalCost: number
-  averageCostBasis: number
-  currentPrice: number
+  totalBtc: Quantity
+  totalCost: UsdAmount
+  averageCostBasis: Price
+  currentPrice: Price
   unrealizedPnl: number
   unrealizedPnlPercent: number
   totalPurchaseCount: number
@@ -24,12 +32,12 @@ export interface PurchaseHistoryResponse {
 export interface PurchaseDto {
   id: PurchaseId
   executedAt: string
-  price: number
-  cost: number
-  quantity: number
+  price: Price
+  cost: UsdAmount
+  quantity: Quantity
   multiplierTier: string
-  multiplier: number
-  dropPercentage: number
+  multiplier: BtcMultiplier
+  dropPercentage: Percentage
 }
 
 // Live status (matches LiveStatusResponse)
@@ -38,8 +46,8 @@ export interface LiveStatusResponse {
   healthMessage: string | null
   nextBuyTime: string | null
   lastPurchaseTime: string | null
-  lastPurchasePrice: number | null
-  lastPurchaseBtc: number | null
+  lastPurchasePrice: Price | null
+  lastPurchaseBtc: Quantity | null
   lastPurchaseTier: string | null
 }
 
@@ -47,18 +55,18 @@ export interface LiveStatusResponse {
 export interface PriceChartResponse {
   prices: PricePointDto[]
   purchases: PurchaseMarkerDto[]
-  averageCostBasis: number
+  averageCostBasis: Price
 }
 
 export interface PricePointDto {
   date: string
-  price: number
+  price: Price
 }
 
 export interface PurchaseMarkerDto {
   date: string
-  price: number
-  btcAmount: number
+  price: Price
+  btcAmount: Quantity
   tier: string
 }
 

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TradingBot.ApiService.Configuration;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Endpoints;
 
@@ -210,7 +211,7 @@ public static class DashboardEndpoints
 
         var prices = await db.DailyPrices
             .AsNoTracking()
-            .Where(dp => dp.Symbol == "BTC" && dp.Date >= startDate)
+            .Where(dp => dp.Symbol == Symbol.Btc && dp.Date >= startDate)
             .OrderBy(dp => dp.Date)
             .Select(dp => new PricePointDto(
                 Date: dp.Date.ToString("yyyy-MM-dd"),

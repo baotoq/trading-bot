@@ -1,13 +1,15 @@
+using TradingBot.ApiService.Models.Values;
+
 namespace TradingBot.ApiService.Endpoints;
 
 // Portfolio overview
 public record PortfolioResponse(
-    decimal TotalBtc,
-    decimal TotalCost,
-    decimal AverageCostBasis,
-    decimal CurrentPrice,
-    decimal UnrealizedPnl,
-    decimal UnrealizedPnlPercent,
+    Quantity TotalBtc,
+    UsdAmount TotalCost,
+    Price AverageCostBasis,
+    Price CurrentPrice,
+    decimal UnrealizedPnl,         // Stays decimal: can be negative (no value object fits)
+    decimal UnrealizedPnlPercent,  // Stays decimal: can be negative
     int TotalPurchaseCount,
     DateTimeOffset? FirstPurchaseDate,
     DateTimeOffset? LastPurchaseDate
@@ -23,12 +25,12 @@ public record PurchaseHistoryResponse(
 public record PurchaseDto(
     Guid Id,
     DateTimeOffset ExecutedAt,
-    decimal Price,
-    decimal Cost,
-    decimal Quantity,
+    Price Price,
+    UsdAmount Cost,
+    Quantity Quantity,
     string MultiplierTier,
-    decimal Multiplier,
-    decimal DropPercentage
+    Multiplier Multiplier,
+    Percentage DropPercentage
 );
 
 // Live status
@@ -37,8 +39,8 @@ public record LiveStatusResponse(
     string? HealthMessage,
     DateTimeOffset? NextBuyTime,
     DateTimeOffset? LastPurchaseTime,
-    decimal? LastPurchasePrice,
-    decimal? LastPurchaseBtc,
+    Price? LastPurchasePrice,
+    Quantity? LastPurchaseBtc,
     string? LastPurchaseTier
 );
 
@@ -46,43 +48,43 @@ public record LiveStatusResponse(
 public record PriceChartResponse(
     List<PricePointDto> Prices,
     List<PurchaseMarkerDto> Purchases,
-    decimal AverageCostBasis
+    Price AverageCostBasis
 );
 
-public record PricePointDto(string Date, decimal Price);
+public record PricePointDto(string Date, Price Price);
 
-public record PurchaseMarkerDto(string Date, decimal Price, decimal BtcAmount, string Tier);
+public record PurchaseMarkerDto(string Date, Price Price, Quantity BtcAmount, string Tier);
 
 // DCA config for backtest form pre-fill
 public record DcaConfigResponse(
-    decimal BaseDailyAmount,
+    UsdAmount BaseDailyAmount,
     int HighLookbackDays,
     int BearMarketMaPeriod,
-    decimal BearBoostFactor,
-    decimal MaxMultiplierCap,
+    Multiplier BearBoostFactor,
+    Multiplier MaxMultiplierCap,
     List<MultiplierTierDto> Tiers);
 
-public record MultiplierTierDto(decimal DropPercentage, decimal Multiplier);
+public record MultiplierTierDto(Percentage DropPercentage, Multiplier Multiplier);
 
 // Configuration management (full config with all fields)
 public record ConfigResponse(
-    decimal BaseDailyAmount,
+    UsdAmount BaseDailyAmount,
     int DailyBuyHour,
     int DailyBuyMinute,
     int HighLookbackDays,
     bool DryRun,
     int BearMarketMaPeriod,
-    decimal BearBoostFactor,
-    decimal MaxMultiplierCap,
+    Multiplier BearBoostFactor,
+    Multiplier MaxMultiplierCap,
     List<MultiplierTierDto> Tiers);
 
 public record UpdateConfigRequest(
-    decimal BaseDailyAmount,
+    UsdAmount BaseDailyAmount,
     int DailyBuyHour,
     int DailyBuyMinute,
     int HighLookbackDays,
     bool DryRun,
     int BearMarketMaPeriod,
-    decimal BearBoostFactor,
-    decimal MaxMultiplierCap,
+    Multiplier BearBoostFactor,
+    Multiplier MaxMultiplierCap,
     List<MultiplierTierDto> Tiers);

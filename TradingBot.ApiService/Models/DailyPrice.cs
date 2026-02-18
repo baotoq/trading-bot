@@ -1,4 +1,5 @@
 using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Models;
 
@@ -18,30 +19,31 @@ public class DailyPrice : AuditedEntity
     /// Trading symbol (e.g., "BTC").
     /// Part of composite primary key with Date.
     /// </summary>
-    public string Symbol { get; set; } = "BTC";
+    public Symbol Symbol { get; set; } = Symbol.Btc;
 
     /// <summary>
     /// Opening price for the day.
     /// </summary>
-    public decimal Open { get; set; }
+    public Price Open { get; set; }
 
     /// <summary>
     /// Highest price during the day.
     /// </summary>
-    public decimal High { get; set; }
+    public Price High { get; set; }
 
     /// <summary>
     /// Lowest price during the day.
     /// </summary>
-    public decimal Low { get; set; }
+    public Price Low { get; set; }
 
     /// <summary>
     /// Closing price for the day.
     /// </summary>
-    public decimal Close { get; set; }
+    public Price Close { get; set; }
 
     /// <summary>
     /// Trading volume for the day.
+    /// Stays decimal: no domain semantics beyond "number of units"
     /// </summary>
     public decimal Volume { get; set; }
 

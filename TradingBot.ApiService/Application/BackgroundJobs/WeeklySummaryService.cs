@@ -134,8 +134,8 @@ public class WeeklySummaryService(
         var weekBtc = purchases.Sum(p => p.Quantity);
         var weekUsd = purchases.Sum(p => p.Cost);
         var weekAvgPrice = weekBtc > 0 ? weekUsd / weekBtc : 0m;
-        var weekBestPrice = purchases.Any() ? purchases.Min(p => p.Price) : 0m;
-        var weekWorstPrice = purchases.Any() ? purchases.Max(p => p.Price) : 0m;
+        var weekBestPrice = purchases.Any() ? purchases.Min(p => p.Price.Value) : 0m;
+        var weekWorstPrice = purchases.Any() ? purchases.Max(p => p.Price.Value) : 0m;
 
         var weekTotalsSection = weekCount > 0
             ? $"""

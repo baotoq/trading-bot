@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Models;
 using TradingBot.ApiService.Models.Ids;
+using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Infrastructure.Data;
 
@@ -24,6 +25,20 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             .HaveConversion<IngestionJobId.EfCoreValueConverter, IngestionJobId.EfCoreValueComparer>();
         configurationBuilder.Properties<DcaConfigurationId>()
             .HaveConversion<DcaConfigurationId.EfCoreValueConverter, DcaConfigurationId.EfCoreValueComparer>();
+
+        // Phase 14 (value objects)
+        configurationBuilder.Properties<Price>()
+            .HaveConversion<Price.EfCoreValueConverter, Price.EfCoreValueComparer>();
+        configurationBuilder.Properties<UsdAmount>()
+            .HaveConversion<UsdAmount.EfCoreValueConverter, UsdAmount.EfCoreValueComparer>();
+        configurationBuilder.Properties<Quantity>()
+            .HaveConversion<Quantity.EfCoreValueConverter, Quantity.EfCoreValueComparer>();
+        configurationBuilder.Properties<Multiplier>()
+            .HaveConversion<Multiplier.EfCoreValueConverter, Multiplier.EfCoreValueComparer>();
+        configurationBuilder.Properties<Percentage>()
+            .HaveConversion<Percentage.EfCoreValueConverter, Percentage.EfCoreValueComparer>();
+        configurationBuilder.Properties<Symbol>()
+            .HaveConversion<Symbol.EfCoreValueConverter, Symbol.EfCoreValueComparer>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

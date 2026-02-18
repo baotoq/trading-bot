@@ -209,8 +209,8 @@ public class PriceDataService(
             return 0; // Return 0 to signal "data unavailable"
         }
 
-        // Calculate simple moving average
-        var sma = closePrices.Average();
+        // Calculate simple moving average (extract underlying decimal for LINQ Average)
+        var sma = closePrices.Average(p => p.Value);
 
         logger.LogDebug("200-day SMA for {Symbol}: {SMA} (from {Count} days)", symbol, sma, closePrices.Count);
 
