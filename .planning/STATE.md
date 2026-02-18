@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 14 -- Value Objects (next phase of v2.0 DDD Foundation)
+**Current focus:** Phase 15 -- next phase of v2.0 DDD Foundation
 
 ## Current Position
 
-Phase: 14 of 18 (Value Objects -- In Progress)
-Plan: 1 of 2 in current phase (14-01 complete)
-Status: In Progress
-Last activity: 2026-02-18 -- Completed 14-01 (value object definitions and entity application)
+Phase: 14 of 18 (Value Objects -- Complete)
+Plan: 2 of 2 in current phase (14-01 and 14-02 complete)
+Status: In Progress (phase 14 done, moving to phase 15)
+Last activity: 2026-02-18 -- Completed 14-02 (value objects applied to services, DcaOptions config, backtest)
 
-Progress: [|||||||||||||||||||||||||.......] 69% (33/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||......] 71% (34/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [|||||||||||||||||||||||||.......] 69% (33/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 32
+- Total plans completed: 34
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -51,6 +51,7 @@ Progress: [|||||||||||||||||||||||||.......] 69% (33/~48 plans estimated)
 | 13-strongly-typed-ids | 01 | 6min | 2 | 6 |
 | 13-strongly-typed-ids | 02 | 4min | 2 | 13 |
 | 14-value-objects | 01 | 5min | 2 | 14 |
+| 14-value-objects | 02 | 15min | 2 | 13 |
 
 ## Accumulated Context
 
@@ -71,6 +72,8 @@ Recent for v2.0:
 - [Phase 14-value-objects]: Multiplier sanity cap 20x (not 10x); operational cap remains MaxMultiplierCap in config
 - [Phase 14-value-objects]: High30Day/Ma200Day/RemainingUsdc stay decimal (0 sentinel for data unavailable; value objects reject 0)
 - [Phase 14-value-objects]: MultiplierTierData inside jsonb keeps raw decimal (avoid EF Core jsonb/STJ serialization complexity)
+- [Phase 14-value-objects]: Conversions.TypeConverter added globally for ASP.NET Core config binding; CultureInfo.InvariantCulture required for tier label formatting
+- [Phase 14-value-objects]: DcaOptionsValidator removes positivity checks now enforced by value objects at binding time; DcaExecutionService fallback constructs MultiplierResult directly to avoid 0-sentinel path
 
 ### Known Risks
 
@@ -89,9 +92,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 14-01-PLAN.md
-Resume file: .planning/phases/14-value-objects/14-01-SUMMARY.md
-Next step: Execute 14-02 (apply value objects to services, DcaOptions config, backtest)
+Stopped at: Completed 14-02-PLAN.md
+Resume file: .planning/phases/14-value-objects/14-02-SUMMARY.md
+Next step: Execute Phase 15 (next phase per ROADMAP)
 
 ---
-*State updated: 2026-02-18 after 14-01 (value object definitions and entity application)*
+*State updated: 2026-02-18 after 14-02 (value objects applied to services, DcaOptions config, backtest, all tests pass)*
