@@ -1,8 +1,9 @@
 using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Models;
 
-public class Purchase : BaseEntity
+public class Purchase : BaseEntity<PurchaseId>
 {
     public DateTimeOffset ExecutedAt { get; set; }
     public decimal Price { get; set; }

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Services.HistoricalData;
 using TradingBot.ApiService.Application.Services.HistoricalData.Models;
 using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Endpoints;
 
@@ -41,6 +42,7 @@ public static class DataEndpoints
 
         var job = new Models.IngestionJob
         {
+            Id = IngestionJobId.New(),
             StartDate = startDate,
             EndDate = endDate,
             Force = force,
@@ -172,12 +174,12 @@ public static class DataEndpoints
     }
 
     private static async Task<IResult> GetJobStatusAsync(
-        Guid jobId,
+        IngestionJobId jobId,
         TradingBotDbContext db,
         ILogger<Program> logger,
         CancellationToken ct)
     {
-        var job = await db.IngestionJobs.FindAsync([jobId], ct);
+        var job = await db.IngestionJobs.FirstOrDefaultAsync(j => j.Id == jobId, ct);
 
         if (job == null)
         {

@@ -1,14 +1,14 @@
 using TradingBot.ApiService.Application.Services.HistoricalData.Models;
 using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Models;
 
 /// <summary>
 /// Tracks historical data ingestion jobs with status, progress, and error details.
 /// </summary>
-public class IngestionJob : AuditedEntity
+public class IngestionJob : BaseEntity<IngestionJobId>
 {
-    public Guid Id { get; init; } = Guid.CreateVersion7();
 
     public IngestionJobStatus Status { get; set; } = IngestionJobStatus.Pending;
 

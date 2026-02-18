@@ -1,11 +1,10 @@
 using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Models;
 
-public class DcaConfiguration : AuditedEntity
+public class DcaConfiguration : BaseEntity<DcaConfigurationId>
 {
-    // Fixed ID for singleton pattern
-    public Guid Id { get; init; } = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
     public decimal BaseDailyAmount { get; set; }
     public int DailyBuyHour { get; set; }

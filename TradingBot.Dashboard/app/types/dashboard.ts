@@ -1,3 +1,6 @@
+// Branded types for type-safe IDs (mirrors backend strongly-typed IDs)
+export type PurchaseId = string & { readonly __brand: 'PurchaseId' }
+
 // Portfolio overview (matches PortfolioResponse)
 export interface PortfolioResponse {
   totalBtc: number
@@ -19,7 +22,7 @@ export interface PurchaseHistoryResponse {
 }
 
 export interface PurchaseDto {
-  id: string
+  id: PurchaseId
   executedAt: string
   price: number
   cost: number

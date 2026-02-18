@@ -1,4 +1,5 @@
 using System.Threading.Channels;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Services.HistoricalData;
 
@@ -8,7 +9,7 @@ namespace TradingBot.ApiService.Application.Services.HistoricalData;
 /// </summary>
 public class IngestionJobQueue
 {
-    private readonly Channel<Guid> _channel;
+    private readonly Channel<IngestionJobId> _channel;
 
     public IngestionJobQueue()
     {
@@ -16,13 +17,13 @@ public class IngestionJobQueue
         {
             FullMode = BoundedChannelFullMode.DropWrite
         };
-        _channel = Channel.CreateBounded<Guid>(options);
+        _channel = Channel.CreateBounded<IngestionJobId>(options);
     }
 
     /// <summary>
     /// Attempts to enqueue a job. Returns false if queue is full (job already running).
     /// </summary>
-    public bool TryEnqueue(Guid jobId)
+    public bool TryEnqueue(IngestionJobId jobId)
     {
         return _channel.Writer.TryWrite(jobId);
     }
@@ -31,7 +32,7 @@ public class IngestionJobQueue
     /// Reads all jobs from the queue as they become available.
     /// Blocks until a job is enqueued.
     /// </summary>
-    public IAsyncEnumerable<Guid> ReadAllAsync(CancellationToken ct = default)
+    public IAsyncEnumerable<IngestionJobId> ReadAllAsync(CancellationToken ct = default)
     {
         return _channel.Reader.ReadAllAsync(ct);
     }

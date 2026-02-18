@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Models;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -50,7 +51,7 @@ public class ConfigurationService(
         {
             entity = new DcaConfiguration
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001")
+                Id = DcaConfigurationId.Singleton
             };
             db.DcaConfigurations.Add(entity);
         }

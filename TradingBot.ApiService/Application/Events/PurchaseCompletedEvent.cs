@@ -1,9 +1,10 @@
 using TradingBot.ApiService.BuildingBlocks;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Events;
 
 public record PurchaseCompletedEvent(
-    Guid PurchaseId,
+    PurchaseId PurchaseId,
     decimal BtcAmount,
     decimal Price,
     decimal UsdSpent,

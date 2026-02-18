@@ -1,8 +1,10 @@
 using EFCore.BulkExtensions;
+using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Services.HistoricalData.Models;
 using TradingBot.ApiService.Infrastructure.CoinGecko;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Models;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Services.HistoricalData;
 
@@ -18,9 +20,9 @@ public class DataIngestionService(
     /// <summary>
     /// Runs a complete ingestion job: fetch data, bulk insert, detect gaps, auto-fill, update job status.
     /// </summary>
-    public async Task RunIngestionAsync(Guid jobId, CancellationToken ct = default)
+    public async Task RunIngestionAsync(IngestionJobId jobId, CancellationToken ct = default)
     {
-        var job = await db.IngestionJobs.FindAsync([jobId], ct);
+        var job = await db.IngestionJobs.FirstOrDefaultAsync(j => j.Id == jobId, ct);
         if (job == null)
         {
             throw new InvalidOperationException($"Ingestion job {jobId} not found");

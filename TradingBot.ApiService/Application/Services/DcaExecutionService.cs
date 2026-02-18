@@ -10,6 +10,7 @@ using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Hyperliquid.Models;
 using TradingBot.ApiService.Models;
+using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Services;
 
@@ -134,6 +135,7 @@ public class DcaExecutionService(
         // Step 6: Create purchase record and place order
         var purchase = new Purchase
         {
+            Id = PurchaseId.New(),
             ExecutedAt = DateTimeOffset.UtcNow,
             Price = currentPrice,
             Quantity = 0, // Will be updated with actual fill
