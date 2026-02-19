@@ -3,4 +3,4 @@ using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Events;
 
-public record PurchaseFailedEvent(PurchaseId PurchaseId) : IDomainEvent;
+public record PurchaseCreatedEvent(PurchaseId PurchaseId) : IDomainEvent;
