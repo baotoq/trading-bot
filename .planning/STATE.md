@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 17 of 18 (Domain Event Dispatch -- In Progress)
-Plan: 2 of 3 in current phase (Plan 02 complete)
-Status: Phase 17 In Progress -- Plans 01-02 complete, Plan 03 pending
-Last activity: 2026-02-19 -- Completed 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage)
+Phase: 17 of 18 (Domain Event Dispatch -- Complete)
+Plan: 3 of 3 in current phase (Plan 03 complete -- Phase 17 DONE)
+Status: Phase 17 Complete -- All 3 plans done; Phase 18 next
+Last activity: 2026-02-19 -- Completed 17-03 (PubSubRegistry subscriptions, single dispatch path, IPublisher removed)
 
-Progress: [|||||||||||||||||||||||||||||||||.] 83% (40/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||||||||||] 85% (41/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [|||||||||||||||||||||||||||||||||.] 83% (40/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 40
+- Total plans completed: 41
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -58,6 +58,7 @@ Progress: [|||||||||||||||||||||||||||||||||.] 83% (40/~48 plans estimated)
 | 16-result-pattern | 02 | 1min | 2 | 2 |
 | 17-domain-event-dispatch | 01 | 49min | 2 | 12 |
 | 17-domain-event-dispatch | 02 | 4min | 2 | 12 |
+| 17-domain-event-dispatch | 03 | 2min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -92,6 +93,10 @@ Recent for v2.0:
 - [Phase 17-domain-event-dispatch]: MapPubSub uses mediator.Publish(object) with null check -- MediatR runtime dispatch works for both IDomainEvent and IntegrationEvent types; no IntegrationEvent cast needed
 - [Phase 17-domain-event-dispatch]: IDomainEventPublisher.PublishDirectAsync calls SaveChangesAsync immediately; appropriate for non-aggregate events without surrounding aggregate transaction
 - [Phase 17-domain-event-dispatch]: Dead-letter check at start of ProcessOutboxMessagesAsync (before processing); message moved to dead-letter on 4th pickup cycle after 3 retries exhausted
+- [Phase 17-domain-event-dispatch]: All 6 domain events subscribed in PubSubRegistry using fluent .Subscribe<T>() chaining on returned registry value
+- [Phase 17-domain-event-dispatch]: DcaExecutionService manual dispatch block (Steps 8-9) removed -- interceptor from Plan 01 handles this automatically during SaveChangesAsync
+- [Phase 17-domain-event-dispatch]: PurchaseSkippedEvent now uses IDomainEventPublisher.PublishDirectAsync (same outbox path as aggregate events via Dapr)
+- [Phase 17-domain-event-dispatch]: IPublisher (MediatR) fully removed from DcaExecutionService; all event dispatch via single outbox pipeline
 
 ### Known Risks
 
@@ -109,9 +114,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 17-02-PLAN.md
-Resume file: .planning/phases/17-domain-event-dispatch/17-02-SUMMARY.md
-Next step: Execute Phase 17 Plan 03 (domain event subscriptions registration)
+Stopped at: Completed 17-03-PLAN.md
+Resume file: .planning/phases/17-domain-event-dispatch/17-03-SUMMARY.md
+Next step: Execute Phase 18 (first plan)
 
 ---
-*State updated: 2026-02-19 after 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage; Phase 17 Plan 02 complete)*
+*State updated: 2026-02-19 after 17-03 (PubSubRegistry subscriptions, single dispatch path, IPublisher removed; Phase 17 complete)*
