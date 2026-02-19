@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+using ErrorOr;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TradingBot.ApiService.Configuration;
@@ -12,7 +12,7 @@ namespace TradingBot.ApiService.Application.Services;
 public interface IConfigurationService
 {
     Task<DcaOptions> GetCurrentAsync(CancellationToken ct = default);
-    Task UpdateAsync(DcaOptions options, CancellationToken ct = default);
+    Task<ErrorOr<Updated>> UpdateAsync(DcaOptions options, CancellationToken ct = default);
     Task<DcaOptions> GetDefaultsAsync(CancellationToken ct = default);
 }
 
@@ -36,13 +36,14 @@ public class ConfigurationService(
         return MapToOptions(entity);
     }
 
-    public async Task UpdateAsync(DcaOptions options, CancellationToken ct = default)
+    public async Task<ErrorOr<Updated>> UpdateAsync(DcaOptions options, CancellationToken ct = default)
     {
-        // Validate input
+        // Validate input (defense-in-depth: catches config-binding errors before touching aggregate)
         var validationResult = validator.Validate(Options.DefaultName, options);
         if (validationResult.Failed)
         {
-            throw new ValidationException(string.Join("; ", validationResult.Failures ?? []));
+            return Error.Validation("ConfigValidationFailed",
+                string.Join("; ", validationResult.Failures ?? []));
         }
 
         // Upsert configuration
@@ -50,6 +51,7 @@ public class ConfigurationService(
 
         if (entity == null)
         {
+            // Create path: DcaConfiguration.Create() still throws per locked decision (validator already passed)
             entity = DcaConfiguration.Create(
                 DcaConfigurationId.Singleton,
                 options.BaseDailyAmount,
@@ -67,19 +69,30 @@ public class ConfigurationService(
         }
         else
         {
+            // Update path: call behavior methods and propagate ErrorOr errors
             entity.UpdateDailyAmount(options.BaseDailyAmount);
-            entity.UpdateSchedule(options.DailyBuyHour, options.DailyBuyMinute);
-            entity.UpdateTiers(options.MultiplierTiers
+
+            var scheduleResult = entity.UpdateSchedule(options.DailyBuyHour, options.DailyBuyMinute);
+            if (scheduleResult.IsError) return scheduleResult.Errors;
+
+            var tiersResult = entity.UpdateTiers(options.MultiplierTiers
                 .Select(t => new MultiplierTierData(t.DropPercentage.Value, t.Multiplier.Value))
                 .ToList());
-            entity.UpdateBearMarket(options.BearMarketMaPeriod, options.BearBoostFactor);
-            entity.UpdateSettings(options.HighLookbackDays, options.DryRun, options.MaxMultiplierCap);
+            if (tiersResult.IsError) return tiersResult.Errors;
+
+            var bearResult = entity.UpdateBearMarket(options.BearMarketMaPeriod, options.BearBoostFactor);
+            if (bearResult.IsError) return bearResult.Errors;
+
+            var settingsResult = entity.UpdateSettings(options.HighLookbackDays, options.DryRun, options.MaxMultiplierCap);
+            if (settingsResult.IsError) return settingsResult.Errors;
         }
 
         await db.SaveChangesAsync(ct);
 
         // CRITICAL: Invalidate IOptionsMonitor cache so next read picks up new values
         optionsCache.TryRemove(Options.DefaultName);
+
+        return Result.Updated;
     }
 
     public Task<DcaOptions> GetDefaultsAsync(CancellationToken ct = default)
