@@ -5,7 +5,7 @@
 - **v1.0 Daily BTC Smart DCA** -- Phases 1-4 (shipped 2026-02-12) -- [archive](milestones/v1.0-ROADMAP.md)
 - **v1.1 Backtesting Engine** -- Phases 5-8 (shipped 2026-02-13) -- [archive](milestones/v1.1-ROADMAP.md)
 - **v1.2 Web Dashboard** -- Phases 9-12 (shipped 2026-02-14) -- [archive](milestones/v1.2-ROADMAP.md)
-- **v2.0 DDD Foundation** -- Phases 13-18 (in progress)
+- **v2.0 DDD Foundation** -- Phases 13-19 (in progress)
 
 ## Phases
 
@@ -50,6 +50,7 @@
 - [x] **Phase 16: Result Pattern** - Explicit error handling replacing exceptions in domain operations (completed 2026-02-19)
 - [x] **Phase 17: Domain Event Dispatch** - Aggregate-raised events dispatched after SaveChanges (completed 2026-02-19)
 - [x] **Phase 18: Specification Pattern** - Reusable, testable query composition (completed 2026-02-19)
+- [ ] **Phase 19: Dashboard Nullable Price Fix** - Fix runtime crash on empty DB/unreachable Hyperliquid (gap closure)
 
 ## Phase Details
 
@@ -138,10 +139,24 @@ Plans:
 - [ ] 18-02-PLAN.md -- Apply specs to DashboardEndpoints + WeeklySummaryService + MissedPurchaseVerificationService
 - [ ] 18-03-PLAN.md -- TestContainers integration tests for all specs against real PostgreSQL
 
+### Phase 19: Dashboard Nullable Price Fix
+**Goal**: Dashboard endpoints handle empty DB and unreachable Hyperliquid gracefully -- no 500 errors from value object validation
+**Depends on**: Phase 14 (value objects introduced the Price type), Phase 18 (specifications used in dashboard)
+**Requirements**: TS-04
+**Gap Closure:** Closes INT-01 and FLOW-01 from v2.0 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. `PortfolioResponse.AverageCostBasis`, `CurrentPrice`, and `PriceChartResponse.AverageCostBasis` are `Price?` (nullable) instead of `Price`
+  2. Dashboard portfolio endpoint returns valid JSON with null prices when DB is empty or Hyperliquid unreachable (no 500)
+  3. Dashboard chart endpoint returns valid JSON with null average cost basis when no purchases exist (no 500)
+  4. All existing tests pass (no behavioral regression)
+**Plans**: 1 plan
+Plans:
+- [ ] 19-01-PLAN.md -- Make Price fields nullable in DTOs + update endpoint construction logic + dashboard null handling
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
+Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -164,6 +179,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 16. Result Pattern | 2/2 | Complete    | 2026-02-19 | - |
 | 17. Domain Event Dispatch | 3/3 | Complete    | 2026-02-19 | - |
 | 18. Specification Pattern | 3/3 | Complete    | 2026-02-19 | - |
+| 19. Dashboard Nullable Price Fix | 0/1 | Pending | - | - |
 
 ---
-*Roadmap updated: 2026-02-19 after 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage)*
+*Roadmap updated: 2026-02-20 after gap closure planning (Phase 19 added for INT-01/FLOW-01)*
