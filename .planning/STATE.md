@@ -2,23 +2,23 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v2.0 DDD Foundation
-**Updated:** 2026-02-18
+**Updated:** 2026-02-19
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 15 -- next phase of v2.0 DDD Foundation
+**Current focus:** Phase 15 -- Rich Aggregate Roots
 
 ## Current Position
 
-Phase: 14 of 18 (Value Objects -- Complete)
-Plan: 2 of 2 in current phase (14-01 and 14-02 complete)
-Status: In Progress (phase 14 done, moving to phase 15)
-Last activity: 2026-02-18 -- Completed 14-02 (value objects applied to services, DcaOptions config, backtest)
+Phase: 15 of 18 (Rich Aggregate Roots -- In Progress)
+Plan: 1 of 2 in current phase (15-01 complete)
+Status: In Progress
+Last activity: 2026-02-19 -- Completed 15-01 (AggregateRoot base class, Purchase rich aggregate, identity-only events, aggregate event dispatch)
 
-Progress: [||||||||||||||||||||||||||......] 71% (34/~48 plans estimated)
+Progress: [|||||||||||||||||||||||||||.....] 73% (35/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [||||||||||||||||||||||||||......] 71% (34/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 34
+- Total plans completed: 35
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -52,6 +52,7 @@ Progress: [||||||||||||||||||||||||||......] 71% (34/~48 plans estimated)
 | 13-strongly-typed-ids | 02 | 4min | 2 | 13 |
 | 14-value-objects | 01 | 5min | 2 | 14 |
 | 14-value-objects | 02 | 15min | 2 | 13 |
+| 15-rich-aggregate-roots | 01 | 4min | 2 | 9 |
 
 ## Accumulated Context
 
@@ -74,6 +75,8 @@ Recent for v2.0:
 - [Phase 14-value-objects]: MultiplierTierData inside jsonb keeps raw decimal (avoid EF Core jsonb/STJ serialization complexity)
 - [Phase 14-value-objects]: Conversions.TypeConverter added globally for ASP.NET Core config binding; CultureInfo.InvariantCulture required for tier label formatting
 - [Phase 14-value-objects]: DcaOptionsValidator removes positivity checks now enforced by value objects at binding time; DcaExecutionService fallback constructs MultiplierResult directly to avoid 0-sentinel path
+- [Phase 15-rich-aggregate-roots]: AggregateRoot<TId> base class with protected AddDomainEvent and ClearDomainEvents; Purchase uses static Create() factory and behavior methods that raise identity-only domain events
+- [Phase 15-rich-aggregate-roots]: DcaSchedulerBackgroundService scheduler-level catch blocks log-only for infrastructure failures (no PurchaseFailedEvent): no Purchase aggregate exists at scheduler level to provide PurchaseId
 
 ### Known Risks
 
@@ -91,10 +94,10 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-18
-Stopped at: Completed 14-02-PLAN.md
-Resume file: .planning/phases/14-value-objects/14-02-SUMMARY.md
-Next step: Execute Phase 15 (next phase per ROADMAP)
+Last session: 2026-02-19
+Stopped at: Completed 15-01-PLAN.md
+Resume file: .planning/phases/15-rich-aggregate-roots/15-01-SUMMARY.md
+Next step: Execute Phase 15 Plan 02 (next plan per ROADMAP)
 
 ---
-*State updated: 2026-02-18 after 14-02 (value objects applied to services, DcaOptions config, backtest, all tests pass)*
+*State updated: 2026-02-19 after 15-01 (AggregateRoot base class, Purchase rich aggregate, identity-only events, all 53 tests pass)*
