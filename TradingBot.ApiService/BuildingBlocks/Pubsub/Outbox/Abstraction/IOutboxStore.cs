@@ -7,4 +7,5 @@ public interface IOutboxStore
     Task MarkAsProcessedAsync(Guid messageId, CancellationToken cancellationToken = default);
     Task MarkAsAsync(Guid messageId, ProcessingStatus status, CancellationToken cancellationToken = default);
     Task IncrementRetryAsync(Guid messageId, CancellationToken cancellationToken = default);
+    Task MoveToDeadLetterAsync(OutboxMessage message, string? lastError, CancellationToken cancellationToken = default);
 }

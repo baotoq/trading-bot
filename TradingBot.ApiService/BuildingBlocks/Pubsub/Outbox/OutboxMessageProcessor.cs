@@ -15,8 +15,8 @@ public class OutboxMessageProcessor(
         {
             if (message.RetryCount >= 3)
             {
-                logger.LogWarning("Message {MessageId} exceeded max retry count, skipping", message.Id);
-                await outboxStore.MarkAsAsync(message.Id, ProcessingStatus.Failed, cancellationToken);
+                logger.LogWarning("Message {MessageId} {EventName} exceeded max retry count, moving to dead-letter", message.Id, message.EventName);
+                await outboxStore.MoveToDeadLetterAsync(message, null, cancellationToken);
                 return;
             }
 

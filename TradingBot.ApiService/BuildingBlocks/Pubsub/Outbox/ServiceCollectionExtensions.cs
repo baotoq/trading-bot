@@ -25,6 +25,9 @@ public static class ServiceCollectionExtensions
             services.AddScoped<IOutboxStore>(sp => new EfCoreOutboxStore(sp.GetRequiredService<TDbContext>()));
             services.AddScoped<IEventPublisher, OutboxEventPublisher>();
             services.AddScoped<IOutboxMessageProcessor, OutboxMessageProcessor>();
+            services.AddScoped<IDomainEventPublisher>(sp => new DomainEventPublisher(
+                sp.GetRequiredService<TDbContext>(),
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
             services.AddSingleton(new JsonSerializerOptions
             {

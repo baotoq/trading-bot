@@ -56,4 +56,19 @@ public class EfCoreOutboxStore(DbContext dbContext) : IOutboxStore
             await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
+
+    public async Task MoveToDeadLetterAsync(OutboxMessage message, string? lastError, CancellationToken cancellationToken = default)
+    {
+        var deadLetter = new DeadLetterMessage
+        {
+            EventName = message.EventName,
+            Payload = message.Payload,
+            FailedAt = DateTimeOffset.UtcNow,
+            LastError = lastError,
+            RetryCount = message.RetryCount,
+        };
+        await dbContext.Set<DeadLetterMessage>().AddAsync(deadLetter, cancellationToken);
+        dbContext.Set<OutboxMessage>().Remove(message);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

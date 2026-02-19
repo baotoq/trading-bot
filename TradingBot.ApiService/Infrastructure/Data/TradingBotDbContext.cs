@@ -14,6 +14,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
     public DbSet<DcaConfiguration> DcaConfigurations => Set<DcaConfiguration>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+    public DbSet<DeadLetterMessage> DeadLetterMessages => Set<DeadLetterMessage>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -156,5 +157,13 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
         });
 
         modelBuilder.AddOutboxMessageEntity();
+
+        modelBuilder.Entity<DeadLetterMessage>(entity =>
+        {
+            entity.ToTable("DeadLetterMessages");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.EventName);
+            entity.HasIndex(e => e.FailedAt);
+        });
     }
 }
