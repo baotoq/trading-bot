@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using TradingBot.ApiService.Application.Services;
+using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Configuration;
 
 namespace TradingBot.ApiService.Endpoints;
@@ -42,43 +42,42 @@ public static class ConfigurationEndpoints
         ILogger<Program> logger,
         CancellationToken ct)
     {
-        try
+        var options = new DcaOptions
         {
-            var options = new DcaOptions
-            {
-                BaseDailyAmount = request.BaseDailyAmount,
-                DailyBuyHour = request.DailyBuyHour,
-                DailyBuyMinute = request.DailyBuyMinute,
-                HighLookbackDays = request.HighLookbackDays,
-                DryRun = request.DryRun,
-                BearMarketMaPeriod = request.BearMarketMaPeriod,
-                BearBoostFactor = request.BearBoostFactor,
-                MaxMultiplierCap = request.MaxMultiplierCap,
-                MultiplierTiers = request.Tiers
-                    .Select(t => new MultiplierTier
-                    {
-                        DropPercentage = t.DropPercentage,
-                        Multiplier = t.Multiplier
-                    })
-                    .ToList()
-            };
+            BaseDailyAmount = request.BaseDailyAmount,
+            DailyBuyHour = request.DailyBuyHour,
+            DailyBuyMinute = request.DailyBuyMinute,
+            HighLookbackDays = request.HighLookbackDays,
+            DryRun = request.DryRun,
+            BearMarketMaPeriod = request.BearMarketMaPeriod,
+            BearBoostFactor = request.BearBoostFactor,
+            MaxMultiplierCap = request.MaxMultiplierCap,
+            MultiplierTiers = request.Tiers
+                .Select(t => new MultiplierTier
+                {
+                    DropPercentage = t.DropPercentage,
+                    Multiplier = t.Multiplier
+                })
+                .ToList()
+        };
 
-            await configService.UpdateAsync(options, ct);
+        var result = await configService.UpdateAsync(options, ct);
 
-            logger.LogInformation(
-                "DCA configuration updated: BaseDailyAmount={BaseDailyAmount}, DailyBuyTime={Hour}:{Minute}, DryRun={DryRun}",
-                options.BaseDailyAmount,
-                options.DailyBuyHour,
-                options.DailyBuyMinute,
-                options.DryRun);
-
-            return Results.Ok(new { message = "Configuration updated successfully" });
-        }
-        catch (ValidationException ex)
+        if (result.IsError)
         {
-            logger.LogWarning(ex, "Configuration update failed validation");
-            return Results.BadRequest(new { errors = new[] { ex.Message } });
+            logger.LogWarning("Configuration update failed: {Errors}",
+                string.Join(", ", result.Errors.Select(e => e.Code)));
+            return result.ToHttpResult();
         }
+
+        logger.LogInformation(
+            "DCA configuration updated: BaseDailyAmount={BaseDailyAmount}, DailyBuyTime={Hour}:{Minute}, DryRun={DryRun}",
+            options.BaseDailyAmount,
+            options.DailyBuyHour,
+            options.DailyBuyMinute,
+            options.DryRun);
+
+        return Results.Ok(new { message = "Configuration updated successfully" });
     }
 
     private static ConfigResponse MapToConfigResponse(DcaOptions options)
