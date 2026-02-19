@@ -104,7 +104,10 @@ Plans:
   1. Domain operations (factory methods, behavior methods) return ErrorOr<T> for expected failures instead of throwing exceptions
   2. Minimal API endpoints map ErrorOr results to appropriate HTTP status codes (400 for validation, 404 for not found, 409 for conflict)
   3. Application services use Result pattern for orchestration -- no try/catch wrapping domain logic
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 16-01-PLAN.md -- ErrorOr package + DcaConfiguration error definitions + behavior methods return ErrorOr + ToHttpResult extension
+- [ ] 16-02-PLAN.md -- ConfigurationService ErrorOr orchestration + endpoint mapping + test verification
 
 ### Phase 17: Domain Event Dispatch
 **Goal**: Aggregates raise domain events when state changes, and those events reliably dispatch after persistence -- enabling loose coupling between aggregates
