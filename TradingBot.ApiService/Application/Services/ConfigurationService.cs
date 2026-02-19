@@ -50,15 +50,31 @@ public class ConfigurationService(
 
         if (entity == null)
         {
-            entity = new DcaConfiguration
-            {
-                Id = DcaConfigurationId.Singleton
-            };
+            entity = DcaConfiguration.Create(
+                DcaConfigurationId.Singleton,
+                options.BaseDailyAmount,
+                options.DailyBuyHour,
+                options.DailyBuyMinute,
+                options.HighLookbackDays,
+                options.DryRun,
+                options.BearMarketMaPeriod,
+                options.BearBoostFactor,
+                options.MaxMultiplierCap,
+                options.MultiplierTiers
+                    .Select(t => new MultiplierTierData(t.DropPercentage.Value, t.Multiplier.Value))
+                    .ToList());
             db.DcaConfigurations.Add(entity);
         }
-
-        MapFromOptions(entity, options);
-        entity.UpdatedAt = DateTimeOffset.UtcNow;
+        else
+        {
+            entity.UpdateDailyAmount(options.BaseDailyAmount);
+            entity.UpdateSchedule(options.DailyBuyHour, options.DailyBuyMinute);
+            entity.UpdateTiers(options.MultiplierTiers
+                .Select(t => new MultiplierTierData(t.DropPercentage.Value, t.Multiplier.Value))
+                .ToList());
+            entity.UpdateBearMarket(options.BearMarketMaPeriod, options.BearBoostFactor);
+            entity.UpdateSettings(options.HighLookbackDays, options.DryRun, options.MaxMultiplierCap);
+        }
 
         await db.SaveChangesAsync(ct);
 
@@ -95,20 +111,5 @@ public class ConfigurationService(
                 })
                 .ToList()
         };
-    }
-
-    private static void MapFromOptions(DcaConfiguration entity, DcaOptions options)
-    {
-        entity.BaseDailyAmount = options.BaseDailyAmount;
-        entity.DailyBuyHour = options.DailyBuyHour;
-        entity.DailyBuyMinute = options.DailyBuyMinute;
-        entity.HighLookbackDays = options.HighLookbackDays;
-        entity.DryRun = options.DryRun;
-        entity.BearMarketMaPeriod = options.BearMarketMaPeriod;
-        entity.BearBoostFactor = options.BearBoostFactor;
-        entity.MaxMultiplierCap = options.MaxMultiplierCap;
-        entity.MultiplierTiers = options.MultiplierTiers
-            .Select(t => new MultiplierTierData(t.DropPercentage.Value, t.Multiplier.Value))
-            .ToList();
     }
 }
