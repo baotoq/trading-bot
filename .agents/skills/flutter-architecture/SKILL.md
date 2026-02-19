@@ -4,6 +4,12 @@ description: Comprehensive guide for architecting Flutter applications following
 metadata:
   author: Stanislav [MADTeacher] Chernyshev
   version: "1.0"
+  domain: frontend
+  triggers: Flutter, Dart, widget, Riverpod, Bloc, GoRouter, cross-platform
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: flutter-animation, flutter-expert
 ---
 
 # Flutter Architecture

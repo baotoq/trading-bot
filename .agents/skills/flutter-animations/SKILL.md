@@ -4,6 +4,12 @@ description: "Comprehensive guide for implementing animations in Flutter. Use wh
 metadata:
   author: Stanislav [MADTeacher] Chernyshev
   version: "1.0"
+  domain: frontend
+  triggers: Flutter, Dart, animations
+  role: specialist
+  scope: implementation
+  output-format: code
+  related-skills: flutter-architecture, flutter-expert
 ---
 
 # Flutter Animations

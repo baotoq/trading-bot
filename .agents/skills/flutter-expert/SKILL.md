@@ -10,7 +10,7 @@ metadata:
   role: specialist
   scope: implementation
   output-format: code
-  related-skills: react-native-expert, test-master, fullstack-guardian
+  related-skills: react-native-expert, test-master, fullstack-guardian, flutter-architect, flutter-animation
 ---
 
 # Flutter Expert
