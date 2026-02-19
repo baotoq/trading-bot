@@ -1,6 +1,6 @@
 namespace TradingBot.ApiService.BuildingBlocks;
 
-public abstract class AggregateRoot<TId> : BaseEntity<TId>
+public abstract class AggregateRoot<TId> : BaseEntity<TId>, IAggregateRoot
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 

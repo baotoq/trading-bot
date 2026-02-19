@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.EfCore;
 using TradingBot.ApiService.Models;
 using TradingBot.ApiService.Models.Ids;
 using TradingBot.ApiService.Models.Values;
@@ -11,6 +13,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<DailyPrice> DailyPrices => Set<DailyPrice>();
     public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
     public DbSet<DcaConfiguration> DcaConfigurations => Set<DcaConfiguration>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -151,5 +154,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             // Enforce single-row constraint
             entity.ToTable(t => t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid"));
         });
+
+        modelBuilder.AddOutboxMessageEntity();
     }
 }

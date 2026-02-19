@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -9,6 +10,7 @@ using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Services.Backtest;
 using TradingBot.ApiService.Application.Services.HistoricalData;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Endpoints;
 using TradingBot.ApiService.Infrastructure.CoinGecko;
@@ -66,8 +68,17 @@ try
     builder.Services.AddOptions<HyperliquidOptions>()
         .Bind(builder.Configuration.GetSection("Hyperliquid"));
 
-    // EF Core DbContext via Aspire
-    builder.AddNpgsqlDbContext<TradingBotDbContext>("tradingbotdb");
+    // Domain event outbox interceptor -- registered as singleton (stateless)
+    var domainEventJsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    var domainEventOutboxInterceptor = new DomainEventOutboxInterceptor(domainEventJsonOptions);
+    builder.Services.AddSingleton(domainEventOutboxInterceptor);
+
+    // EF Core DbContext via Aspire with domain event interceptor
+    builder.AddNpgsqlDbContext<TradingBotDbContext>("tradingbotdb",
+        configureDbContextOptions: options =>
+        {
+            options.AddInterceptors(domainEventOutboxInterceptor);
+        });
 
     // PostgreSQL distributed lock
     builder.Services.AddPostgresDistributedLock();
