@@ -19,20 +19,10 @@
     />
 
     <!-- Current Price -->
-    <UCard class="border-l-4 border-blue-500">
-      <template #header>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Current Price</p>
-      </template>
-
-      <div v-if="!pending && currentPrice" class="space-y-1">
-        <p class="text-2xl font-bold">
-          {{ currentPrice }}
-        </p>
-      </div>
-      <div v-else>
-        <USkeleton class="h-8 w-full" />
-      </div>
-    </UCard>
+    <DashboardStatCard
+      title="Current Price"
+      :value="pending ? undefined : currentPrice"
+    />
 
     <!-- Unrealized P&L -->
     <DashboardStatCard
@@ -65,16 +55,19 @@ const totalCost = computed(() => {
 
 const averageCostBasis = computed(() => {
   if (!props.portfolio) return undefined
+  if (props.portfolio.averageCostBasis === null) return '--'
   return `$${props.portfolio.averageCostBasis.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 })
 
 const currentPrice = computed(() => {
   if (!props.portfolio) return undefined
+  if (props.portfolio.currentPrice === null) return '--'
   return `$${props.portfolio.currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 })
 
 const unrealizedPnl = computed(() => {
   if (!props.portfolio) return undefined
+  if (props.portfolio.unrealizedPnl === null || props.portfolio.unrealizedPnlPercent === null) return '--'
   const pnlPercent = props.portfolio.unrealizedPnlPercent >= 0
     ? `+${props.portfolio.unrealizedPnlPercent.toFixed(2)}%`
     : `${props.portfolio.unrealizedPnlPercent.toFixed(2)}%`
@@ -85,7 +78,7 @@ const unrealizedPnl = computed(() => {
 })
 
 const pnlColorClass = computed(() => {
-  if (!props.portfolio) return ''
+  if (!props.portfolio || props.portfolio.unrealizedPnl === null) return ''
   return props.portfolio.unrealizedPnl >= 0 ? 'text-green-500' : 'text-red-500'
 })
 </script>

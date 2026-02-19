@@ -12,11 +12,11 @@ export type TradingSymbol = string & { readonly __brand: 'Symbol' }
 // Portfolio overview (matches PortfolioResponse)
 export interface PortfolioResponse {
   totalBtc: Quantity
-  totalCost: UsdAmount
-  averageCostBasis: Price
-  currentPrice: Price
-  unrealizedPnl: number
-  unrealizedPnlPercent: number
+  totalCost: number                   // plain decimal (not UsdAmount) -- zero when no purchases
+  averageCostBasis: Price | null      // null when no purchases
+  currentPrice: Price | null          // null when Hyperliquid unreachable
+  unrealizedPnl: number | null        // null when currentPrice unavailable
+  unrealizedPnlPercent: number | null // null when currentPrice unavailable
   totalPurchaseCount: number
   firstPurchaseDate: string | null
   lastPurchaseDate: string | null
@@ -55,7 +55,7 @@ export interface LiveStatusResponse {
 export interface PriceChartResponse {
   prices: PricePointDto[]
   purchases: PurchaseMarkerDto[]
-  averageCostBasis: Price
+  averageCostBasis: Price | null  // null when no purchases
 }
 
 export interface PricePointDto {

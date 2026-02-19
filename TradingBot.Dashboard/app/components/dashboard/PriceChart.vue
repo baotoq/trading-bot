@@ -81,9 +81,11 @@ const chartOptions = computed<ChartOptions<'line'>>(() => {
     return {}
   }
 
-  const annotations: any = {
-    // Average cost basis line
-    avgLine: {
+  const annotations: any = {}
+
+  // Only add average cost basis line when data is available (null when no purchases)
+  if (chartData.value.averageCostBasis !== null) {
+    annotations.avgLine = {
       type: 'line',
       yMin: chartData.value.averageCostBasis,
       yMax: chartData.value.averageCostBasis,
