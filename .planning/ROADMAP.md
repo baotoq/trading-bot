@@ -2,15 +2,15 @@
 
 ## Milestones
 
-- **v1.0 Daily BTC Smart DCA** -- Phases 1-4 (shipped 2026-02-12) -- [archive](milestones/v1.0-ROADMAP.md)
-- **v1.1 Backtesting Engine** -- Phases 5-8 (shipped 2026-02-13) -- [archive](milestones/v1.1-ROADMAP.md)
-- **v1.2 Web Dashboard** -- Phases 9-12 (shipped 2026-02-14) -- [archive](milestones/v1.2-ROADMAP.md)
-- **v2.0 DDD Foundation** -- Phases 13-19 (in progress)
+- ✅ **v1.0 Daily BTC Smart DCA** -- Phases 1-4 (shipped 2026-02-12) -- [archive](milestones/v1.0-ROADMAP.md)
+- ✅ **v1.1 Backtesting Engine** -- Phases 5-8 (shipped 2026-02-13) -- [archive](milestones/v1.1-ROADMAP.md)
+- ✅ **v1.2 Web Dashboard** -- Phases 9-12 (shipped 2026-02-14) -- [archive](milestones/v1.2-ROADMAP.md)
+- ✅ **v2.0 DDD Foundation** -- Phases 13-19 (shipped 2026-02-20) -- [archive](milestones/v2.0-ROADMAP.md)
 
 ## Phases
 
 <details>
-<summary>v1.0 Daily BTC Smart DCA (Phases 1-4) -- SHIPPED 2026-02-12</summary>
+<summary>✅ v1.0 Daily BTC Smart DCA (Phases 1-4) -- SHIPPED 2026-02-12</summary>
 
 - [x] Phase 1: Foundation & Hyperliquid Client (3/3 plans) -- completed 2026-02-12
 - [x] Phase 2: Core DCA Engine (3/3 plans) -- completed 2026-02-12
@@ -20,7 +20,7 @@
 </details>
 
 <details>
-<summary>v1.1 Backtesting Engine (Phases 5-8) -- SHIPPED 2026-02-13</summary>
+<summary>✅ v1.1 Backtesting Engine (Phases 5-8) -- SHIPPED 2026-02-13</summary>
 
 - [x] Phase 5: MultiplierCalculator Extraction (1/1 plan) -- completed 2026-02-13
 - [x] Phase 6: Backtest Simulation Engine (2/2 plans) -- completed 2026-02-13
@@ -30,7 +30,7 @@
 </details>
 
 <details>
-<summary>v1.2 Web Dashboard (Phases 9-12) -- SHIPPED 2026-02-14</summary>
+<summary>✅ v1.2 Web Dashboard (Phases 9-12) -- SHIPPED 2026-02-14</summary>
 
 - [x] Phase 9: Infrastructure & Aspire Integration (2/2 plans) -- completed 2026-02-13
 - [x] Phase 9.1: Migrate Dashboard to Fresh Nuxt Setup (1/1 plan) -- completed 2026-02-13
@@ -40,123 +40,20 @@
 
 </details>
 
-### v2.0 DDD Foundation (In Progress)
+<details>
+<summary>✅ v2.0 DDD Foundation (Phases 13-19) -- SHIPPED 2026-02-20</summary>
 
-**Milestone Goal:** Upgrade building blocks and domain model to proper DDD tactical patterns -- rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
+- [x] Phase 13: Strongly-Typed IDs (2/2 plans) -- completed 2026-02-18
+- [x] Phase 14: Value Objects (2/2 plans) -- completed 2026-02-18
+- [x] Phase 15: Rich Aggregate Roots (2/2 plans) -- completed 2026-02-19
+- [x] Phase 16: Result Pattern (2/2 plans) -- completed 2026-02-19
+- [x] Phase 17: Domain Event Dispatch (3/3 plans) -- completed 2026-02-19
+- [x] Phase 18: Specification Pattern (3/3 plans) -- completed 2026-02-19
+- [x] Phase 19: Dashboard Nullable Price Fix (1/1 plan) -- completed 2026-02-19
 
-- [x] **Phase 13: Strongly-Typed IDs** - Replace raw Guid IDs with source-generated typed wrappers (completed 2026-02-18)
-- [x] **Phase 14: Value Objects** - Domain primitives with encapsulated validation (1/2 plans complete) (completed 2026-02-18)
-- [x] **Phase 15: Rich Aggregate Roots** - Base entity hierarchy, factory methods, and invariant enforcement (completed 2026-02-19)
-- [x] **Phase 16: Result Pattern** - Explicit error handling replacing exceptions in domain operations (completed 2026-02-19)
-- [x] **Phase 17: Domain Event Dispatch** - Aggregate-raised events dispatched after SaveChanges (completed 2026-02-19)
-- [x] **Phase 18: Specification Pattern** - Reusable, testable query composition (completed 2026-02-19)
-- [x] **Phase 19: Dashboard Nullable Price Fix** - Fix runtime crash on empty DB/unreachable Hyperliquid (gap closure) (completed 2026-02-19)
-
-## Phase Details
-
-### Phase 13: Strongly-Typed IDs
-**Goal**: Entity IDs are type-safe -- impossible to pass a PurchaseId where an IngestionJobId is expected
-**Depends on**: Nothing (first phase of v2.0)
-**Requirements**: TS-01
-**Success Criteria** (what must be TRUE):
-  1. All entities with Guid PKs use strongly-typed ID wrappers (PurchaseId, IngestionJobId, DcaConfigurationId) instead of raw Guid -- DailyPrice excluded (composite key, no Guid PK)
-  2. EF Core persists and loads entities with typed IDs without schema changes (Guid columns unchanged in database)
-  3. All API endpoints serialize/deserialize typed IDs as plain GUIDs in JSON responses (dashboard unaffected)
-  4. All existing tests pass with typed IDs (no behavioral regression)
-**Plans**: 2 plans
-Plans:
-- [x] 13-01-PLAN.md -- Vogen setup + typed ID definitions + generic BaseEntity<TId> + EF Core converter registration
-- [x] 13-02-PLAN.md -- Apply typed IDs to all entities + update all callers + dashboard branded types
-
-### Phase 14: Value Objects
-**Goal**: Domain primitives enforce their own validity -- invalid prices, quantities, or amounts cannot exist at runtime
-**Depends on**: Phase 13 (Vogen infrastructure already installed)
-**Requirements**: TS-02, TS-03, TS-04
-**Success Criteria** (what must be TRUE):
-  1. Core domain primitives (Price, Quantity, Multiplier, UsdAmount, Symbol) are value objects with built-in validation (e.g., Price rejects negative values)
-  2. Value objects persist via EF Core converters registered in ConfigureConventions (no manual mapping per property)
-  3. All API endpoints serialize/deserialize value objects correctly in JSON (round-trip: send value, receive same value)
-  4. Existing tests pass with value objects replacing raw decimal/string fields
-**Plans**: 2 plans
-Plans:
-- [x] 14-01-PLAN.md -- Value object definitions (Price, UsdAmount, Quantity, Multiplier, Percentage, Symbol) + entity application + EF Core converters + dashboard branded types
-- [ ] 14-02-PLAN.md -- Apply value objects to DcaOptions, MultiplierCalculator, BacktestSimulator, services, handlers + test refresh
-
-### Phase 15: Rich Aggregate Roots
-**Goal**: Aggregates own their state changes and enforce business rules -- no external code can put an aggregate into an invalid state
-**Depends on**: Phase 14 (aggregates use value objects for properties)
-**Requirements**: DM-01, DM-02, DM-03, DM-04
-**Success Criteria** (what must be TRUE):
-  1. Base entity hierarchy includes AggregateRoot base class with domain event collection (AddDomainEvent, ClearDomainEvents)
-  2. Purchase aggregate enforces invariants (price > 0, quantity > 0, valid symbol) via static factory method -- constructor is private
-  3. DcaConfiguration aggregate enforces invariants (tiers ascending, daily amount > 0, valid schedule) via encapsulated behavior methods -- no public setters
-  4. Entities use private setters throughout -- all state changes go through domain methods
-  5. Application services create aggregates through factory methods and mutate through behavior methods (no direct property assignment)
-**Plans**: 2 plans
-Plans:
-- [ ] 15-01-PLAN.md -- AggregateRoot base class + Purchase aggregate (factory, behavior methods, DcaExecutionService updated)
-- [ ] 15-02-PLAN.md -- DcaConfiguration aggregate (factory, behavior methods, ConfigurationService updated)
-
-### Phase 16: Result Pattern
-**Goal**: Domain operations communicate failures through return values, not exceptions -- callers handle errors explicitly
-**Depends on**: Phase 15 (domain methods exist to return results from)
-**Requirements**: EH-01, EH-02, EH-03
-**Success Criteria** (what must be TRUE):
-  1. Domain operations (factory methods, behavior methods) return ErrorOr<T> for expected failures instead of throwing exceptions
-  2. Minimal API endpoints map ErrorOr results to appropriate HTTP status codes (400 for validation, 404 for not found, 409 for conflict)
-  3. Application services use Result pattern for orchestration -- no try/catch wrapping domain logic
-**Plans**: 2 plans
-Plans:
-- [ ] 16-01-PLAN.md -- ErrorOr package + DcaConfiguration error definitions + behavior methods return ErrorOr + ToHttpResult extension
-- [ ] 16-02-PLAN.md -- ConfigurationService ErrorOr orchestration + endpoint mapping + test verification
-
-### Phase 17: Domain Event Dispatch
-**Goal**: Aggregates raise domain events when state changes, and those events reliably dispatch after persistence -- enabling loose coupling between aggregates
-**Depends on**: Phase 15 (AggregateRoot base class with event collection), Phase 16 (events raised on successful operations)
-**Requirements**: DE-01, DE-02, DE-03, DE-04
-**Success Criteria** (what must be TRUE):
-  1. Aggregates raise domain events when state changes (PurchaseExecuted when purchase created, ConfigurationUpdated when config modified)
-  2. Domain events dispatch after SaveChanges via SaveChangesInterceptor -- if SaveChanges fails, no events dispatch
-  3. Domain events automatically bridge to integration events via existing outbox pattern (domain event triggers outbox message creation)
-  4. Existing MediatR event handlers continue working with new dispatch mechanism (no handler rewrites needed)
-**Plans**: 3 plans
-Plans:
-- [x] 17-01-PLAN.md -- SaveChangesInterceptor + IAggregateRoot interface + domain event enrichment with key data
-- [x] 17-02-PLAN.md -- Wire Dapr/outbox infrastructure + generalize PubSubRegistry + IDomainEventPublisher + dead-letter table
-- [ ] 17-03-PLAN.md -- Subscribe domain events + remove manual dispatch + PurchaseSkippedEvent via outbox
-
-### Phase 18: Specification Pattern
-**Goal**: Complex queries are encapsulated in reusable, testable specification classes -- query logic lives in the domain, not scattered across services
-**Depends on**: Phase 14 (specifications use value objects in filter criteria)
-**Requirements**: QP-01, QP-02, QP-03
-**Success Criteria** (what must be TRUE):
-  1. Complex queries encapsulated in Specification classes using Ardalis.Specification (e.g., PurchasesByDateRangeSpec, DailyPricesByPeriodSpec)
-  2. Specifications translate to server-side SQL -- no client-side evaluation (verified via EF Core query logging)
-  3. Dashboard queries (purchases with filtering/pagination, daily prices by date range) use specifications instead of inline LINQ
-**Plans**: 3 plans
-Plans:
-- [ ] 18-01-PLAN.md -- Ardalis.Specification packages + WithSpecification extension + all composable spec classes
-- [ ] 18-02-PLAN.md -- Apply specs to DashboardEndpoints + WeeklySummaryService + MissedPurchaseVerificationService
-- [ ] 18-03-PLAN.md -- TestContainers integration tests for all specs against real PostgreSQL
-
-### Phase 19: Dashboard Nullable Price Fix
-**Goal**: Dashboard endpoints handle empty DB and unreachable Hyperliquid gracefully -- no 500 errors from value object validation
-**Depends on**: Phase 14 (value objects introduced the Price type), Phase 18 (specifications used in dashboard)
-**Requirements**: TS-04
-**Gap Closure:** Closes INT-01 and FLOW-01 from v2.0 milestone audit
-**Success Criteria** (what must be TRUE):
-  1. `PortfolioResponse.AverageCostBasis`, `CurrentPrice`, and `PriceChartResponse.AverageCostBasis` are `Price?` (nullable) instead of `Price`
-  2. Dashboard portfolio endpoint returns valid JSON with null prices when DB is empty or Hyperliquid unreachable (no 500)
-  3. Dashboard chart endpoint returns valid JSON with null average cost basis when no purchases exist (no 500)
-  4. All existing tests pass (no behavioral regression)
-**Plans**: 1 plan
-Plans:
-- [ ] 19-01-PLAN.md -- Make Price fields nullable in DTOs + update endpoint construction logic + dashboard null handling
+</details>
 
 ## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -173,13 +70,13 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
 | 10. Dashboard Core | v1.2 | 3/3 | Complete | 2026-02-13 |
 | 11. Backtest Visualization | v1.2 | 4/4 | Complete | 2026-02-14 |
 | 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
-| 13. Strongly-Typed IDs | 2/2 | Complete    | 2026-02-18 | - |
-| 14. Value Objects | 2/2 | Complete    | 2026-02-18 | - |
-| 15. Rich Aggregate Roots | 2/2 | Complete    | 2026-02-19 | - |
-| 16. Result Pattern | 2/2 | Complete    | 2026-02-19 | - |
-| 17. Domain Event Dispatch | 3/3 | Complete    | 2026-02-19 | - |
-| 18. Specification Pattern | 3/3 | Complete    | 2026-02-19 | - |
-| 19. Dashboard Nullable Price Fix | 1/1 | Complete    | 2026-02-19 | - |
+| 13. Strongly-Typed IDs | v2.0 | 2/2 | Complete | 2026-02-18 |
+| 14. Value Objects | v2.0 | 2/2 | Complete | 2026-02-18 |
+| 15. Rich Aggregate Roots | v2.0 | 2/2 | Complete | 2026-02-19 |
+| 16. Result Pattern | v2.0 | 2/2 | Complete | 2026-02-19 |
+| 17. Domain Event Dispatch | v2.0 | 3/3 | Complete | 2026-02-19 |
+| 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
+| 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
 
 ---
-*Roadmap updated: 2026-02-20 after gap closure planning (Phase 19 added for INT-01/FLOW-01)*
+*Roadmap updated: 2026-02-20 after v2.0 DDD Foundation milestone completion*

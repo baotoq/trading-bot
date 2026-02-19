@@ -45,17 +45,18 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - ✓ DCA configuration management with server-validated forms and cache invalidation -- v1.2
 - ✓ Live bot status with health badge, countdown timer, connection indicators -- v1.2
 
+- ✓ Strongly-typed IDs (PurchaseId, IngestionJobId, DcaConfigurationId) via Vogen source generation -- v2.0
+- ✓ Value objects for domain primitives (Price, Quantity, Multiplier, UsdAmount, Percentage, Symbol) with built-in validation -- v2.0
+- ✓ Rich aggregate roots with factory methods, private setters, behavior methods, and invariant enforcement -- v2.0
+- ✓ Domain event dispatch from aggregate roots via SaveChangesInterceptor -- v2.0
+- ✓ Domain-to-integration event bridge (domain events automatically produce outbox messages via Dapr) -- v2.0
+- ✓ Result pattern with ErrorOr for explicit error handling from domain through endpoint -- v2.0
+- ✓ Specification pattern with 7 composable specs (Ardalis.Specification) for reusable query composition -- v2.0
+- ✓ AggregateRoot<TId> base class with domain event collection and IAggregateRoot marker -- v2.0
+
 ### Active
 
-<!-- v2.0 DDD Foundation -->
-- [ ] Rich aggregate roots with encapsulated behavior and invariant enforcement
-- [ ] Value objects for domain primitives (Money, Quantity, Price, Multiplier)
-- [ ] Domain event dispatch from aggregate roots (entity raises events, not services)
-- [ ] Domain-to-integration event bridge (domain events automatically produce integration events)
-- [ ] Strongly-typed IDs replacing raw Guid usage
-- [ ] Result pattern for explicit error handling in domain operations
-- [ ] Specification pattern for reusable query composition
-- [ ] Improved base entity hierarchy with aggregate root marker
+(No active requirements -- planning next milestone)
 
 ### Out of Scope
 
@@ -71,29 +72,21 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Mobile app -- web dashboard is responsive, no native app needed
 - Real-time order book -- not relevant for DCA spot purchases
 - Manual buy/sell buttons -- bot is fully automated
-
-## Current Milestone: v2.0 DDD Foundation
-
-**Goal:** Upgrade building blocks and domain model to proper DDD tactical patterns — rich aggregates, value objects, strongly-typed IDs, domain event dispatch, and clean event bridging.
-
-**Target features:**
-- Rich aggregate roots with behavior encapsulation
-- Value objects for domain primitives
-- Domain event dispatch from entities
-- Domain-to-integration event bridge
-- Strongly-typed IDs
-- Result pattern + Specification pattern
-- Improved base entity hierarchy
+- Generic Repository<T> -- EF Core DbContext is already unit of work
+- Event Sourcing -- massive complexity for DCA bot state-based persistence
+- Separate domain/persistence models -- over-engineering for this domain size
+- Cross-aggregate transactions -- use domain events for eventual consistency
 
 ## Current State
 
-Shipped v1.2 Web Dashboard (2026-02-14).
+Shipped v2.0 DDD Foundation (2026-02-20).
 
 **Codebase:**
-- ~7,100 lines of C# (backend, 12 phases, 30 plans)
+- ~10,000+ lines of C# (backend, 19 phases, 45 plans)
 - ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard)
-- 53 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 1 existing)
+- 62 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 9 Specification integration, 1 existing)
 - Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot, Nuxt 4, @nuxt/ui v4, Tailwind CSS v4, Chart.js, VueUse
+- DDD additions: Vogen 8.0.4, ErrorOr 2.0.1, Ardalis.Specification 9.3.1
 
 **API Surface:**
 - POST /api/backtest -- single backtest with config overrides
@@ -108,7 +101,7 @@ Shipped v1.2 Web Dashboard (2026-02-14).
 - GET /api/dashboard/chart -- price chart with purchase markers
 - GET /api/dashboard/config -- DCA config for backtest pre-fill
 - GET /api/config -- full DCA configuration
-- PUT /api/config -- update DCA configuration with validation
+- PUT /api/config -- update DCA configuration with validation (ErrorOr result mapping)
 - GET /api/config/defaults -- appsettings.json default values
 
 **Dashboard Features:**
@@ -154,6 +147,15 @@ Shipped v1.2 Web Dashboard (2026-02-14).
 | Session storage for comparison | Survives refresh but not tab close, avoids localStorage quota issues | ✓ Good |
 | Singleton DcaConfiguration entity | Single-row constraint via CHECK, JSONB for tiers flexibility | ✓ Good |
 | IOptionsMonitor cache invalidation | Immediate config effect after DB update without app restart | ✓ Good |
+| Vogen 8.0.4 for typed IDs + value objects | Source-generated, zero runtime overhead, EF Core + STJ converters included | ✓ Good |
+| ErrorOr 2.0.1 for Result pattern | Zero allocation, .NET 10 optimized, clean propagation from domain to endpoint | ✓ Good |
+| Ardalis.Specification for query encapsulation | Composable specs, server-side SQL evaluation, EF Core integration | ✓ Good |
+| Domain events dispatch AFTER SaveChanges | Via interceptor, not before -- prevents event dispatch on failed persistence | ✓ Good |
+| Single outbox pipeline for all events | Domain + integration events use same Dapr outbox path, removed dual MediatR/Dapr dispatch | ✓ Good |
+| Dead-letter table for failed messages | Automatic move after 3 retries, prevents poison message blocking | ✓ Good |
+| AggregateRoot<TId> with IAggregateRoot marker | Interceptor queries ChangeTracker for IAggregateRoot, clean separation | ✓ Good |
+| Factory methods throw, behavior methods return ErrorOr | Create() path is startup/infrastructure, behavior is runtime with user input | ✓ Good |
+| Nullable Price? in dashboard DTOs | Handles empty DB and unreachable exchange gracefully, no 500 errors | ✓ Good |
 
 ---
-*Last updated: 2026-02-14 after v2.0 milestone start*
+*Last updated: 2026-02-20 after v2.0 milestone*

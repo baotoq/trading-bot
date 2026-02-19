@@ -85,3 +85,33 @@
 **What's next:** Runtime testing, advanced analytics, notifications, CSV export
 
 ---
+
+## v2.0 DDD Foundation (Shipped: 2026-02-20)
+
+**Delivered:** Domain-Driven Design tactical patterns upgrade -- strongly-typed IDs, value objects, rich aggregates, result pattern, domain event dispatch, and specification pattern across the entire domain model.
+
+**Phases completed:** 13-19 (7 phases, 15 plans total)
+
+**Key accomplishments:**
+
+- Strongly-typed IDs with Vogen source generation (PurchaseId, IngestionJobId, DcaConfigurationId) replacing raw Guid usage across all entities
+- Value objects for domain primitives (Price, Quantity, Multiplier, UsdAmount, Percentage, Symbol) with built-in validation and zero-runtime-overhead converters
+- Rich aggregate roots with factory methods, private setters, behavior methods, and invariant enforcement (Purchase and DcaConfiguration)
+- Result pattern with ErrorOr for explicit error handling from domain through endpoint (no exception-based control flow)
+- Domain event dispatch via SaveChangesInterceptor with automatic outbox bridge, dead-letter support, and single dispatch pipeline
+- Specification pattern with 7 composable specs (Ardalis.Specification), TestContainers integration tests, and dashboard query encapsulation
+
+**Stats:**
+
+- 461 files created/modified
+- 43,106 insertions / 2,079 deletions
+- 7 phases, 15 plans, 84 commits (34 feature/fix/refactor)
+- 2 days from start to ship (2026-02-18 → 2026-02-20)
+- 62 tests passing (53 existing + 9 new spec integration tests)
+
+**Git range:** `0842fc4` → `65436d1`
+
+**What's next:** Advanced domain patterns (smart enums, CQRS read models, event versioning)
+
+---
+
