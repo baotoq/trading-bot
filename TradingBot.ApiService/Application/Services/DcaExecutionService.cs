@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.BuildingBlocks.DistributedLocks;
+using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
@@ -23,7 +23,7 @@ public class DcaExecutionService(
     HyperliquidClient hyperliquidClient,
     TradingBotDbContext dbContext,
     IDistributedLock distributedLock,
-    IPublisher publisher,
+    IDomainEventPublisher domainEventPublisher,
     IOptionsMonitor<DcaOptions> dcaOptions,
     IPriceDataService priceDataService,
     ILogger<DcaExecutionService> logger) : IDcaExecutionService
@@ -65,7 +65,7 @@ public class DcaExecutionService(
             if (existingPurchase != null)
             {
                 logger.LogInformation("Purchase already completed today {Date}: {PurchaseId}", purchaseDate, existingPurchase.Id);
-                await publisher.Publish(new PurchaseSkippedEvent(
+                await domainEventPublisher.PublishDirectAsync(new PurchaseSkippedEvent(
                     "Already purchased today",
                     null,
                     null,
@@ -86,7 +86,7 @@ public class DcaExecutionService(
         if (usdcBalance < MinimumBalance)
         {
             logger.LogWarning("Balance {Balance} below minimum {Min}, skipping", usdcBalance, MinimumBalance);
-            await publisher.Publish(new PurchaseSkippedEvent(
+            await domainEventPublisher.PublishDirectAsync(new PurchaseSkippedEvent(
                 "Insufficient balance",
                 usdcBalance,
                 options.BaseDailyAmount.Value,
@@ -109,7 +109,7 @@ public class DcaExecutionService(
         if (usdAmount.Value < MinimumOrderValue)
         {
             logger.LogWarning("Amount {Amount} below minimum order {Min}", usdAmount, MinimumOrderValue);
-            await publisher.Publish(new PurchaseSkippedEvent(
+            await domainEventPublisher.PublishDirectAsync(new PurchaseSkippedEvent(
                 $"Amount below minimum order value (${MinimumOrderValue})",
                 usdcBalance,
                 MinimumOrderValue,
