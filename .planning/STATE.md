@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 16 of 18 (Result Pattern -- In Progress)
-Plan: 1 of 2 in current phase (plan 01 complete)
-Status: Phase 16 In Progress -- Plan 01 complete, Plan 02 next
-Last activity: 2026-02-19 -- Completed 16-01 (ErrorOr foundation: package, error codes, behavior method signatures, ToHttpResult extension)
+Phase: 16 of 18 (Result Pattern -- Complete)
+Plan: 2 of 2 in current phase (both plans complete)
+Status: Phase 16 Complete -- Ready for Phase 17
+Last activity: 2026-02-19 -- Completed 16-02 (ConfigurationService and Endpoints wired with ErrorOr end-to-end)
 
-Progress: [|||||||||||||||||||||||||||||...] 77% (37/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||||||..] 79% (38/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -55,6 +55,7 @@ Progress: [|||||||||||||||||||||||||||||...] 77% (37/~48 plans estimated)
 | 15-rich-aggregate-roots | 01 | 4min | 2 | 9 |
 | 15-rich-aggregate-roots | 02 | 2min | 2 | 4 |
 | 16-result-pattern | 01 | 2min | 2 | 4 |
+| 16-result-pattern | 02 | 1min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -82,6 +83,7 @@ Recent for v2.0:
 - [Phase 15-rich-aggregate-roots]: DcaConfiguration inherits AggregateRoot<DcaConfigurationId>; fine-grained behavior methods (UpdateDailyAmount/Schedule/Tiers/BearMarket/Settings) each raise DcaConfigurationUpdatedEvent; empty tier list is valid; ConfigurationService retains validator call as defense-in-depth
 - [Phase 16-result-pattern]: ValidateScheduleErrors/ValidateTierErrors return List<Error> shared by Create() (throws) and behavior methods (returns ErrorOr); Create() factory still throws per locked decision
 - [Phase 16-result-pattern]: ToHttpResult() handles Updated success as 204 NoContent, all other T values as 200 OK; ConfigurationService callers deferred to Plan 02
+- [Phase 16-result-pattern]: ConfigurationService.UpdateAsync returns ErrorOr<Updated>; DcaOptionsValidator failure becomes Error.Validation (not throws); Create() path still throws per locked decision; all behavior method ErrorOr results propagated via IsError check
 
 ### Known Risks
 
@@ -100,9 +102,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 16-01-PLAN.md
-Resume file: .planning/phases/16-result-pattern/16-01-SUMMARY.md
-Next step: Execute 16-02 (wire ConfigurationService and endpoints to use ErrorOr)
+Stopped at: Completed 16-02-PLAN.md
+Resume file: .planning/phases/16-result-pattern/16-02-SUMMARY.md
+Next step: Execute Phase 17 (next phase in roadmap)
 
 ---
-*State updated: 2026-02-19 after 16-01 (ErrorOr foundation: package, error codes, behavior method signatures, ToHttpResult extension)*
+*State updated: 2026-02-19 after 16-02 (ErrorOr wired through ConfigurationService and endpoint; Phase 16 complete)*
