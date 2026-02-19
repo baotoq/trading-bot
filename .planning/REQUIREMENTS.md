@@ -36,7 +36,7 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 
 ### Query Patterns
 
-- [ ] **QP-01**: Complex queries encapsulated in Specification classes (reusable, testable)
+- [x] **QP-01**: Complex queries encapsulated in Specification classes (reusable, testable)
 - [ ] **QP-02**: Specifications translate to server-side SQL (no client-side evaluation)
 - [ ] **QP-03**: Dashboard queries (purchases, daily prices) use specifications for filtering/pagination
 
@@ -84,7 +84,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EH-01 | Phase 16: Result Pattern | Complete |
 | EH-02 | Phase 16: Result Pattern | Complete |
 | EH-03 | Phase 16: Result Pattern | Complete |
-| QP-01 | Phase 18: Specification Pattern | Pending |
+| QP-01 | Phase 18: Specification Pattern | Complete |
 | QP-02 | Phase 18: Specification Pattern | Pending |
 | QP-03 | Phase 18: Specification Pattern | Pending |
 

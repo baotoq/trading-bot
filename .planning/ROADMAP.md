@@ -163,7 +163,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 15. Rich Aggregate Roots | 2/2 | Complete    | 2026-02-19 | - |
 | 16. Result Pattern | 2/2 | Complete    | 2026-02-19 | - |
 | 17. Domain Event Dispatch | 3/3 | Complete    | 2026-02-19 | - |
-| 18. Specification Pattern | v2.0 | 0/? | Not started | - |
+| 18. Specification Pattern | 1/3 | In Progress|  | - |
 
 ---
 *Roadmap updated: 2026-02-19 after 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage)*

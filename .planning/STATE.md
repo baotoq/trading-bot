@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 17 -- Domain Event Dispatch
+**Current focus:** Phase 18 -- Specification Pattern
 
 ## Current Position
 
-Phase: 17 of 18 (Domain Event Dispatch -- Complete)
-Plan: 3 of 3 in current phase (Plan 03 complete -- Phase 17 DONE)
-Status: Phase 17 Complete -- All 3 plans done; Phase 18 next
-Last activity: 2026-02-19 -- Completed 17-03 (PubSubRegistry subscriptions, single dispatch path, IPublisher removed)
+Phase: 18 of 18 (Specification Pattern -- In Progress)
+Plan: 1 of 2 in current phase (Plan 01 complete -- 18-01 done)
+Status: Phase 18 In Progress -- Plan 01 done; Plan 02 next
+Last activity: 2026-02-19 -- Completed 18-01 (Ardalis.Specification packages, WithSpecification extension, 7 spec classes)
 
-Progress: [||||||||||||||||||||||||||||||||||] 85% (41/~48 plans estimated)
+Progress: [|||||||||||||||||||||||||||||||||||] 88% (42/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -59,6 +59,7 @@ Progress: [||||||||||||||||||||||||||||||||||] 85% (41/~48 plans estimated)
 | 17-domain-event-dispatch | 01 | 49min | 2 | 12 |
 | 17-domain-event-dispatch | 02 | 4min | 2 | 12 |
 | 17-domain-event-dispatch | 03 | 2min | 2 | 2 |
+| 18-specification-pattern | 01 | 2min | 2 | 8 |
 
 ## Accumulated Context
 
@@ -97,6 +98,10 @@ Recent for v2.0:
 - [Phase 17-domain-event-dispatch]: DcaExecutionService manual dispatch block (Steps 8-9) removed -- interceptor from Plan 01 handles this automatically during SaveChangesAsync
 - [Phase 17-domain-event-dispatch]: PurchaseSkippedEvent now uses IDomainEventPublisher.PublishDirectAsync (same outbox path as aggregate events via Dapr)
 - [Phase 17-domain-event-dispatch]: IPublisher (MediatR) fully removed from DcaExecutionService; all event dispatch via single outbox pipeline
+- [Phase 18-specification-pattern]: PurchaseFilledStatusSpec has no OrderBy to avoid ordering conflicts when composed with PurchasesOrderedByDateSpec or PurchaseCursorSpec
+- [Phase 18-specification-pattern]: PurchaseCursorSpec owns OrderByDescending because cursor comparison inherently assumes descending order
+- [Phase 18-specification-pattern]: AsNoTracking lives in ordering specs (PurchasesOrderedByDateSpec, DailyPriceByDateRangeSpec) as always-applied base for read queries
+- [Phase 18-specification-pattern]: WithSpecification uses SpecificationEvaluator.Default.GetQuery() on IQueryable<T> (not DbSet<T>) to enable multi-spec chaining
 
 ### Known Risks
 
@@ -114,9 +119,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 17-03-PLAN.md
-Resume file: .planning/phases/17-domain-event-dispatch/17-03-SUMMARY.md
-Next step: Execute Phase 18 (first plan)
+Stopped at: Completed 18-01-PLAN.md
+Resume file: .planning/phases/18-specification-pattern/18-01-SUMMARY.md
+Next step: Execute Phase 18 Plan 02 (call-site composition in endpoints)
 
 ---
-*State updated: 2026-02-19 after 17-03 (PubSubRegistry subscriptions, single dispatch path, IPublisher removed; Phase 17 complete)*
+*State updated: 2026-02-19 after 18-01 (Ardalis.Specification packages, WithSpecification extension, 7 spec classes)*
