@@ -1,3 +1,4 @@
+using ErrorOr;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Models.Ids;
@@ -32,8 +33,14 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
         Multiplier maxMultiplierCap,
         List<MultiplierTierData> multiplierTiers)
     {
-        ValidateSchedule(dailyBuyHour, dailyBuyMinute);
-        ValidateTiers(multiplierTiers);
+        // Factory method stays throwing per locked decision
+        var scheduleErrors = ValidateScheduleErrors(dailyBuyHour, dailyBuyMinute);
+        if (scheduleErrors.Count > 0)
+            throw new ArgumentException(scheduleErrors[0].Description);
+
+        var tierErrors = ValidateTierErrors(multiplierTiers);
+        if (tierErrors.Count > 0)
+            throw new ArgumentException(tierErrors[0].Description);
 
         var config = new DcaConfiguration
         {
@@ -60,67 +67,83 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
         AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
     }
 
-    public void UpdateSchedule(int hour, int minute)
+    public ErrorOr<Updated> UpdateSchedule(int hour, int minute)
     {
-        ValidateSchedule(hour, minute);
+        var errors = ValidateScheduleErrors(hour, minute);
+        if (errors.Count > 0)
+            return errors;
+
         DailyBuyHour = hour;
         DailyBuyMinute = minute;
         UpdatedAt = DateTimeOffset.UtcNow;
         AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        return Result.Updated;
     }
 
-    public void UpdateTiers(List<MultiplierTierData> tiers)
+    public ErrorOr<Updated> UpdateTiers(List<MultiplierTierData> tiers)
     {
-        ValidateTiers(tiers);
+        var errors = ValidateTierErrors(tiers);
+        if (errors.Count > 0)
+            return errors;
+
         MultiplierTiers = tiers;
         UpdatedAt = DateTimeOffset.UtcNow;
         AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        return Result.Updated;
     }
 
-    public void UpdateBearMarket(int maPeriod, Multiplier boostFactor)
+    public ErrorOr<Updated> UpdateBearMarket(int maPeriod, Multiplier boostFactor)
     {
         if (maPeriod <= 0)
-            throw new ArgumentException("MA period must be greater than 0", nameof(maPeriod));
+            return DcaConfigurationErrors.InvalidMaPeriod;
 
         BearMarketMaPeriod = maPeriod;
         BearBoostFactor = boostFactor;
         UpdatedAt = DateTimeOffset.UtcNow;
         AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        return Result.Updated;
     }
 
-    public void UpdateSettings(int highLookbackDays, bool dryRun, Multiplier maxMultiplierCap)
+    public ErrorOr<Updated> UpdateSettings(int highLookbackDays, bool dryRun, Multiplier maxMultiplierCap)
     {
         if (highLookbackDays <= 0)
-            throw new ArgumentException("High lookback days must be greater than 0", nameof(highLookbackDays));
+            return DcaConfigurationErrors.InvalidHighLookbackDays;
 
         HighLookbackDays = highLookbackDays;
         DryRun = dryRun;
         MaxMultiplierCap = maxMultiplierCap;
         UpdatedAt = DateTimeOffset.UtcNow;
         AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        return Result.Updated;
     }
 
-    private static void ValidateSchedule(int hour, int minute)
+    private static List<Error> ValidateScheduleErrors(int hour, int minute)
     {
+        var errors = new List<Error>();
         if (hour < 0 || hour > 23)
-            throw new ArgumentException("Hour must be between 0 and 23", nameof(hour));
+            errors.Add(DcaConfigurationErrors.InvalidScheduleHour);
         if (minute < 0 || minute > 59)
-            throw new ArgumentException("Minute must be between 0 and 59", nameof(minute));
+            errors.Add(DcaConfigurationErrors.InvalidScheduleMinute);
+        return errors;
     }
 
-    private static void ValidateTiers(List<MultiplierTierData> tiers)
+    private static List<Error> ValidateTierErrors(List<MultiplierTierData> tiers)
     {
+        var errors = new List<Error>();
+
         if (tiers == null || tiers.Count == 0)
-            return;
+            return errors;
 
         if (!tiers.OrderBy(t => t.DropPercentage).SequenceEqual(tiers))
-            throw new ArgumentException("Tiers must be ordered by ascending drop percentage", nameof(tiers));
+            errors.Add(DcaConfigurationErrors.TiersNotAscending);
 
         if (tiers.Any(t => t.Multiplier <= 0 || t.Multiplier > 20))
-            throw new ArgumentException("Tier multipliers must be between 0 (exclusive) and 20 (inclusive)", nameof(tiers));
+            errors.Add(DcaConfigurationErrors.TierMultiplierOutOfRange);
 
         if (tiers.Select(t => t.DropPercentage).Distinct().Count() != tiers.Count)
-            throw new ArgumentException("Tier drop percentages must be unique", nameof(tiers));
+            errors.Add(DcaConfigurationErrors.TierDropPercentageDuplicate);
+
+        return errors;
     }
 }
 
