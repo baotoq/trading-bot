@@ -46,7 +46,7 @@
 
 - [x] **Phase 13: Strongly-Typed IDs** - Replace raw Guid IDs with source-generated typed wrappers (completed 2026-02-18)
 - [x] **Phase 14: Value Objects** - Domain primitives with encapsulated validation (1/2 plans complete) (completed 2026-02-18)
-- [ ] **Phase 15: Rich Aggregate Roots** - Base entity hierarchy, factory methods, and invariant enforcement
+- [x] **Phase 15: Rich Aggregate Roots** - Base entity hierarchy, factory methods, and invariant enforcement (completed 2026-02-19)
 - [ ] **Phase 16: Result Pattern** - Explicit error handling replacing exceptions in domain operations
 - [ ] **Phase 17: Domain Event Dispatch** - Aggregate-raised events dispatched after SaveChanges
 - [ ] **Phase 18: Specification Pattern** - Reusable, testable query composition
@@ -149,7 +149,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
 | 13. Strongly-Typed IDs | 2/2 | Complete    | 2026-02-18 | - |
 | 14. Value Objects | 2/2 | Complete    | 2026-02-18 | - |
-| 15. Rich Aggregate Roots | 1/2 | In Progress|  | - |
+| 15. Rich Aggregate Roots | 2/2 | Complete   | 2026-02-19 | - |
 | 16. Result Pattern | v2.0 | 0/? | Not started | - |
 | 17. Domain Event Dispatch | v2.0 | 0/? | Not started | - |
 | 18. Specification Pattern | v2.0 | 0/? | Not started | - |

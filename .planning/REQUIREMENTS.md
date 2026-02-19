@@ -18,7 +18,7 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 
 - [x] **DM-01**: Base entity hierarchy includes AggregateRoot base class with domain event collection
 - [x] **DM-02**: Purchase aggregate enforces invariants (price > 0, quantity > 0, valid symbol) via factory method
-- [ ] **DM-03**: DcaConfiguration aggregate enforces invariants (tiers ascending, daily amount > 0, valid schedule) via encapsulated behavior methods
+- [x] **DM-03**: DcaConfiguration aggregate enforces invariants (tiers ascending, daily amount > 0, valid schedule) via encapsulated behavior methods
 - [x] **DM-04**: Entities use private setters -- state changes only through domain methods
 
 ### Domain Events
@@ -75,7 +75,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TS-04 | Phase 14: Value Objects | Complete |
 | DM-01 | Phase 15: Rich Aggregate Roots | Complete |
 | DM-02 | Phase 15: Rich Aggregate Roots | Complete |
-| DM-03 | Phase 15: Rich Aggregate Roots | Pending |
+| DM-03 | Phase 15: Rich Aggregate Roots | Complete |
 | DM-04 | Phase 15: Rich Aggregate Roots | Complete |
 | DE-01 | Phase 17: Domain Event Dispatch | Pending |
 | DE-02 | Phase 17: Domain Event Dispatch | Pending |

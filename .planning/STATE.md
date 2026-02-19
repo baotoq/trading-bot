@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 15 of 18 (Rich Aggregate Roots -- In Progress)
-Plan: 1 of 2 in current phase (15-01 complete)
-Status: In Progress
-Last activity: 2026-02-19 -- Completed 15-01 (AggregateRoot base class, Purchase rich aggregate, identity-only events, aggregate event dispatch)
+Phase: 15 of 18 (Rich Aggregate Roots -- Complete)
+Plan: 2 of 2 in current phase (both complete)
+Status: Phase 15 Complete -- Ready for Phase 16
+Last activity: 2026-02-19 -- Completed 15-02 (DcaConfiguration rich aggregate, factory method, behavior methods, domain events, invariant enforcement)
 
-Progress: [|||||||||||||||||||||||||||.....] 73% (35/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||||....] 75% (36/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [|||||||||||||||||||||||||||.....] 73% (35/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 35
+- Total plans completed: 36
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -53,6 +53,7 @@ Progress: [|||||||||||||||||||||||||||.....] 73% (35/~48 plans estimated)
 | 14-value-objects | 01 | 5min | 2 | 14 |
 | 14-value-objects | 02 | 15min | 2 | 13 |
 | 15-rich-aggregate-roots | 01 | 4min | 2 | 9 |
+| 15-rich-aggregate-roots | 02 | 2min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -77,6 +78,7 @@ Recent for v2.0:
 - [Phase 14-value-objects]: DcaOptionsValidator removes positivity checks now enforced by value objects at binding time; DcaExecutionService fallback constructs MultiplierResult directly to avoid 0-sentinel path
 - [Phase 15-rich-aggregate-roots]: AggregateRoot<TId> base class with protected AddDomainEvent and ClearDomainEvents; Purchase uses static Create() factory and behavior methods that raise identity-only domain events
 - [Phase 15-rich-aggregate-roots]: DcaSchedulerBackgroundService scheduler-level catch blocks log-only for infrastructure failures (no PurchaseFailedEvent): no Purchase aggregate exists at scheduler level to provide PurchaseId
+- [Phase 15-rich-aggregate-roots]: DcaConfiguration inherits AggregateRoot<DcaConfigurationId>; fine-grained behavior methods (UpdateDailyAmount/Schedule/Tiers/BearMarket/Settings) each raise DcaConfigurationUpdatedEvent; empty tier list is valid; ConfigurationService retains validator call as defense-in-depth
 
 ### Known Risks
 
@@ -95,9 +97,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 15-01-PLAN.md
-Resume file: .planning/phases/15-rich-aggregate-roots/15-01-SUMMARY.md
-Next step: Execute Phase 15 Plan 02 (next plan per ROADMAP)
+Stopped at: Completed 15-02-PLAN.md
+Resume file: .planning/phases/15-rich-aggregate-roots/15-02-SUMMARY.md
+Next step: Execute Phase 16 (next phase per ROADMAP)
 
 ---
-*State updated: 2026-02-19 after 15-01 (AggregateRoot base class, Purchase rich aggregate, identity-only events, all 53 tests pass)*
+*State updated: 2026-02-19 after 15-02 (DcaConfiguration rich aggregate, factory method, behavior methods, domain events, all 53 tests pass)*
