@@ -5,6 +5,7 @@ using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using TradingBot.ApiService.Application.BackgroundJobs;
+using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Application.Health;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Application.Services.Backtest;
@@ -129,7 +130,14 @@ try
     builder.AddRedisDistributedCache("redis");
 
     // Dapr pub-sub + outbox infrastructure
-    builder.Services.AddDaprPubSub();
+    var pubSubRegistry = builder.Services.AddDaprPubSub();
+    pubSubRegistry
+        .Subscribe<PurchaseCreatedEvent>()
+        .Subscribe<PurchaseCompletedEvent>()
+        .Subscribe<PurchaseFailedEvent>()
+        .Subscribe<PurchaseSkippedEvent>()
+        .Subscribe<DcaConfigurationCreatedEvent>()
+        .Subscribe<DcaConfigurationUpdatedEvent>();
     builder.Services.AddOutboxPublishingWithEfCore<TradingBotDbContext>();
 
     var app = builder.Build();

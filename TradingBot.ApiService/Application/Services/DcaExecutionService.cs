@@ -210,21 +210,11 @@ public class DcaExecutionService(
             logger.LogError(ex, "Order placement failed: {Error}", ex.Message);
         }
 
-        // Step 7: Persist purchase record
+        // Step 7: Persist purchase record (interceptor auto-dispatches domain events to outbox)
         dbContext.Purchases.Add(purchase);
         await dbContext.SaveChangesAsync(ct);
 
         logger.LogInformation("Purchase persisted: {PurchaseId} with status {Status}", purchase.Id, purchase.Status);
-
-        // Step 8: Dispatch domain events accumulated by aggregate behavior methods
-        var eventsToDispatch = purchase.DomainEvents.ToList();
-        foreach (var domainEvent in eventsToDispatch)
-        {
-            await publisher.Publish(domainEvent, ct);
-        }
-        purchase.ClearDomainEvents();
-
-        logger.LogInformation("Dispatched {Count} domain events for {PurchaseId}", eventsToDispatch.Count, purchase.Id);
     }
 
     private async Task<MultiplierResult> CalculateMultiplierAsync(
