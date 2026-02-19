@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Flutter mobile + web app for portfolio monitoring, backtest visualization, configuration management, and push notifications.
+A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Flutter iOS app for portfolio monitoring, backtest visualization, configuration management, and push notifications.
 
 ## Core Value
 
@@ -57,7 +57,7 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 ### Active
 
 <!-- v3.0 Flutter Mobile -->
-- [ ] Flutter mobile app (iOS + Web) with full dashboard feature parity
+- [ ] Flutter iOS app with full dashboard feature parity
 - [ ] Push notifications for buy executions and alerts
 - [ ] Deprecate Nuxt dashboard (keep code, remove from Aspire orchestration)
 
@@ -82,10 +82,10 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 
 ## Current Milestone: v3.0 Flutter Mobile
 
-**Goal:** Replace Nuxt web dashboard with Flutter mobile + web app, add push notifications
+**Goal:** Replace Nuxt web dashboard with Flutter iOS app, add push notifications
 
 **Target features:**
-- Flutter app (iOS + Web) with full dashboard parity (portfolio, charts, history, backtest, config, status)
+- Flutter iOS app with full dashboard parity (portfolio, charts, history, backtest, config, status)
 - Push notifications for buy executions and alerts
 - Deprecate Nuxt dashboard from Aspire orchestration
 
@@ -127,7 +127,7 @@ Shipped v2.0 DDD Foundation (2026-02-20). Starting v3.0 Flutter Mobile.
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0 backend + Flutter (iOS + Web) frontend -- migrating from Nuxt 4
+- **Tech Stack**: .NET 10.0 backend + Flutter iOS frontend -- migrating from Nuxt 4
 - **Exchange**: Hyperliquid spot market only -- no other exchanges
 - **Asset**: BTC only -- single trading pair
 - **Direction**: Buy only -- no sell logic
