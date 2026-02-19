@@ -2,7 +2,7 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v3.0 Flutter Mobile
-**Updated:** 2026-02-20
+**Updated:** 2026-02-20 (20-01 complete)
 
 ## Project Reference
 
@@ -14,11 +14,11 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 20 of 25 (Flutter Project Setup + Core Infrastructure)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-02-20 -- v3.0 roadmap created (6 phases, 27 requirements mapped)
+Plan: 01 of 02 complete
+Status: In progress
+Last activity: 2026-02-20 -- 20-01 complete: Flutter scaffold, go_router, dark theme, placeholder screens
 
-Progress: [░░░░░░░░░░] 0% (0/11 plans complete)
+Progress: [░░░░░░░░░░] 9% (1/11 plans complete)
 
 ## Milestones Shipped
 
@@ -52,6 +52,11 @@ Progress: [░░░░░░░░░░] 0% (0/11 plans complete)
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+**20-01 decisions:**
+- Removed custom_lint from pubspec (analyzer ^8.0.0 conflicts with riverpod_generator 4.x requiring ^9.0.0); riverpod_lint 3.x uses analysis_server_plugin directly
+- Dark-only theme: single ThemeData with Brightness.dark, no darkTheme/themeMode — ignores iOS system setting
+- NavigationBar (Material 3) + CupertinoIcons over CupertinoTabBar — avoids GlobalKey crash with StatefulShellRoute
+
 ### Known Risks
 
 - Phase 24 (Push Notifications) requires a real physical iOS device -- APNs does not work on iOS Simulator
@@ -70,8 +75,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Roadmap created for v3.0 Flutter Mobile (Phases 20-25)
-Next step: `/gsd:plan-phase 20`
+Stopped at: Completed 20-01-PLAN.md (Flutter scaffold + go_router + dark theme + placeholder screens)
+Next step: Execute 20-02-PLAN.md (Dio HTTP client + API key interceptor)
 
 ---
-*State updated: 2026-02-20 after v3.0 roadmap creation*
+*State updated: 2026-02-20 after 20-01 completion*

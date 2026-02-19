@@ -12,8 +12,8 @@ Requirements for Flutter iOS mobile app milestone. Each maps to roadmap phases.
 - [ ] **APP-01**: User can enter API base URL and API key on first launch, stored securely in iOS Keychain
 - [ ] **APP-02**: App authenticates all API requests via x-api-key header injected automatically
 - [ ] **APP-03**: App redirects to setup screen on 401/403 API responses
-- [ ] **APP-04**: App supports system light and dark mode automatically
-- [ ] **APP-05**: User can pull-to-refresh on all data screens to re-fetch from API
+- [x] **APP-04**: App supports system light and dark mode automatically
+- [x] **APP-05**: User can pull-to-refresh on all data screens to re-fetch from API
 - [ ] **APP-06**: App shows error snackbars for transient API failures with cached stale data indicator
 
 ### Portfolio & Status
@@ -92,8 +92,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | APP-01 | Phase 20 | Pending |
 | APP-02 | Phase 20 | Pending |
 | APP-03 | Phase 20 | Pending |
-| APP-04 | Phase 20 | Pending |
-| APP-05 | Phase 20 | Pending |
+| APP-04 | Phase 20 | Complete |
+| APP-05 | Phase 20 | Complete |
 | APP-06 | Phase 20 | Pending |
 | PORT-01 | Phase 21 | Pending |
 | PORT-02 | Phase 21 | Pending |
