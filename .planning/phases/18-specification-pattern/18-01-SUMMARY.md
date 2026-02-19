@@ -82,7 +82,7 @@ Each task was committed atomically:
 1. **Task 1: Install Ardalis.Specification packages and create WithSpecification extension** - `1d532df` (chore)
 2. **Task 2: Create all composable specification classes** - `ad3b913` (feat)
 
-**Plan metadata:** `(pending)` (docs: complete plan)
+**Plan metadata:** `a7d613b` (docs: complete plan)
 
 ## Files Created/Modified
 - `TradingBot.ApiService/TradingBot.ApiService.csproj` - Added Ardalis.Specification 9.3.1 and Ardalis.Specification.EntityFrameworkCore 9.3.1 package references
