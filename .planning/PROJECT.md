@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Nuxt 4 web dashboard for portfolio monitoring, backtest visualization, and configuration management.
+A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Flutter mobile + web app for portfolio monitoring, backtest visualization, configuration management, and push notifications.
 
 ## Core Value
 
-The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically. The dashboard provides real-time visibility and control.
+The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically. The mobile app provides real-time visibility, control, and push notifications wherever you are.
 
 ## Requirements
 
@@ -56,7 +56,10 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 
 ### Active
 
-(No active requirements -- planning next milestone)
+<!-- v3.0 Flutter Mobile -->
+- [ ] Flutter mobile app (iOS + Web) with full dashboard feature parity
+- [ ] Push notifications for buy executions and alerts
+- [ ] Deprecate Nuxt dashboard (keep code, remove from Aspire orchestration)
 
 ### Out of Scope
 
@@ -69,7 +72,7 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Genetic algorithm / ML optimization -- grid search is sufficient for ~5 DCA parameters
 - Backtest result persistence -- compute-on-fly is cheaper; user re-runs as needed
 - Multi-user authentication -- single-user bot, API key auth is sufficient
-- Mobile app -- web dashboard is responsive, no native app needed
+- ~~Mobile app~~ -- now building Flutter mobile app (v3.0)
 - Real-time order book -- not relevant for DCA spot purchases
 - Manual buy/sell buttons -- bot is fully automated
 - Generic Repository<T> -- EF Core DbContext is already unit of work
@@ -77,16 +80,26 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Separate domain/persistence models -- over-engineering for this domain size
 - Cross-aggregate transactions -- use domain events for eventual consistency
 
+## Current Milestone: v3.0 Flutter Mobile
+
+**Goal:** Replace Nuxt web dashboard with Flutter mobile + web app, add push notifications
+
+**Target features:**
+- Flutter app (iOS + Web) with full dashboard parity (portfolio, charts, history, backtest, config, status)
+- Push notifications for buy executions and alerts
+- Deprecate Nuxt dashboard from Aspire orchestration
+
 ## Current State
 
-Shipped v2.0 DDD Foundation (2026-02-20).
+Shipped v2.0 DDD Foundation (2026-02-20). Starting v3.0 Flutter Mobile.
 
 **Codebase:**
 - ~10,000+ lines of C# (backend, 19 phases, 45 plans)
-- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard)
+- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard — deprecating)
 - 62 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 9 Specification integration, 1 existing)
-- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot, Nuxt 4, @nuxt/ui v4, Tailwind CSS v4, Chart.js, VueUse
+- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot
 - DDD additions: Vogen 8.0.4, ErrorOr 2.0.1, Ardalis.Specification 9.3.1
+- Flutter: Dart 3.11, TradingBot.Mobile/ (fresh init)
 
 **API Surface:**
 - POST /api/backtest -- single backtest with config overrides
@@ -114,7 +127,7 @@ Shipped v2.0 DDD Foundation (2026-02-20).
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0 backend + Nuxt 4 frontend -- must build on current foundation
+- **Tech Stack**: .NET 10.0 backend + Flutter (iOS + Web) frontend -- migrating from Nuxt 4
 - **Exchange**: Hyperliquid spot market only -- no other exchanges
 - **Asset**: BTC only -- single trading pair
 - **Direction**: Buy only -- no sell logic
@@ -158,4 +171,4 @@ Shipped v2.0 DDD Foundation (2026-02-20).
 | Nullable Price? in dashboard DTOs | Handles empty DB and unreachable exchange gracefully, no 500 errors | ✓ Good |
 
 ---
-*Last updated: 2026-02-20 after v2.0 milestone*
+*Last updated: 2026-02-20 after v3.0 milestone start*

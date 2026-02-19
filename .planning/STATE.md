@@ -1,23 +1,22 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** v2.0 DDD Foundation (SHIPPED)
+**Milestone:** v3.0 Flutter Mobile
 **Updated:** 2026-02-20
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-20)
 
-**Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Planning next milestone
+**Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via mobile app
+**Current focus:** Defining requirements for v3.0
 
 ## Current Position
 
-Phase: All complete
-Status: v2.0 DDD Foundation shipped
-Last activity: 2026-02-20 -- Milestone v2.0 archived
-
-Progress: [████████████████████████████████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-20 — Milestone v3.0 started
 
 ## Milestones Shipped
 
@@ -43,6 +42,7 @@ Progress: [███████████████████████
 | v1.1 | 5-8 | 7 | Complete |
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
+| v3.0 | 20+ | — | Defining |
 
 ## Accumulated Context
 
@@ -65,8 +65,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Milestone v2.0 archived
-Next step: `/gsd:new-milestone` to start next milestone
+Stopped at: Milestone v3.0 defining requirements
+Next step: Complete requirements and roadmap
 
 ---
-*State updated: 2026-02-20 after v2.0 DDD Foundation milestone completion*
+*State updated: 2026-02-20 after v3.0 Flutter Mobile milestone start*
