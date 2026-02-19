@@ -14,11 +14,11 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 17 of 18 (Domain Event Dispatch -- In Progress)
-Plan: 1 of 2 in current phase (Plan 01 complete)
-Status: Phase 17 In Progress -- Plan 01 complete, Plan 02 pending
-Last activity: 2026-02-19 -- Completed 17-01 (DomainEventOutboxInterceptor + enriched domain events)
+Plan: 2 of 3 in current phase (Plan 02 complete)
+Status: Phase 17 In Progress -- Plans 01-02 complete, Plan 03 pending
+Last activity: 2026-02-19 -- Completed 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage)
 
-Progress: [||||||||||||||||||||||||||||||||..] 81% (39/~48 plans estimated)
+Progress: [|||||||||||||||||||||||||||||||||.] 83% (40/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [||||||||||||||||||||||||||||||||..] 81% (39/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 38
+- Total plans completed: 40
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -57,6 +57,7 @@ Progress: [||||||||||||||||||||||||||||||||..] 81% (39/~48 plans estimated)
 | 16-result-pattern | 01 | 2min | 2 | 4 |
 | 16-result-pattern | 02 | 1min | 2 | 2 |
 | 17-domain-event-dispatch | 01 | 49min | 2 | 12 |
+| 17-domain-event-dispatch | 02 | 4min | 2 | 12 |
 
 ## Accumulated Context
 
@@ -88,6 +89,9 @@ Recent for v2.0:
 - [Phase 17-domain-event-dispatch]: Aspire AddNpgsqlDbContext configureDbContextOptions is Action<DbContextOptionsBuilder> (no IServiceProvider); interceptor created before registration and captured by closure
 - [Phase 17-domain-event-dispatch]: PurchaseSkippedEvent.SkippedAt renamed to OccurredAt for consistency with all other domain events
 - [Phase 17-domain-event-dispatch]: Runtime type serialization via JsonSerializer.Serialize(event, event.GetType(), options) prevents empty JSON when serializing IDomainEvent interface
+- [Phase 17-domain-event-dispatch]: MapPubSub uses mediator.Publish(object) with null check -- MediatR runtime dispatch works for both IDomainEvent and IntegrationEvent types; no IntegrationEvent cast needed
+- [Phase 17-domain-event-dispatch]: IDomainEventPublisher.PublishDirectAsync calls SaveChangesAsync immediately; appropriate for non-aggregate events without surrounding aggregate transaction
+- [Phase 17-domain-event-dispatch]: Dead-letter check at start of ProcessOutboxMessagesAsync (before processing); message moved to dead-letter on 4th pickup cycle after 3 retries exhausted
 
 ### Known Risks
 
@@ -105,9 +109,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 17-01-PLAN.md
-Resume file: .planning/phases/17-domain-event-dispatch/17-01-SUMMARY.md
-Next step: Execute Phase 17 Plan 02 (outbox publisher wiring)
+Stopped at: Completed 17-02-PLAN.md
+Resume file: .planning/phases/17-domain-event-dispatch/17-02-SUMMARY.md
+Next step: Execute Phase 17 Plan 03 (domain event subscriptions registration)
 
 ---
-*State updated: 2026-02-19 after 17-01 (DomainEventOutboxInterceptor + enriched domain events; Phase 17 Plan 01 complete)*
+*State updated: 2026-02-19 after 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage; Phase 17 Plan 02 complete)*

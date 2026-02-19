@@ -25,7 +25,7 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 
 - [x] **DE-01**: Aggregates raise domain events when state changes (PurchaseExecuted, ConfigurationUpdated)
 - [x] **DE-02**: Domain events dispatch after SaveChanges via SaveChangesInterceptor (consistency guarantee)
-- [ ] **DE-03**: Domain events automatically bridge to integration events via existing outbox pattern
+- [x] **DE-03**: Domain events automatically bridge to integration events via existing outbox pattern
 - [ ] **DE-04**: Existing MediatR event handlers continue working with new dispatch mechanism
 
 ### Error Handling
@@ -79,7 +79,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DM-04 | Phase 15: Rich Aggregate Roots | Complete |
 | DE-01 | Phase 17: Domain Event Dispatch | Complete |
 | DE-02 | Phase 17: Domain Event Dispatch | Complete |
-| DE-03 | Phase 17: Domain Event Dispatch | Pending |
+| DE-03 | Phase 17: Domain Event Dispatch | Complete |
 | DE-04 | Phase 17: Domain Event Dispatch | Pending |
 | EH-01 | Phase 16: Result Pattern | Complete |
 | EH-02 | Phase 16: Result Pattern | Complete |

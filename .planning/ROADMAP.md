@@ -120,8 +120,8 @@ Plans:
   4. Existing MediatR event handlers continue working with new dispatch mechanism (no handler rewrites needed)
 **Plans**: 3 plans
 Plans:
-- [ ] 17-01-PLAN.md -- SaveChangesInterceptor + IAggregateRoot interface + domain event enrichment with key data
-- [ ] 17-02-PLAN.md -- Wire Dapr/outbox infrastructure + generalize PubSubRegistry + IDomainEventPublisher + dead-letter table
+- [x] 17-01-PLAN.md -- SaveChangesInterceptor + IAggregateRoot interface + domain event enrichment with key data
+- [x] 17-02-PLAN.md -- Wire Dapr/outbox infrastructure + generalize PubSubRegistry + IDomainEventPublisher + dead-letter table
 - [ ] 17-03-PLAN.md -- Subscribe domain events + remove manual dispatch + PurchaseSkippedEvent via outbox
 
 ### Phase 18: Specification Pattern
@@ -158,8 +158,8 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 14. Value Objects | 2/2 | Complete    | 2026-02-18 | - |
 | 15. Rich Aggregate Roots | 2/2 | Complete    | 2026-02-19 | - |
 | 16. Result Pattern | 2/2 | Complete    | 2026-02-19 | - |
-| 17. Domain Event Dispatch | 1/3 | In Progress|  | - |
+| 17. Domain Event Dispatch | 2/3 | In Progress|  | - |
 | 18. Specification Pattern | v2.0 | 0/? | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-18 after 14-01 (value object definitions and entity application)*
+*Roadmap updated: 2026-02-19 after 17-02 (Dapr pub-sub + outbox wiring, IDomainEventPublisher, DeadLetterMessage)*
