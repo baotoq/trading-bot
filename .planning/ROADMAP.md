@@ -118,7 +118,11 @@ Plans:
   2. Domain events dispatch after SaveChanges via SaveChangesInterceptor -- if SaveChanges fails, no events dispatch
   3. Domain events automatically bridge to integration events via existing outbox pattern (domain event triggers outbox message creation)
   4. Existing MediatR event handlers continue working with new dispatch mechanism (no handler rewrites needed)
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 17-01-PLAN.md -- SaveChangesInterceptor + IAggregateRoot interface + domain event enrichment with key data
+- [ ] 17-02-PLAN.md -- Wire Dapr/outbox infrastructure + generalize PubSubRegistry + IDomainEventPublisher + dead-letter table
+- [ ] 17-03-PLAN.md -- Subscribe domain events + remove manual dispatch + PurchaseSkippedEvent via outbox
 
 ### Phase 18: Specification Pattern
 **Goal**: Complex queries are encapsulated in reusable, testable specification classes -- query logic lives in the domain, not scattered across services
