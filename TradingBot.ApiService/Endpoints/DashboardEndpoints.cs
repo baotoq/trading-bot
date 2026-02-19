@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TradingBot.ApiService.Application.Specifications;
+using TradingBot.ApiService.Application.Specifications.DailyPrices;
+using TradingBot.ApiService.Application.Specifications.Purchases;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Models.Values;
 
@@ -28,8 +31,8 @@ public static class DashboardEndpoints
         CancellationToken ct)
     {
         var purchases = await db.Purchases
-            .AsNoTracking()
-            .Where(p => !p.IsDryRun && (p.Status == Models.PurchaseStatus.Filled || p.Status == Models.PurchaseStatus.PartiallyFilled))
+            .WithSpecification(new PurchaseFilledStatusSpec())
+            .WithSpecification(new PurchasesOrderedByDateSpec())
             .ToListAsync(ct);
 
         var totalBtc = purchases.Sum(p => p.Quantity);
@@ -77,38 +80,29 @@ public static class DashboardEndpoints
         CancellationToken ct = default)
     {
         var query = db.Purchases
-            .AsNoTracking()
-            .Where(p => !p.IsDryRun && (p.Status == Models.PurchaseStatus.Filled || p.Status == Models.PurchaseStatus.PartiallyFilled));
+            .WithSpecification(new PurchaseFilledStatusSpec());
 
         if (startDate.HasValue)
         {
-            var startDateTime = startDate.Value.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-            query = query.Where(p => p.ExecutedAt >= startDateTime);
-        }
-
-        if (endDate.HasValue)
-        {
-            var endDateTime = endDate.Value.ToDateTime(TimeOnly.MaxValue, DateTimeKind.Utc);
-            query = query.Where(p => p.ExecutedAt <= endDateTime);
+            query = query.WithSpecification(new PurchaseDateRangeSpec(
+                startDate.Value, endDate ?? DateOnly.MaxValue));
         }
 
         if (!string.IsNullOrEmpty(tier))
         {
-            query = tier == "Base"
-                ? query.Where(p => p.MultiplierTier == null || p.MultiplierTier == "Base")
-                : query.Where(p => p.MultiplierTier == tier);
+            query = query.WithSpecification(new PurchaseTierFilterSpec(tier));
         }
 
-        if (!string.IsNullOrEmpty(cursor))
+        if (!string.IsNullOrEmpty(cursor) && DateTimeOffset.TryParse(cursor, out var cursorDate))
         {
-            if (DateTimeOffset.TryParse(cursor, out var cursorDate))
-            {
-                query = query.Where(p => p.ExecutedAt < cursorDate);
-            }
+            query = query.WithSpecification(new PurchaseCursorSpec(cursorDate));
+        }
+        else
+        {
+            query = query.WithSpecification(new PurchasesOrderedByDateSpec());
         }
 
         var items = await query
-            .OrderByDescending(p => p.ExecutedAt)
             .Take(pageSize + 1)
             .Select(p => new PurchaseDto(
                 Id: p.Id,
@@ -141,9 +135,8 @@ public static class DashboardEndpoints
         CancellationToken ct)
     {
         var lastPurchase = await db.Purchases
-            .AsNoTracking()
-            .Where(p => !p.IsDryRun && (p.Status == Models.PurchaseStatus.Filled || p.Status == Models.PurchaseStatus.PartiallyFilled))
-            .OrderByDescending(p => p.ExecutedAt)
+            .WithSpecification(new PurchaseFilledStatusSpec())
+            .WithSpecification(new PurchasesOrderedByDateSpec())
             .FirstOrDefaultAsync(ct);
 
         string healthStatus;
@@ -210,9 +203,7 @@ public static class DashboardEndpoints
         var startDate = DateOnly.FromDateTime(DateTime.UtcNow.AddDays(-days));
 
         var prices = await db.DailyPrices
-            .AsNoTracking()
-            .Where(dp => dp.Symbol == Symbol.Btc && dp.Date >= startDate)
-            .OrderBy(dp => dp.Date)
+            .WithSpecification(new DailyPriceByDateRangeSpec(Symbol.Btc, startDate))
             .Select(dp => new PricePointDto(
                 Date: dp.Date.ToString("yyyy-MM-dd"),
                 Price: dp.Close
@@ -220,11 +211,10 @@ public static class DashboardEndpoints
             .ToListAsync(ct);
 
         var purchases = await db.Purchases
-            .AsNoTracking()
-            .Where(p => !p.IsDryRun &&
-                       (p.Status == Models.PurchaseStatus.Filled || p.Status == Models.PurchaseStatus.PartiallyFilled) &&
-                       DateOnly.FromDateTime(p.ExecutedAt.DateTime) >= startDate)
+            .WithSpecification(new PurchaseFilledStatusSpec())
+            .Where(p => DateOnly.FromDateTime(p.ExecutedAt.DateTime) >= startDate)
             .OrderBy(p => p.ExecutedAt)
+            .AsNoTracking()
             .Select(p => new PurchaseMarkerDto(
                 Date: DateOnly.FromDateTime(p.ExecutedAt.DateTime).ToString("yyyy-MM-dd"),
                 Price: p.Price,
@@ -234,8 +224,8 @@ public static class DashboardEndpoints
             .ToListAsync(ct);
 
         var allPurchases = await db.Purchases
-            .AsNoTracking()
-            .Where(p => !p.IsDryRun && (p.Status == Models.PurchaseStatus.Filled || p.Status == Models.PurchaseStatus.PartiallyFilled))
+            .WithSpecification(new PurchaseFilledStatusSpec())
+            .WithSpecification(new PurchasesOrderedByDateSpec())
             .ToListAsync(ct);
 
         var totalBtc = allPurchases.Sum(p => p.Quantity);
