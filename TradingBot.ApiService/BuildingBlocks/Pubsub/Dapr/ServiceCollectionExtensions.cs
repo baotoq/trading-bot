@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
     extension(PubSubRegistry registry)
     {
-        public PubSubRegistry Subscribe<TEvent>() where  TEvent : IntegrationEvent
+        public PubSubRegistry Subscribe<TEvent>() where TEvent : class
         {
             registry.Add<TEvent>();
             return registry;

@@ -128,6 +128,10 @@ try
 
     builder.AddRedisDistributedCache("redis");
 
+    // Dapr pub-sub + outbox infrastructure
+    builder.Services.AddDaprPubSub();
+    builder.Services.AddOutboxPublishingWithEfCore<TradingBotDbContext>();
+
     var app = builder.Build();
 
     // Run EF Core migrations

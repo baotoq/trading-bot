@@ -1,8 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using System.Text.Json;
-using TradingBot.ApiService.BuildingBlocks.Pubsub.Abstraction;
 using TradingBot.ApiService.BuildingBlocks.Pubsub.Outbox.Abstraction;
 
 namespace TradingBot.ApiService.BuildingBlocks.Pubsub.Dapr;
@@ -20,7 +18,7 @@ public class PubSubRegistry
 
     private readonly List<PubSubSubscription> _subscriptions = new();
 
-    public void Add<TEvent>() where TEvent : IntegrationEvent
+    public void Add<TEvent>() where TEvent : class
     {
         _subscriptions.Add(new PubSubSubscription
         {
@@ -78,7 +76,8 @@ public static class WebApplicationExtensions
 
                 try
                 {
-                    if (JsonSerializer.Deserialize(daprEvent.Data, sub.EventType, jsonOptions) is not IntegrationEvent message)
+                    var message = JsonSerializer.Deserialize(daprEvent.Data, sub.EventType, jsonOptions);
+                    if (message is null)
                     {
                         logger.LogInformation("Received null or invalid message for event type {EventType}", sub.EventType.Name);
                         return Results.BadRequest();
