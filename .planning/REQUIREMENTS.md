@@ -30,8 +30,8 @@ Requirements for v2.0 milestone. Each maps to roadmap phases.
 
 ### Error Handling
 
-- [ ] **EH-01**: Domain operations return ErrorOr<T> instead of throwing exceptions for expected failures
-- [ ] **EH-02**: Minimal API endpoints map ErrorOr results to appropriate HTTP status codes
+- [x] **EH-01**: Domain operations return ErrorOr<T> instead of throwing exceptions for expected failures
+- [x] **EH-02**: Minimal API endpoints map ErrorOr results to appropriate HTTP status codes
 - [ ] **EH-03**: Application services use Result pattern for orchestration (no try/catch for domain logic)
 
 ### Query Patterns
@@ -81,8 +81,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DE-02 | Phase 17: Domain Event Dispatch | Pending |
 | DE-03 | Phase 17: Domain Event Dispatch | Pending |
 | DE-04 | Phase 17: Domain Event Dispatch | Pending |
-| EH-01 | Phase 16: Result Pattern | Pending |
-| EH-02 | Phase 16: Result Pattern | Pending |
+| EH-01 | Phase 16: Result Pattern | Complete |
+| EH-02 | Phase 16: Result Pattern | Complete |
 | EH-03 | Phase 16: Result Pattern | Pending |
 | QP-01 | Phase 18: Specification Pattern | Pending |
 | QP-02 | Phase 18: Specification Pattern | Pending |

@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 15 -- Rich Aggregate Roots
+**Current focus:** Phase 16 -- Result Pattern
 
 ## Current Position
 
-Phase: 15 of 18 (Rich Aggregate Roots -- Complete)
-Plan: 2 of 2 in current phase (both complete)
-Status: Phase 15 Complete -- Ready for Phase 16
-Last activity: 2026-02-19 -- Completed 15-02 (DcaConfiguration rich aggregate, factory method, behavior methods, domain events, invariant enforcement)
+Phase: 16 of 18 (Result Pattern -- In Progress)
+Plan: 1 of 2 in current phase (plan 01 complete)
+Status: Phase 16 In Progress -- Plan 01 complete, Plan 02 next
+Last activity: 2026-02-19 -- Completed 16-01 (ErrorOr foundation: package, error codes, behavior method signatures, ToHttpResult extension)
 
-Progress: [||||||||||||||||||||||||||||....] 75% (36/~48 plans estimated)
+Progress: [|||||||||||||||||||||||||||||...] 77% (37/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [||||||||||||||||||||||||||||....] 75% (36/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 36
+- Total plans completed: 37
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -54,6 +54,7 @@ Progress: [||||||||||||||||||||||||||||....] 75% (36/~48 plans estimated)
 | 14-value-objects | 02 | 15min | 2 | 13 |
 | 15-rich-aggregate-roots | 01 | 4min | 2 | 9 |
 | 15-rich-aggregate-roots | 02 | 2min | 2 | 4 |
+| 16-result-pattern | 01 | 2min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent for v2.0:
 - [Phase 15-rich-aggregate-roots]: AggregateRoot<TId> base class with protected AddDomainEvent and ClearDomainEvents; Purchase uses static Create() factory and behavior methods that raise identity-only domain events
 - [Phase 15-rich-aggregate-roots]: DcaSchedulerBackgroundService scheduler-level catch blocks log-only for infrastructure failures (no PurchaseFailedEvent): no Purchase aggregate exists at scheduler level to provide PurchaseId
 - [Phase 15-rich-aggregate-roots]: DcaConfiguration inherits AggregateRoot<DcaConfigurationId>; fine-grained behavior methods (UpdateDailyAmount/Schedule/Tiers/BearMarket/Settings) each raise DcaConfigurationUpdatedEvent; empty tier list is valid; ConfigurationService retains validator call as defense-in-depth
+- [Phase 16-result-pattern]: ValidateScheduleErrors/ValidateTierErrors return List<Error> shared by Create() (throws) and behavior methods (returns ErrorOr); Create() factory still throws per locked decision
+- [Phase 16-result-pattern]: ToHttpResult() handles Updated success as 204 NoContent, all other T values as 200 OK; ConfigurationService callers deferred to Plan 02
 
 ### Known Risks
 
@@ -97,9 +100,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 15-02-PLAN.md
-Resume file: .planning/phases/15-rich-aggregate-roots/15-02-SUMMARY.md
-Next step: Execute Phase 16 (next phase per ROADMAP)
+Stopped at: Completed 16-01-PLAN.md
+Resume file: .planning/phases/16-result-pattern/16-01-SUMMARY.md
+Next step: Execute 16-02 (wire ConfigurationService and endpoints to use ErrorOr)
 
 ---
-*State updated: 2026-02-19 after 15-02 (DcaConfiguration rich aggregate, factory method, behavior methods, domain events, all 53 tests pass)*
+*State updated: 2026-02-19 after 16-01 (ErrorOr foundation: package, error codes, behavior method signatures, ToHttpResult extension)*
