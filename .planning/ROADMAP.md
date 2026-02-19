@@ -183,7 +183,7 @@ Plans:
 | 17. Domain Event Dispatch | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
-| 20. Flutter Project Setup + Core Infrastructure | v3.0 | 2/2 | Complete | 2026-02-19 |
+| 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
 | 21. Portfolio + Status Screens | v3.0 | 0/2 | Not started | - |
 | 22. Price Chart + Purchase History | v3.0 | 0/2 | Not started | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
