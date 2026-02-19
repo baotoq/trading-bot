@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via web dashboard
-**Current focus:** Phase 16 -- Result Pattern
+**Current focus:** Phase 17 -- Domain Event Dispatch
 
 ## Current Position
 
-Phase: 16 of 18 (Result Pattern -- Complete)
-Plan: 2 of 2 in current phase (both plans complete)
-Status: Phase 16 Complete -- Ready for Phase 17
-Last activity: 2026-02-19 -- Completed 16-02 (ConfigurationService and Endpoints wired with ErrorOr end-to-end)
+Phase: 17 of 18 (Domain Event Dispatch -- In Progress)
+Plan: 1 of 2 in current phase (Plan 01 complete)
+Status: Phase 17 In Progress -- Plan 01 complete, Plan 02 pending
+Last activity: 2026-02-19 -- Completed 17-01 (DomainEventOutboxInterceptor + enriched domain events)
 
-Progress: [||||||||||||||||||||||||||||||..] 79% (38/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||||||||..] 81% (39/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -29,7 +29,7 @@ Progress: [||||||||||||||||||||||||||||||..] 79% (38/~48 plans estimated)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 37
+- Total plans completed: 38
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
@@ -56,6 +56,7 @@ Progress: [||||||||||||||||||||||||||||||..] 79% (38/~48 plans estimated)
 | 15-rich-aggregate-roots | 02 | 2min | 2 | 4 |
 | 16-result-pattern | 01 | 2min | 2 | 4 |
 | 16-result-pattern | 02 | 1min | 2 | 2 |
+| 17-domain-event-dispatch | 01 | 49min | 2 | 12 |
 
 ## Accumulated Context
 
@@ -84,10 +85,12 @@ Recent for v2.0:
 - [Phase 16-result-pattern]: ValidateScheduleErrors/ValidateTierErrors return List<Error> shared by Create() (throws) and behavior methods (returns ErrorOr); Create() factory still throws per locked decision
 - [Phase 16-result-pattern]: ToHttpResult() handles Updated success as 204 NoContent, all other T values as 200 OK; ConfigurationService callers deferred to Plan 02
 - [Phase 16-result-pattern]: ConfigurationService.UpdateAsync returns ErrorOr<Updated>; DcaOptionsValidator failure becomes Error.Validation (not throws); Create() path still throws per locked decision; all behavior method ErrorOr results propagated via IsError check
+- [Phase 17-domain-event-dispatch]: Aspire AddNpgsqlDbContext configureDbContextOptions is Action<DbContextOptionsBuilder> (no IServiceProvider); interceptor created before registration and captured by closure
+- [Phase 17-domain-event-dispatch]: PurchaseSkippedEvent.SkippedAt renamed to OccurredAt for consistency with all other domain events
+- [Phase 17-domain-event-dispatch]: Runtime type serialization via JsonSerializer.Serialize(event, event.GetType(), options) prevents empty JSON when serializing IDomainEvent interface
 
 ### Known Risks
 
-- Domain event dispatch timing: SaveChangesInterceptor.SavedChangesAsync (after commit), NOT SaveChangesAsync override (before commit)
 - Value objects need careful EF Core converter registration in ConfigureConventions
 - Rich aggregate refactoring touches all entity creation/mutation sites
 
@@ -102,9 +105,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 16-02-PLAN.md
-Resume file: .planning/phases/16-result-pattern/16-02-SUMMARY.md
-Next step: Execute Phase 17 (next phase in roadmap)
+Stopped at: Completed 17-01-PLAN.md
+Resume file: .planning/phases/17-domain-event-dispatch/17-01-SUMMARY.md
+Next step: Execute Phase 17 Plan 02 (outbox publisher wiring)
 
 ---
-*State updated: 2026-02-19 after 16-02 (ErrorOr wired through ConfigurationService and endpoint; Phase 16 complete)*
+*State updated: 2026-02-19 after 17-01 (DomainEventOutboxInterceptor + enriched domain events; Phase 17 Plan 01 complete)*
