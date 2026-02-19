@@ -3,4 +3,6 @@ using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Events;
 
-public record DcaConfigurationUpdatedEvent(DcaConfigurationId ConfigId) : IDomainEvent;
+public record DcaConfigurationUpdatedEvent(
+    DcaConfigurationId ConfigId,
+    DateTimeOffset OccurredAt) : IDomainEvent;

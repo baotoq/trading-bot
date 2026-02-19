@@ -56,7 +56,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
             MultiplierTiers = multiplierTiers
         };
 
-        config.AddDomainEvent(new DcaConfigurationCreatedEvent(id));
+        config.AddDomainEvent(new DcaConfigurationCreatedEvent(id, DateTimeOffset.UtcNow));
         return config;
     }
 
@@ -64,7 +64,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
     {
         BaseDailyAmount = amount;
         UpdatedAt = DateTimeOffset.UtcNow;
-        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id, DateTimeOffset.UtcNow));
     }
 
     public ErrorOr<Updated> UpdateSchedule(int hour, int minute)
@@ -76,7 +76,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
         DailyBuyHour = hour;
         DailyBuyMinute = minute;
         UpdatedAt = DateTimeOffset.UtcNow;
-        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id, DateTimeOffset.UtcNow));
         return Result.Updated;
     }
 
@@ -88,7 +88,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
 
         MultiplierTiers = tiers;
         UpdatedAt = DateTimeOffset.UtcNow;
-        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id, DateTimeOffset.UtcNow));
         return Result.Updated;
     }
 
@@ -100,7 +100,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
         BearMarketMaPeriod = maPeriod;
         BearBoostFactor = boostFactor;
         UpdatedAt = DateTimeOffset.UtcNow;
-        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id, DateTimeOffset.UtcNow));
         return Result.Updated;
     }
 
@@ -113,7 +113,7 @@ public class DcaConfiguration : AggregateRoot<DcaConfigurationId>
         DryRun = dryRun;
         MaxMultiplierCap = maxMultiplierCap;
         UpdatedAt = DateTimeOffset.UtcNow;
-        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id));
+        AddDomainEvent(new DcaConfigurationUpdatedEvent(Id, DateTimeOffset.UtcNow));
         return Result.Updated;
     }
 

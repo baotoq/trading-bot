@@ -28,7 +28,7 @@ public class PurchaseSkippedHandler(
 
             *Reason:* {notification.Reason}
             {contextualDetail}{balanceLine}{requiredLine}
-            _{notification.SkippedAt:yyyy-MM-dd HH:mm:ss} UTC_
+            _{notification.OccurredAt:yyyy-MM-dd HH:mm:ss} UTC_
             """;
 
         try

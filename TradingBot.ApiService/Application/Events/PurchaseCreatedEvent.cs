@@ -3,4 +3,9 @@ using TradingBot.ApiService.Models.Ids;
 
 namespace TradingBot.ApiService.Application.Events;
 
-public record PurchaseCreatedEvent(PurchaseId PurchaseId) : IDomainEvent;
+public record PurchaseCreatedEvent(
+    PurchaseId PurchaseId,
+    decimal Price,
+    decimal Cost,
+    decimal Multiplier,
+    DateTimeOffset OccurredAt) : IDomainEvent;

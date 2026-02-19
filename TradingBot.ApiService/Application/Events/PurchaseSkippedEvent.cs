@@ -6,5 +6,5 @@ public record PurchaseSkippedEvent(
     string Reason,
     decimal? CurrentBalance,
     decimal? RequiredAmount,
-    DateTimeOffset SkippedAt
+    DateTimeOffset OccurredAt
 ) : IDomainEvent;

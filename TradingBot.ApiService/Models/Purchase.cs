@@ -73,7 +73,12 @@ public class Purchase : AggregateRoot<PurchaseId>
             ma200Day,
             isDryRun);
 
-        purchase.AddDomainEvent(new PurchaseCreatedEvent(purchase.Id));
+        purchase.AddDomainEvent(new PurchaseCreatedEvent(
+            purchase.Id,
+            price.Value,
+            cost.Value,
+            multiplier.Value,
+            DateTimeOffset.UtcNow));
 
         return purchase;
     }
@@ -88,7 +93,12 @@ public class Purchase : AggregateRoot<PurchaseId>
         IsDryRun = true;
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        AddDomainEvent(new PurchaseCompletedEvent(Id));
+        AddDomainEvent(new PurchaseCompletedEvent(
+            Id,
+            price.Value,
+            quantity.Value,
+            actualCost.Value,
+            DateTimeOffset.UtcNow));
     }
 
     public void RecordFill(Quantity quantity, Price avgPrice, UsdAmount actualCost, string orderId, decimal requestedQuantity)
@@ -102,7 +112,12 @@ public class Purchase : AggregateRoot<PurchaseId>
             : PurchaseStatus.PartiallyFilled;
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        AddDomainEvent(new PurchaseCompletedEvent(Id));
+        AddDomainEvent(new PurchaseCompletedEvent(
+            Id,
+            avgPrice.Value,
+            quantity.Value,
+            actualCost.Value,
+            DateTimeOffset.UtcNow));
     }
 
     public void RecordResting(string orderId)
@@ -112,7 +127,10 @@ public class Purchase : AggregateRoot<PurchaseId>
         FailureReason = "Order resting instead of filling (IOC should not rest)";
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        AddDomainEvent(new PurchaseFailedEvent(Id));
+        AddDomainEvent(new PurchaseFailedEvent(
+            Id,
+            FailureReason,
+            DateTimeOffset.UtcNow));
     }
 
     public void RecordFailure(string reason, string? rawResponse = null)
@@ -122,7 +140,10 @@ public class Purchase : AggregateRoot<PurchaseId>
         RawResponse = rawResponse;
         UpdatedAt = DateTimeOffset.UtcNow;
 
-        AddDomainEvent(new PurchaseFailedEvent(Id));
+        AddDomainEvent(new PurchaseFailedEvent(
+            Id,
+            reason,
+            DateTimeOffset.UtcNow));
     }
 
     public void SetRawResponse(string rawResponse)
