@@ -68,20 +68,20 @@
 ## Phase Details
 
 ### Phase 20: Flutter Project Setup + Core Infrastructure
-**Goal**: Users can authenticate the app against the .NET API with their API key stored securely in iOS Keychain, and the app responds correctly to light/dark mode
+**Goal**: Users can authenticate the app against the .NET API with their API key injected at build time, and the app launches to a dark-only themed 4-tab navigation with error handling infrastructure
 **Depends on**: Nothing (first phase of milestone)
 **Requirements**: APP-01, APP-02, APP-03, APP-04, APP-05, APP-06
 **Success Criteria** (what must be TRUE):
-  1. User can enter API base URL and API key on first launch and the credentials are stored in iOS Keychain (not in source or UserDefaults)
+  1. API base URL and API key are injected at build time via --dart-define and sent as x-api-key header on every Dio request
   2. All subsequent API requests automatically carry the x-api-key header without any user action
-  3. When any API call returns 401 or 403, the app navigates to the setup screen instead of showing a generic error
-  4. App renders correctly in both light and dark mode following the iOS system setting
+  3. When any API call returns 401 or 403, a snackbar shows "Authentication failed" and user stays on current screen
+  4. App renders in dark-only mode with Bitcoin orange accent, ignoring iOS system setting
   5. User can pull-to-refresh on any data screen and the API is re-fetched; transient failures show a snackbar with cached data still visible
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 20-01: Flutter project scaffold, pubspec.yaml, go_router, Riverpod ProviderScope, theme setup
-- [ ] 20-02: flutter_secure_storage Keychain wrapper, Dio ApiKeyInterceptor, first-run setup screen, 401/403 redirect guard
+- [ ] 20-01-PLAN.md — Flutter project scaffold with dependencies, dark theme, go_router 4-tab navigation, placeholder screens with pull-to-refresh
+- [ ] 20-02-PLAN.md — Dio HTTP client with build-time config, API key interceptor, typed exceptions, error snackbar/retry widgets
 
 ### Phase 21: Portfolio + Status Screens
 **Goal**: Users can see their full portfolio position and confirm the bot is alive, with live price and a countdown to the next buy
@@ -183,7 +183,7 @@ Plans:
 | 17. Domain Event Dispatch | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
-| 20. Flutter Project Setup + Core Infrastructure | v3.0 | 0/2 | Not started | - |
+| 20. Flutter Project Setup + Core Infrastructure | v3.0 | 0/2 | Planned | - |
 | 21. Portfolio + Status Screens | v3.0 | 0/2 | Not started | - |
 | 22. Price Chart + Purchase History | v3.0 | 0/2 | Not started | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
