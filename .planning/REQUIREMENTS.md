@@ -89,39 +89,39 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| APP-01 | — | Pending |
-| APP-02 | — | Pending |
-| APP-03 | — | Pending |
-| APP-04 | — | Pending |
-| APP-05 | — | Pending |
-| APP-06 | — | Pending |
-| PORT-01 | — | Pending |
-| PORT-02 | — | Pending |
-| PORT-03 | — | Pending |
-| PORT-04 | — | Pending |
-| PORT-05 | — | Pending |
-| CHART-01 | — | Pending |
-| CHART-02 | — | Pending |
-| CHART-03 | — | Pending |
-| CHART-04 | — | Pending |
-| CHART-05 | — | Pending |
-| CHART-06 | — | Pending |
-| CONF-01 | — | Pending |
-| CONF-02 | — | Pending |
-| CONF-03 | — | Pending |
-| CONF-04 | — | Pending |
-| PUSH-01 | — | Pending |
-| PUSH-02 | — | Pending |
-| PUSH-03 | — | Pending |
-| PUSH-04 | — | Pending |
-| PUSH-05 | — | Pending |
-| DEPR-01 | — | Pending |
+| APP-01 | Phase 20 | Pending |
+| APP-02 | Phase 20 | Pending |
+| APP-03 | Phase 20 | Pending |
+| APP-04 | Phase 20 | Pending |
+| APP-05 | Phase 20 | Pending |
+| APP-06 | Phase 20 | Pending |
+| PORT-01 | Phase 21 | Pending |
+| PORT-02 | Phase 21 | Pending |
+| PORT-03 | Phase 21 | Pending |
+| PORT-04 | Phase 21 | Pending |
+| PORT-05 | Phase 21 | Pending |
+| CHART-01 | Phase 22 | Pending |
+| CHART-02 | Phase 22 | Pending |
+| CHART-03 | Phase 22 | Pending |
+| CHART-04 | Phase 22 | Pending |
+| CHART-05 | Phase 22 | Pending |
+| CHART-06 | Phase 22 | Pending |
+| CONF-01 | Phase 23 | Pending |
+| CONF-02 | Phase 23 | Pending |
+| CONF-03 | Phase 23 | Pending |
+| CONF-04 | Phase 23 | Pending |
+| PUSH-01 | Phase 24 | Pending |
+| PUSH-02 | Phase 24 | Pending |
+| PUSH-03 | Phase 24 | Pending |
+| PUSH-04 | Phase 24 | Pending |
+| PUSH-05 | Phase 24 | Pending |
+| DEPR-01 | Phase 25 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 27 total
-- Mapped to phases: 0
-- Unmapped: 27 ⚠️
+- Mapped to phases: 27
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after initial definition*
+*Last updated: 2026-02-20 after roadmap creation (100% coverage)*
