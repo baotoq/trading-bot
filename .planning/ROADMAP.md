@@ -91,7 +91,10 @@ Plans:
   3. DcaConfiguration aggregate enforces invariants (tiers ascending, daily amount > 0, valid schedule) via encapsulated behavior methods -- no public setters
   4. Entities use private setters throughout -- all state changes go through domain methods
   5. Application services create aggregates through factory methods and mutate through behavior methods (no direct property assignment)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 15-01-PLAN.md -- AggregateRoot base class + Purchase aggregate (factory, behavior methods, DcaExecutionService updated)
+- [ ] 15-02-PLAN.md -- DcaConfiguration aggregate (factory, behavior methods, ConfigurationService updated)
 
 ### Phase 16: Result Pattern
 **Goal**: Domain operations communicate failures through return values, not exceptions -- callers handle errors explicitly
