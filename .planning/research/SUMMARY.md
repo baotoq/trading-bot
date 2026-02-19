@@ -1,276 +1,250 @@
 # Project Research Summary
 
-**Project:** BTC Smart DCA Bot - v1.2 Web Dashboard
-**Domain:** Trading bot web dashboard with portfolio tracking, backtest visualization, and bot monitoring
-**Researched:** 2026-02-13
+**Project:** BTC Smart DCA Bot — Flutter iOS App
+**Domain:** Native iOS mobile dashboard + push notifications for single-user Bitcoin DCA trading bot
+**Researched:** 2026-02-20
 **Confidence:** HIGH
 
 ## Executive Summary
 
-The v1.2 Web Dashboard adds a monitoring and analytics interface to an existing .NET 10 DCA bot. Research shows the winning pattern is **view-only transparency first, interactive management later**. Users need to see their portfolio, verify bot purchases, and validate the strategy through backtest visualization before they need configuration editing. The recommended stack is Nuxt 4 + TanStack Query + lightweight-charts + SignalR, matching modern 2026 best practices for Vue 3 financial dashboards.
+This milestone adds a native iOS Flutter app to the existing .NET 10.0 BTC DCA trading bot. The app replaces the Nuxt 4 web dashboard as the primary monitoring interface, providing portfolio visibility, purchase history, bot health monitoring, and — critically — push notifications delivered via Firebase Cloud Messaging and Apple Push Notification service (APNs). The backend API surface is already complete and compatible; the primary development effort is Flutter-side UI plus two targeted backend additions: FCM token registration endpoints and a `FcmNotificationService` that hooks into the existing purchase event pipeline alongside the current Telegram notifier.
 
-The architecture follows a clean frontend-consuming-APIs pattern with strict separation: Nuxt handles presentation, .NET handles business logic and persistence. Critical findings show most backend pieces already exist (Purchase model, backtest API, health checks). Only 5 new endpoints needed for MVP: portfolio aggregation, live price, paginated purchases, config view, and bot status. The existing backtest infrastructure provides immediate differentiation through interactive equity curve visualization.
+The recommended approach is: Flutter + Riverpod 3.x + Dio + fl_chart + firebase_messaging, with the iOS Keychain via `flutter_secure_storage` handling the API key. All core packages are verified against pub.dev as of 2026-02-20. The feature set maps to four tabs — Portfolio, History, Config, and Backtest — mirroring the web dashboard sections with mobile-native adaptations (cards instead of tables, bottom sheets instead of sidebars, 30s polling instead of 10s). Push notifications cover two categories: transactional (buy executed, buy failed, high-multiplier triggers) and operational (missed buy health alerts). Telegram remains as the fallback notification channel and must not be removed until the iOS app is confirmed stable in production.
 
-Three critical risks emerged: (1) premature configuration editing adds 5+ days of complexity with minimal MVP value, (2) API key exposure if stored in frontend code or git, and (3) N+1 query problems causing 2-5s response times for portfolio aggregation. All three are preventable with standard patterns: defer editing to Phase 4, use .env.local for secrets with backend validation, and use EF Core aggregation queries instead of loops.
+The primary risks are: (1) API key security — the key must be stored in iOS Keychain via `flutter_secure_storage`, never in `--dart-define` or source code; (2) APNs configuration — use `.p8` auth key exclusively, never the deprecated `.p12` certificate (confirmed FlutterFire bug with `.p12`); (3) FCM token lifecycle — tokens must be stored in PostgreSQL and refreshed on every app launch, not hardcoded; (4) testing push notifications requires a real physical iOS device, not a simulator. Flutter Web findings are retained in the research files as future-consideration context but are explicitly out of scope for this milestone — the iOS native path avoids all CanvasKit, Safari, and web push pitfalls entirely.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The research converged on **Nuxt 4** as the clear choice for 2026. Nuxt 3 reaches EOL July 31, 2026, and Nuxt 4 (stable since July 2025) provides first-class TypeScript, Vue 3.5+ optimizations, and auto-imports. This eliminates the Vite + Vue SPA alternative which requires manual configuration and routing setup.
+The Flutter stack is anchored on Riverpod 3.x for state management (2026 community standard, compile-time safety, no BuildContext dependency), Dio 5.x for HTTP (global interceptor for `x-api-key` injection), fl_chart 1.1.1 for line charts with purchase markers, and `flutter_secure_storage` 10.0.0 for iOS Keychain. Navigation uses go_router 17.1.0 (official Flutter team package). All versions verified from pub.dev on 2026-02-20.
+
+For push notifications, `firebase_messaging` 16.1.1 mediates APNs on iOS. `flutter_local_notifications` 20.1.0 handles foreground notification display (FCM suppresses the system banner when the app is in the foreground — this must be handled manually). On the backend, `FirebaseAdmin` NuGet 3.4.0 sends FCM messages from .NET 10.0 via the FCM HTTP v1 API. JSON serialization uses `json_annotation` + `json_serializable` with `build_runner` codegen. The `intl` package handles BTC/USD number formatting.
 
 **Core technologies:**
-- **Nuxt 4 (4.3+)**: Vue 3 meta-framework with SSR/SPA modes — industry standard, file-based routing, auto-imports, replaces manual Vite setup
-- **TanStack Query (5.x)**: Server state management for ALL API calls — eliminates manual cache logic, automatic refetch, loading/error states, proven at scale (Vercel, Clerk)
-- **lightweight-charts (4.x)**: TradingView's canvas-based charting for equity curves — 2kb vs ApexCharts 320kb, 60fps rendering, purpose-built for financial time-series
-- **Nuxt UI (4.x)**: 125+ accessible components, Tailwind-based — saves 2-3 weeks of component work, unified UI+Pro (free, MIT), AI-optimized with MCP
-- **SignalR (@microsoft/signalr 8.x)**: Real-time price updates — native .NET integration, WebSocket with SSE/polling fallback, matches backend version
-- **Zod + VeeValidate (3.x + 4.x)**: Schema validation and forms — type-safe validation with TypeScript inference, auto error messages for config forms (Phase 4)
+- `flutter_riverpod` ^3.2.1: State management — compile-time safety, async providers, no BuildContext leaks
+- `dio` ^5.9.1: HTTP client — single global interceptor injects `x-api-key` on every request
+- `firebase_messaging` ^16.1.1: FCM push notifications — mediates APNs for iOS, Flutter Favorite
+- `flutter_local_notifications` ^20.1.0: Foreground notification display — FCM suppresses banners on iOS foreground
+- `fl_chart` ^1.1.1: Line chart with scatter purchase markers, 6 timeframes, touch tooltips (MIT license)
+- `flutter_secure_storage` ^10.0.0: iOS Keychain storage for the `x-api-key` API key
+- `go_router` ^17.1.0: URL-based navigation, deep linking from notification taps to specific screens
+- `FirebaseAdmin` (NuGet) 3.4.0: .NET backend FCM sender, fully compatible with .NET 10.0
 
-**Supporting libraries:** Pinia (client state only, not server data), VueUse (browser APIs and utilities), dayjs (date formatting, 2kb Moment.js replacement), @nuxt/icon (200k+ SVG icons).
+**Backend additions required (minimal scope):**
+- `POST /api/devices/register` + `DELETE /api/devices/{token}` — FCM token lifecycle endpoints, protected by existing `ApiKeyEndpointFilter`
+- `DeviceToken` entity + EF Core migration — follows existing `AuditedEntity` + UUIDv7 pattern
+- `FcmNotificationService` — hooks into `PurchaseCompletedHandler` MediatR handler (parallel to existing `TelegramNotificationService`)
 
-**Critical version requirements:** Nuxt 4 requires Vue 3.5+, VueUse 14.x requires Vue 3.5+, SignalR 8.x matches .NET 10.
+**What does NOT change:** All existing dashboard API endpoints are fully compatible with Flutter as-is. No changes to `GET /api/dashboard/portfolio`, `purchases`, `status`, `chart`, `config`, or any backtest endpoint.
 
 ### Expected Features
 
-Research identified 7 table stakes features and 9 differentiators. The MVP insight: **users need transparency before control**. Portfolio overview, purchase history, and live price are non-negotiable. Backtest visualization is a major differentiator leveraging existing backend infrastructure.
+Features are scoped to iOS only. Flutter Web findings are retained in FEATURES.md as future considerations.
 
-**Must have (table stakes):**
-- Portfolio Overview — total BTC, cost basis, P&L, avg cost (backend: Purchase model ready)
-- Purchase History List — paginated table with date, price, quantity, multiplier, status (backend: Purchase model ready)
-- Live BTC Price — WebSocket or polling for context (backend: Hyperliquid client exists)
-- Bot Status Indicator — health check status, last successful purchase (backend: health endpoint exists)
-- Configuration View (read-only) — display current DCA settings (backend: DcaOptions exists)
-- Basic Auth/Security — API key middleware to protect portfolio data (backend: needs implementation)
+**Must have — P1 (Nuxt parity on iOS):**
+- Portfolio Overview: BTC accumulated, cost basis, unrealized P&L, live price (30s polling, not 10s — battery)
+- Price Chart: 6 timeframes (7D/1M/3M/6M/1Y/All), fl_chart line chart, scatter purchase markers by tier, avg cost dashed line, touch tooltip, pinch-to-zoom
+- Purchase History: infinite scroll, cursor pagination via `infinite_scroll_pagination`, card design (not table rows)
+- Bot Status + Next Buy Countdown: health badge always visible, client-side timer from `nextBuyTime`
+- Pull-to-Refresh: `RefreshIndicator` on all data screens — standard mobile gesture
+- API Key Auth: `flutter_secure_storage` (Keychain) + first-run setup screen for base URL + key entry
+- Dark Mode: `ThemeData` brightness, charts respect theme
+- Error/Offline Handling: cached data with stale indicator, snackbars for transient failures
 
-**Should have (differentiators):**
-- Interactive Backtest Visualization — equity curve charts comparing smart vs fixed DCA (backend: backtest API returns daily logs)
-- Parameter Comparison Charts — visual ranking of sweep results (backend: sweep API ready)
-- Purchase Timeline Chart — see multiplier triggers correlated with price drops (backend: Purchase model has all metadata)
-- Multiplier Reasoning Display — explain why specific multiplier used (backend: Purchase has tier, drop%, high/MA fields)
-- Next Buy Countdown — time until next scheduled purchase (backend: schedule in DcaOptions)
-- Walk-Forward Overfitting Indicator — flag overfit backtest params (backend: sweep API includes validation)
+**Should have — P2 (mobile enhancements, ship after parity):**
+- Push Notification: Buy Executed — FCM, includes cost/price/BTC amount/multiplier tier in body
+- Push Notification: Bot Health Alert — triggers when no purchase in >36h
+- Push Notification: Buy Failed — critical alert from DCA engine catch block
+- Config Edit Form: full-screen form with numeric keyboards, `TimePickerDialog` for schedule, tier list add/remove, `Slider` for cap, inline server validation errors
+- Haptic Feedback: `HapticFeedback.lightImpact()` on refresh, `mediumImpact()` on config save
+- Bottom Sheet Filters on Purchase History: date range + tier filter chips
+- Last Buy Detail Card on Home Screen: expandable card from `GET /api/dashboard/status` fields
 
-**Defer (Phase 4+):**
-- Editable Configuration — convenience feature requiring PUT endpoint + validation + hot-reload (5+ days complexity)
-- Real-Time Notifications — WebSocket/SSE for purchase events (Telegram already covers this)
-- Weekly Summary Dashboard — aggregated metrics by week (requires analytics queries)
+**Defer — P3/v2+:**
+- Backtest Run from Mobile: complex form + 30-45s async response + fl_chart equity curve
+- Parameter Sweep Results as Card List (mobile-adapted ranked cards)
+- Notification History Log (sqflite local storage)
+- Home Screen Widget (native Swift, significant platform effort)
 
-**Anti-features (explicitly avoid):**
-- Sell/Take-Profit Controls — out of scope, accumulation-only bot
-- Manual Buy Button — defeats DCA discipline, encourages emotional trading
-- Multi-Asset Support — BTC only per requirements
-- Leverage/Margin Controls — spot only, no perps/futures
+**Confirmed anti-features (do not build):**
+- Real-time WebSocket price feed (battery drain; 30s polling adequate for once-daily DCA bot)
+- Candlestick charts (DCA does not use OHLC; line chart fully sufficient)
+- Price alerts / threshold notifications (undermines DCA discipline, encourages market timing)
+- Manual Buy Button (defeats DCA automation — the automation IS the feature)
+- Background price polling when app is closed (iOS background fetch limits; FCM push is the correct pattern)
+
+**Push notification scenarios (scoped to what makes sense for a single-user daily DCA bot):**
+- Category 1 — Transactional (always deliver): Buy Executed, Buy Failed, High-Multiplier Triggered (>=2x)
+- Category 2 — Operational (informational): Missed Buy Alert (>36h), Bot Recovered, Data Ingestion Complete
+- Category 3 — Excluded: Price alerts, weekly summary (Telegram already sends), "next buy in 30 min" reminders
 
 ### Architecture Approach
 
-The architecture follows **frontend-consuming-backend-APIs with strict read-only separation for MVP**. Nuxt pages consume composables, composables use TanStack Query for data fetching, queries hit new dashboard endpoints on .NET backend. Backend endpoints aggregate Purchase/DailyPrice data and proxy Hyperliquid price. Zero changes to existing bot logic or domain events.
+The architecture is a feature-first Flutter project consuming the existing .NET API via Dio, with Riverpod providers as the state layer. Each feature follows repository + provider + UI separation: repositories make Dio calls and return typed DTOs (json_serializable), providers expose `AsyncValue<T>` to UI, screens use `ConsumerWidget` to react to async state. A single `ApiKeyInterceptor` on the Dio instance reads from `flutter_secure_storage` and injects `x-api-key` on every outbound request, and redirects to the setup screen on 401/403 responses.
+
+On the backend, `FcmNotificationService` integrates at the `PurchaseCompletedHandler` MediatR handler level — the same integration point as `TelegramNotificationService` — meaning the existing event pipeline (domain event → outbox → Dapr → MediatR) requires zero structural changes. Invalid FCM tokens are cleaned up automatically on each send by inspecting `MessagingErrorCode.Unregistered` in the multicast response. The `DeviceToken` table follows the existing `AuditedEntity` + UUIDv7 conventions.
 
 **Major components:**
-1. **Nuxt Composables (usePortfolio, usePurchases, useBtcPrice, useBacktest)** — encapsulate ALL API calls with caching, expose reactive refs to components
-2. **Dashboard Endpoints (.NET, GET only for MVP)** — 5 new routes: /api/portfolio (aggregate purchases), /api/price (proxy Hyperliquid), /api/purchases (paginated list), /api/config (read DcaOptions), /api/status (health + next buy)
-3. **API Key Middleware (.NET)** — validates X-API-Key header, returns 403 if missing/wrong, configured via Dashboard:ApiKey in appsettings
-4. **TanStack Query Cache** — client-side cache for API responses with automatic background refetch and stale-while-revalidate pattern
-5. **lightweight-charts Wrapper** — Vue component wrapping TradingView chart for equity curves, candlesticks with purchase markers
+1. `core/api/` — Dio singleton + `ApiKeyInterceptor` (reads Keychain, injects header, handles 401/403 redirect to setup)
+2. `core/notifications/` — `FcmService` (permission request, token retrieval, `POST /api/devices/register`, `onTokenRefresh` listener, `onMessage` → `flutter_local_notifications` foreground display)
+3. `core/router/` — `app_router.dart` with redirect guard (no key → `/setup`) + deep link routes from notification taps (`/purchases/:id`)
+4. `features/{portfolio|purchases|status|config}/` — Repository + Riverpod provider + UI screen per feature, following official Flutter architecture recommendations
+5. `.NET FcmNotificationService` — Sends FCM via FirebaseAdmin `SendEachForMulticastAsync`, cleans stale tokens on `Unregistered` errors
+6. `.NET DeviceEndpoints` — `POST /api/devices/register` (upsert LastSeenAt) + `DELETE /api/devices/{token}`, protected by existing `ApiKeyEndpointFilter`
 
-**Data flow pattern (Portfolio Overview example):**
+**Data flow (end-to-end push notification):**
 ```
-User loads / page
-→ Nuxt SSR renders page
-→ usePortfolio() composable
-→ TanStack Query useFetch('/api/portfolio')
-→ Dashboard GET /api/portfolio endpoint
-→ EF Core aggregation: SELECT SUM(Cost), SUM(Quantity) FROM Purchase WHERE Status = 'Filled'
-→ Hyperliquid: GET current BTC price
-→ Calculate: totalBtc, totalCost, currentValue, unrealizedPnL
-→ Return JSON
-→ TanStack Query caches response (60s TTL)
-→ Vue renders <PortfolioCard> component
+DCA Scheduler fires daily
+→ DcaExecutionService places order on Hyperliquid
+→ Purchase entity created, domain event raised
+→ DomainEventOutboxInterceptor saves OutboxMessage
+→ OutboxMessageProcessor → Dapr → PurchaseCompletedHandler (MediatR)
+  ├─ TelegramNotificationService.SendMessageAsync() [unchanged]
+  └─ FcmNotificationService.SendPurchaseNotificationAsync() [NEW]
+    → FirebaseAdmin SDK → FCM HTTP v1 API → APNs → iOS device
+→ Flutter receives FCM message
+  ├─ App in foreground: flutter_local_notifications shows banner
+  ├─ App in background: FCM shows system notification
+  └─ App terminated: FCM shows system notification; tap cold-starts app
+→ Notification tap → go_router navigates to /purchases
 ```
-
-**Key patterns:**
-- Composable-first data fetching (never fetch in components directly)
-- Server-side pagination with offset/limit (page size 50-100)
-- Aggregation queries with GroupBy().Select() (single query, <10ms)
-- API key in HTTP header (X-API-Key), never query params
-- Polling for live price at 5-10s intervals (not 100ms)
 
 ### Critical Pitfalls
 
-Research identified 14 pitfalls across critical/moderate/minor severity. Top 5 are phase blockers or security risks:
+1. **API Key in Flutter Binary** — Never use `--dart-define`, `flutter_dotenv`, or hardcoded constants. These are recoverable from the compiled binary with tools like `strings` or `jadx`. Use `flutter_secure_storage` (iOS Keychain) entered by user on first launch. Enable `flutter build --obfuscate` on release builds. Must be addressed in Phase 1 — if the HTTP client is built incorrectly from the start, the pattern propagates everywhere.
 
-1. **Building Config Editing Before Proving Dashboard Value** — Phase 1 including PUT /api/config + hot-reload + form validation delays MVP by 5+ days. Users need transparency first (see portfolio, verify purchases), not management (edit settings). **Prevention:** Read-only config view in Phase 1, defer editing to Phase 4 after dashboard proven useful. If users request editing frequently, add PUT endpoint then.
+2. **APNs `.p12` Certificate vs `.p8` Auth Key** — Firebase FCM configured with a `.p12` certificate has a confirmed FlutterFire bug (issue #10920) causing silent iOS push failure. Apple deprecated `.p12` authentication in 2025. Always upload a `.p8` APNs Auth Key in Firebase Console (does not expire, works across dev + prod environments). Address before any Flutter notification code is written.
 
-2. **Storing API Keys in Frontend Code or Git** — Hardcoding API key in Nuxt source or committing .env to git exposes key in browser DevTools and git history. **Security breach.** **Prevention:** Use .env.local (gitignored), API key in X-API-Key header validated by backend middleware, never query params. Phase 4 upgrade to JWT with HTTP-only cookie.
+3. **FCM Token Not Refreshed on Rotation** — FCM tokens rotate on app reinstall, OS updates, and after 270+ days of inactivity. Backend must upsert on every app launch (not insert once). Flutter must listen to `FirebaseMessaging.instance.onTokenRefresh` stream and re-register. Backend must inspect `MessagingErrorCode.Unregistered` on each send and delete stale tokens. Address in push notification backend phase before FCM send logic.
 
-3. **N+1 Query Problem in Portfolio Aggregation** — Loading purchase summary then looping over purchases for totals = 100+ queries, 2-5s response time. **Prevention:** Use EF Core aggregation query with GroupBy().Select() — single query, ~10ms for 1000 purchases. Enable EF Core query logging to detect >3 SELECT queries per API call.
+4. **Simulator Cannot Test Push Notifications** — APNs does not work on iOS Simulator at all. All push notification verification requires a real physical iOS device. For automated tests, mock `FcmService` with a test double. This is a "looks done but isn't" trap if only tested on simulator.
 
-4. **Polling Live Price Too Aggressively** — Frontend polling /api/price every 100ms (10 req/s) hammers Hyperliquid API, causes rate limiting. **Prevention:** Poll at 5-10s intervals using VueUse useIntervalFn, cache price on backend for 5s with IMemoryCache, upgrade to SignalR push in Phase 4.
+5. **FCM Foreground Notification Not Displayed Automatically** — FCM does not auto-display a system notification banner when the iOS app is in the foreground. `flutter_local_notifications` must be used to show the banner manually from the `FirebaseMessaging.onMessage` stream listener. Missing this means notifications only work when the app is not open, which fails the most common case (user has app open at time of daily buy).
 
-5. **Not Implementing Pagination for Purchase History** — Returning ALL purchases (1000+) in single response = 500KB+ JSON, 3-5s load time, browser hangs rendering table. **Prevention:** Server-side pagination with Skip/Take, page size 50-100, add index on (ExecutedAt DESC), frontend pagination controls with Nuxt UI.
-
-**Moderate pitfalls:**
-- No error states in UI (show retry button, toast notifications)
-- Chart performance with large datasets (use canvas-based lightweight-charts, downsample if >1000 points)
-- Timezone confusion (store UTC, display with timezone indicator using dayjs)
-- CORS wildcard origins (whitelist specific origins, never `AllowAnyOrigin()` in production)
-
-**Phase-specific warnings:**
-- Phase 1 (View-Only): API key exposure, N+1 queries, no pagination
-- Phase 2 (Backtest Integration): Chart performance, large JSON responses
-- Phase 3 (Enhanced Insights): Timezone confusion, date format inconsistency
-- Phase 4 (Interactive Management): Premature config editing, CORS misconfiguration
+**Web-specific pitfalls (noted for future reference, do not affect iOS scope):**
+- CanvasKit memory leak crashing iOS Safari (Flutter Web only, active confirmed bug as of 2026-02-20 in Flutter 3.27.4-3.38.1)
+- 1.5MB CanvasKit cold load on web before any pixels render
+- Safari web push requiring PWA installation to home screen (iOS 16.4+ only)
 
 ## Implications for Roadmap
 
-Based on research, suggested **4-phase structure prioritizing transparency over management**. Phase 1-2 leverage existing backend (zero new infrastructure), Phase 3 adds visual insights, Phase 4 defers interactive features until dashboard proven valuable.
+Based on combined research, the recommended phase structure follows a dependency-driven order: foundational infrastructure first (API security must be correct from day one), then read-only screens (prove the app works), then write operations (config edit after read screens validated), then push notifications (requires both Flutter + backend readiness and physical device testing), and finally the optional backtest feature. All phases build on the preceding ones with no rework required.
 
-### Phase 1: View-Only Dashboard (MVP)
-**Rationale:** Covers all table stakes, proves value (portfolio tracking), establishes trust (transparency + health), requires ZERO backend infrastructure changes (read-only using existing Purchase/DailyPrice data). Gets dashboard in users' hands fastest to validate core value proposition: "see what the bot is doing."
+### Phase 1: Flutter Project Setup + Core Infrastructure
+**Rationale:** All subsequent phases depend on secure API communication. The API key security pitfall must be resolved here — if the HTTP client is built incorrectly, the mistake is copied into every feature. The Dio interceptor + secure storage pattern is the project's equivalent of setting up CI: foundational, not glamorous, must be right.
+**Delivers:** Flutter project scaffold (`TradingBot.Mobile/`), Dio + `ApiKeyInterceptor`, `flutter_secure_storage` wrapper for Keychain, first-run setup screen (API key + base URL entry), go_router with redirect guard, app theme (light/dark), Riverpod `ProviderScope`, `json_serializable` codegen setup, `build_runner` configured.
+**Addresses:** API key auth (P1), Dark Mode (P1), first-run UX, project structure for all features to follow.
+**Avoids:** Pitfall 1 (API key in binary) — establishes `flutter_secure_storage` as the mandatory pattern before any feature copies the wrong approach.
+**Research flag:** Standard patterns, skip `/gsd:research-phase`. Dio interceptors, flutter_secure_storage, go_router redirect guards all have official documentation and pub.dev examples.
 
-**Delivers:**
-- Portfolio overview (total BTC, cost basis, P&L, avg cost)
-- Purchase history list (paginated table with multiplier reasoning)
-- Live BTC price (polling at 5s intervals)
-- Bot status indicator (health + last purchase)
-- Configuration view (read-only DcaOptions)
-- Basic auth (API key middleware)
+### Phase 2: Portfolio + Status Screens (Read-Only Core)
+**Rationale:** Highest-value, lowest-complexity screens. Portfolio overview is the primary reason to open the app. Status + countdown establishes trust that the bot is running. Both consume existing API endpoints with zero backend changes. Builds confidence in the Flutter/Riverpod pattern before tackling more complex screens like the price chart.
+**Delivers:** Portfolio Overview screen (stats cards for total BTC, cost basis, P&L, live price at 30s polling, green/red color on P&L), Bot Status health badge (always visible), Next Buy Countdown (client-side timer from `nextBuyTime`), Last Buy Detail Card (expandable, data from `GET /api/dashboard/status`), Pull-to-Refresh on all screens, offline/stale state handling, error snackbars.
+**Addresses:** Portfolio Overview (P1), Bot Status + Countdown (P1), Pull-to-Refresh (P1), Last Buy Detail Card (P2).
+**Uses:** `flutter_riverpod` + `dio` + `intl` (BTC formatting to 8 decimal places, USD formatting).
+**Research flag:** Standard patterns, skip `/gsd:research-phase`. Riverpod `FutureProvider` + `ConsumerWidget` is well-documented; `when(data:, loading:, error:)` is the standard pattern.
 
-**Backend work:** 5 new GET endpoints (portfolio aggregation, price proxy, paginated purchases, config view, status), API key middleware, CORS configuration. All read-only, no domain logic changes.
+### Phase 3: Price Chart + Purchase History
+**Rationale:** fl_chart has a learning curve for scatter overlay + touch interaction. Cursor-based infinite scroll pagination is moderately complex. Grouping these two screens together is efficient because they share the "data list from existing API" pattern and both need `fl_chart` as a dependency. Chart depends on the API client established in Phase 1.
+**Delivers:** Price Chart (6 timeframes, fl_chart line chart, scatter purchase markers colored by multiplier tier, avg cost dashed line overlay, touch tooltip with price/date, pinch-to-zoom via `InteractiveViewer`), Purchase History (infinite scroll via `infinite_scroll_pagination`, cursor pagination matching existing `.NET` `GET /api/dashboard/purchases`, card design showing date/cost/BTC/tier/drop%, bottom sheet filters for date range + tier, pull-to-refresh).
+**Addresses:** Price Chart (P1), Average Cost Basis Line (P1), Purchase History (P1), Pinch-to-Zoom (P2), Bottom Sheet Filters (P2).
+**Uses:** `fl_chart` ^1.1.1, `infinite_scroll_pagination` (add to pubspec — v5.1.1, Flutter Favorite).
+**Research flag:** Verify fl_chart scatter + line overlay before implementation. The combination of `LineChartData` + `ScatterChartData` on a single chart widget is not the default usage pattern. Confirm the API supports this before committing to the approach; if not, fall back to vertical line markers which are simpler.
 
-**Addresses features:** Portfolio Overview, Purchase History, Live Price, Bot Status, Config View (all table stakes from FEATURES.md)
+### Phase 4: Configuration Screen (Read + Edit)
+**Rationale:** Config reading is trivial (existing `GET /api/config`). Config editing (`PUT /api/config`) is more complex due to multiplier tier list management (reorderable tiles, add/remove, validation) and inline server-side error display. Placed after read-only screens are stable — configuration changes affect live bot behavior and should only be accessible once the app has been validated working. Haptic feedback is naturally included here as it applies to save actions.
+**Delivers:** Config View screen (all DCA params visible: base amount, schedule, tiers, bear market settings), Config Edit Form (numeric keyboards with formatters, `TimePickerDialog` for `DailyBuyHour`/`DailyBuyMinute`, multiplier tier list with add/remove/reorder, `Slider` for `MaxMultiplierCap`, inline server validation error display matching `DcaOptionsValidator` rules), Haptic Feedback on save (`mediumImpact()`), Haptic on pull-to-refresh (`lightImpact()`).
+**Addresses:** DCA Config View (P1), Config Edit Form (P2), Haptic Feedback (P2).
+**Uses:** `dio` PUT to existing `PUT /api/config` endpoint (no backend changes), form validation logic mirroring `DcaOptionsValidator`.
+**Research flag:** Standard patterns, skip `/gsd:research-phase`. Flutter `TextFormField` with formatters and `PUT` endpoint validation are documented patterns. `DcaOptionsValidator` rules are already implemented in the backend.
 
-**Avoids pitfalls:** Premature config editing (#1), implements pagination from day 1 (#5), uses aggregation queries (#3), 5-10s polling (#4), API key in .env.local (#2)
+### Phase 5: Push Notifications (FCM + APNs Integration)
+**Rationale:** Highest-complexity phase — requires coordinated changes to both Flutter and the .NET backend, Apple Developer account prerequisites, Firebase project setup, and physical device testing. Must come after the app has stable screens to deep-link into (Phases 2-3). APNs `.p8` configuration is a strict prerequisite before any Flutter notification code is written. Token lifecycle management on the backend must be built before the Flutter token registration flow.
+**Delivers (backend):** `DeviceToken` entity + EF Core migration (`device_tokens` table with unique index on Token), `POST /api/devices/register` (upsert pattern, updates `LastSeenAt`) + `DELETE /api/devices/{token}` (protected by existing `ApiKeyEndpointFilter`), `FcmNotificationService` (hooks into `PurchaseCompletedHandler`, sends FCM multicast, cleans `Unregistered` tokens on error), `FirebaseAdmin` NuGet 3.4.0 added to `TradingBot.ApiService`, Firebase service account JSON stored via .NET User Secrets.
+**Delivers (Flutter):** Firebase project configuration (`.p8` APNs Auth Key uploaded, `GoogleService-Info.plist` downloaded), Xcode capabilities (Push Notifications + Background Modes → Remote Notifications), `FcmService` class (permission request, token retrieval, `POST /api/devices/register` on launch, `onTokenRefresh` listener, `onMessage` → `flutter_local_notifications` foreground banner), `onMessageOpenedApp` handler → go_router deep link to `/purchases`, notification payload design (title/body includes cost/price/BTC/tier).
+**Addresses:** Push: Buy Executed (P2), Push: Health Alert (P2), Push: Buy Failed (P2), FCM token lifecycle management, Notification tap deep-linking.
+**Avoids:** Pitfall 2 (`.p12` — must use `.p8`), Pitfall 3 (FCM token lifecycle — upsert + cleanup + refresh listener), Pitfall 4 (must test on physical device, not simulator), Pitfall 5 (foreground display — `flutter_local_notifications` required).
+**Research flag:** Needs `/gsd:research-phase` before implementation. APNs `.p8` key upload steps, Firebase console iOS app registration, `GoogleService-Info.plist` placement, Xcode entitlements for Push Notifications capability, `flutter_local_notifications` iOS notification categories with deep-link actions — procedurally dense, many steps that silently fail if done out of order.
 
-**Research flags:** SKIP research-phase — standard dashboard patterns, well-documented. TanStack Query + Nuxt UI examples plentiful.
-
-### Phase 2: Backtest Integration
-**Rationale:** Leverages existing backtest API (POST /api/backtest, /api/backtest/sweep) to provide validation of strategy. Major differentiator: interactive equity curve visualization shows "why smart DCA works" visually. Medium complexity (charting), high value (trust building).
-
-**Delivers:**
-- Backtest results view (metrics table: total BTC, cost basis, return %, vs fixed DCA)
-- Interactive backtest visualization (equity curve chart comparing strategies)
-- Data freshness indicator (display last ingestion timestamp)
-- Walk-forward overfitting indicator (badge/warning on sweep results)
-
-**Backend work:** ZERO — backtest API already returns daily purchase logs and sweep results. Possibly add GET /api/backtest/data/status to expose ingestion metadata.
-
-**Uses stack:** lightweight-charts (canvas-based, 60fps), TanStack Query mutation for POST /api/backtest
-
-**Implements architecture:** Chart wrapper component, equity curve line series, purchase markers
-
-**Avoids pitfalls:** Chart performance with large datasets (#7) — lightweight-charts is canvas-based, handles 1000+ points smoothly
-
-**Research flags:** SKIP research-phase — TradingView lightweight-charts has official Vue tutorial, backtest API response format already known
-
-### Phase 3: Enhanced Insights
-**Rationale:** Improves user understanding of bot behavior through visual patterns and contextual explanations. Differentiates from basic portfolio trackers. Medium complexity (timeline charts + aggregation), moderate value (insight > control). Builds on Phase 1+2 data.
-
-**Delivers:**
-- Purchase timeline chart (candlestick + markers sized by multiplier)
-- Multiplier reasoning display (per-purchase breakdown: tier matched, bear boost, drop% from high)
-- Next buy countdown (timer based on DailyBuyHour/Minute config)
-- Parameter comparison charts (bar/scatter charts ranking sweep results)
-
-**Backend work:** ZERO — all data exists in Purchase model (MultiplierTier, DropPercentage, High30Day, Ma200Day) and DcaOptions (schedule). Possibly add GET /api/next-buy endpoint for countdown.
-
-**Addresses features:** Purchase Timeline Chart, Multiplier Reasoning, Next Buy Countdown, Parameter Comparison (all differentiators from FEATURES.md)
-
-**Avoids pitfalls:** Timezone confusion (#8) — use dayjs with UTC plugin, display "Feb 13, 2026 10:00 AM UTC". Date format consistency (#12) — single formatDate/formatDateTime util.
-
-**Research flags:** SKIP research-phase — standard charting patterns, Purchase model metadata fully documented in codebase
-
-### Phase 4: Interactive Management (Deferred)
-**Rationale:** High complexity (backend changes + validation + hot-reload), moderate value (convenience > necessity). Defer until dashboard proven valuable through Phase 1-3 usage. Only build if users frequently request config editing (currently they edit appsettings.json successfully).
-
-**Delivers:**
-- Editable configuration (form to edit base amount, schedule, tiers, bear boost)
-- Real-time notifications (toast/alert when new purchase executes via WebSocket)
-- Weekly summary dashboard (aggregate metrics by week: total spent, BTC accumulated, avg multiplier)
-
-**Backend work:** HIGH effort — PUT /api/config endpoint with validation + IOptionsMonitor invalidation or app restart handling, SignalR hub for purchase events (BotStatusHub.BroadcastPurchaseEvent), weekly aggregation queries or materialized view.
-
-**Uses stack:** VeeValidate + Zod (form validation with TS inference), SignalR (WebSocket for real-time events), Pinia (client state for form drafts)
-
-**Implements architecture:** SignalR connection composable (useBotStatus with auto-reconnect), config form with optimistic updates, weekly aggregation queries
-
-**Avoids pitfalls:** CORS wildcard (#9) — whitelist specific origins for WebSocket connections. Pinia overuse (#10) — use only for form draft state, not API data.
-
-**Research flags:** NEEDS research-phase — SignalR integration pattern (.NET Hub → Nuxt composable) needs validation, config hot-reload strategy (IOptionsMonitor.OnChange vs app restart) needs design decision.
+### Phase 6: Backtest (Defer, Ship Separately)
+**Rationale:** Backtest run from mobile requires a complex multi-field form (all DCA params as numeric inputs), a potentially long async wait (30-45s for parameter sweeps), and equity curve visualization using fl_chart. It is a P3 feature with no dependency on Phase 5 push notifications. Safe to defer as a follow-on milestone — the existing Nuxt dashboard handles backtest until this phase ships.
+**Delivers:** Backtest Run form (all DCA params as inputs with numeric keyboards), data ingestion status check (`GET /api/backtest/data/status` before allowing run), Backtest Results screen (metric cards + equity curve via `fl_chart`, Smart vs Fixed DCA comparison), Parameter Sweep ranked card list (mobile-adapted alternative to table — rank badge, key KPIs per card).
+**Addresses:** Backtest Run (P3), Parameter Sweep Cards (P3).
+**Uses:** `fl_chart` equity curve (same library as Phase 3), `POST /api/backtest` + `POST /api/backtest/sweep` (no backend changes needed).
+**Research flag:** Standard patterns for form and fl_chart. Dio `receiveTimeout` must be set to 60s minimum for sweep requests (30-45s server-side execution).
 
 ### Phase Ordering Rationale
 
-- **Phase 1 first:** Zero backend infrastructure risk, leverages existing data models, proves core value (transparency). Users see immediate benefit: portfolio tracking + purchase verification.
-
-- **Phase 2 builds on Phase 1:** Backtest visualization uses same TanStack Query + lightweight-charts stack established in Phase 1. Backtest API already exists (no backend work). Provides validation ("strategy works") before users need management features.
-
-- **Phase 3 enhances understanding:** Timeline charts and multiplier reasoning deepen user insights into bot behavior. Depends on Purchase model metadata already exposed in Phase 1. Low backend effort (possibly 1 GET endpoint for next-buy countdown), high educational value.
-
-- **Phase 4 deferred until proven need:** Config editing requires significant backend work (PUT endpoint + validation + hot-reload) with unclear value (users edit appsettings.json today). Real-time notifications are nice-to-have (Telegram already covers this). Weekly summary is analytics, not core monitoring. Build only if Phase 1-3 usage reveals strong demand.
-
-- **Dependency flow:** Phase 1 establishes composable + TanStack Query patterns → Phase 2 extends with charting → Phase 3 adds insights using same patterns → Phase 4 adds interactivity only if validated. No phase blocks another; all can proceed independently.
-
-- **Pitfall avoidance:** Ordering prevents premature optimization (#1). Phase 1 validates dashboard value before investing 5-7 days in config editing. Phase 2-3 keep complexity low (read-only) while building user trust. Phase 4 only built if ROI proven.
+- **Infrastructure before features:** Phase 1 is a strict prerequisite. API key security cannot be retrofitted after feature screens are built — the wrong pattern propagates into every repository and interceptor.
+- **Read before write:** Phases 2-3 (read-only) must be stable before Phase 4 (config edit). Prevents incorrect config changes during validation of core app behavior.
+- **Stable screens before push:** Phase 5 notification taps deep-link into specific screens — those screens must exist and be stable first (Phases 2-3). The backend notification infrastructure (Phase 5) is also a dependency for deep links.
+- **Physical device availability for Phase 5:** APNs does not work on iOS Simulator. Plan for access to a real iPhone during Phase 5 development and testing. This is not optional.
+- **Telegram stays live throughout all phases:** Do not remove or modify the existing `TelegramNotificationService` until Phase 5 push notifications have been confirmed delivering reliably on the physical device over at least one full daily buy cycle.
+- **Backtest is an independent stream:** Phase 6 has no dependency on Phase 5. Could be worked in parallel if resources allow, but Phases 1-5 deliver higher user value in sequence.
+- **Nuxt dashboard as fallback:** Keep the Nuxt dashboard running until the Flutter app is confirmed stable in production. Both can coexist on different ports. Do not deprecate Nuxt prematurely.
 
 ### Research Flags
 
-**Phases with standard patterns (SKIP research-phase):**
-- **Phase 1 (View-Only Dashboard):** Well-documented patterns — TanStack Query + Nuxt UI + EF Core aggregation queries. Examples plentiful in Nuxt ecosystem. API key middleware is ASP.NET Core standard.
-- **Phase 2 (Backtest Integration):** TradingView lightweight-charts has official Vue tutorial. Equity curve charting is standard financial visualization. Backtest API response format already known from existing implementation.
-- **Phase 3 (Enhanced Insights):** Purchase timeline chart is lightweight-charts candlestick series + markers (documented). Next buy countdown is simple timer logic (VueUse useIntervalFn). Parameter comparison is bar chart (standard).
+**Needs `/gsd:research-phase` before planning:**
+- **Phase 5 (Push Notifications):** APNs `.p8` key generation + Firebase upload procedure, Firebase iOS app registration steps, Xcode Push Notifications + Background Modes entitlements setup, `flutter_local_notifications` notification categories with iOS actionable buttons, FCM token registration endpoint design for token rotation edge cases. This phase has the highest surface area of procedural configuration steps that must be done in a specific order.
+- **Phase 3 (fl_chart scatter + line overlay):** Verify that `fl_chart` 1.1.1 supports rendering scatter purchase markers overlaid on a line price chart within a single chart widget. If the API does not cleanly support this combination, the fallback approach (vertical dashed lines for purchase markers) must be chosen before implementation begins.
 
-**Phases likely needing deeper research:**
-- **Phase 4 (Interactive Management):** SignalR integration pattern needs validation — how to structure .NET Hub, how to consume in Nuxt composable, reconnection handling. Config hot-reload strategy needs design decision: IOptionsMonitor.OnChange with in-memory update vs app restart prompt. Form validation for DCA tiers (nested arrays) needs Zod schema design.
+**Standard patterns, skip `/gsd:research-phase`:**
+- **Phase 1:** Flutter project setup, Dio interceptors, `flutter_secure_storage`, go_router redirect guards — official documentation and pub.dev examples are comprehensive.
+- **Phase 2:** Riverpod `FutureProvider` + `ConsumerWidget` + `AsyncValue.when()` — the canonical Riverpod 3.x pattern, documented on riverpod.dev.
+- **Phase 4:** Flutter `TextFormField` + `PUT` endpoint validation — standard Flutter form patterns.
+- **Phase 6:** Backtest form is a straightforward Flutter form; fl_chart equity curve is the same library as Phase 3, just a different chart type.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All versions verified from official 2026 sources. Nuxt 4 stable since July 2025. TanStack Query proven at scale (Vercel, Clerk). lightweight-charts is TradingView official lib (used by Binance, Coinbase). SignalR matches .NET 10 backend. |
-| Features | HIGH | 7 table stakes features identified from 5+ DCA bot dashboard comparisons (3Commas, Crypto.com, DappFort). 9 differentiators validated against crypto portfolio tracker apps (Coinbureau, Bitsgap). MVP recommendation (view-only first) supported by UI/UX best practices research. |
-| Architecture | HIGH | Frontend-consuming-APIs pattern is standard for trading dashboards (Mevx, 3Commas). Composable-first data fetching is Nuxt 3 best practice. TanStack Query for server state is ecosystem standard. Backend endpoint design (lean, focused) matches .NET Minimal API patterns. |
-| Pitfalls | HIGH | Critical pitfalls validated from multiple sources: premature optimization (UI/UX best practices), API key exposure (ASP.NET Core security docs), N+1 queries (EF Core performance docs), aggressive polling (Hyperliquid rate limits), pagination (standard practice at 1000+ records). |
+| Stack | HIGH | All package versions verified directly from pub.dev and nuget.org on 2026-02-20. No inferred or estimated versions. flutter_riverpod 3.2.1 published 16 days prior. FirebaseAdmin 3.4.0 verified .NET 10 compatible. |
+| Features | HIGH | Feature set derived from the existing Nuxt dashboard API surface (no guessing about endpoints). Mobile adaptations follow established finance app UX patterns (Robinhood, Coinbase, Delta, 3Commas). Anti-features validated against DCA discipline principles. |
+| Architecture | HIGH | Repository + Riverpod + Dio interceptor is the Flutter official recommended architecture per docs.flutter.dev/app-architecture. FCM integration patterns from official FlutterFire docs. Backend FcmNotificationService hooks into the exact same MediatR integration point as the existing Telegram service. |
+| Pitfalls | HIGH | APNs `.p12` bug verified against FlutterFire GitHub issue #10920 (confirmed). CanvasKit iOS Safari memory leak verified against Flutter GitHub issue #178524 (confirmed active, Flutter 3.27.4-3.38.1). FCM token lifecycle best practices from official Firebase docs. iOS Simulator APNs limitation is documented engineering fact. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-**Backend endpoint pagination details:** Research recommends page size 50-100, but optimal size depends on actual Purchase record size (number of fields returned). Validate during Phase 1 implementation: measure response payload at 50/100/200 page sizes, choose based on <100ms query time and <50KB response.
+- **fl_chart 1.1.1 scatter overlay on line chart:** Research confirmed support for line charts and scatter charts separately, but the specific combination of scatter purchase markers overlaid on a line price chart within a single widget needs hands-on verification. If the combined `LineChartData` + scatter approach does not work cleanly, the fallback is vertical dashed lines for purchase markers, which fl_chart does support via `LineChartBarData` with `dashArray`. Resolve before Phase 3 planning.
 
-**SignalR reconnection UX (Phase 4):** Research shows SignalR has automatic reconnection, but doesn't specify UX during reconnection (show "connecting..." indicator? buffer missed events?). Needs design decision during Phase 4 planning: silently reconnect vs show connection status badge.
+- **Apple Developer account prerequisites:** Phase 5 assumes an active Apple Developer account with the ability to create a `.p8` APNs Auth Key and register an App ID with Push Notifications capability. If the account is not set up or the app bundle ID is not registered, this blocks Phase 5 entirely. Verify account status and bundle ID registration before beginning Phase 5 planning.
 
-**Chart downsampling threshold (Phase 2):** lightweight-charts handles 1000+ points smoothly, but exact threshold where downsampling needed depends on browser performance. Research suggests >1000 points, but validate during Phase 2 with 4-year backtest (1,460 daily points). Measure render time, downsample only if >2s initial render.
+- **Firebase project creation:** No Firebase project currently exists for this bot. Creating the project, registering the iOS app bundle ID, downloading `GoogleService-Info.plist`, and configuring the `.p8` APNs Auth Key are all manual steps that must be completed before any Flutter notification code is written. These steps cannot be automated and are the first dependency of Phase 5.
 
-**Config hot-reload strategy (Phase 4):** Research identifies IOptionsMonitor.OnChange as pattern, but doesn't specify if in-memory reload works for all DcaOptions fields (schedule changes might need restart for cron job reconfiguration). Needs design decision during Phase 4: optimistic in-memory update vs prompt user to restart bot.
+- **Aspire Flutter dev integration:** The `DebuggingMadeJoyful.Aspire.Hosting.Dart` community NuGet package (v1.0.0, ~165 downloads) is very low maturity. If it does not work reliably in practice, the fallback is running Flutter outside Aspire as a separate process (Option B: `flutter run -d chrome` independently, with the .NET API URL configured via environment). This only affects the development inner loop, not production behavior.
+
+- **`infinite_scroll_pagination` version:** The `infinite_scroll_pagination` package (v5.1.1, Flutter Favorite) is referenced in FEATURES.md but not included in the STACK.md pubspec.yaml block. Add it explicitly when creating the pubspec: `infinite_scroll_pagination: ^5.1.1`.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Nuxt 4.0 Release Announcement](https://nuxt.com/blog/v4) — Nuxt 4 features, Vue 3.5 requirement, release date (July 2025)
-- [Nuxt Lifecycle - endoflife.date](https://endoflife.date/nuxt) — Nuxt 3 EOL July 31, 2026
-- [TanStack Query Vue Docs](https://tanstack.com/query/v5/docs/framework/vue/overview) — Official API, caching, mutations, SSR
-- [TradingView Lightweight Charts Vue Tutorial](https://tradingview.github.io/lightweight-charts/tutorials/vuejs/wrapper) — Official wrapper pattern
-- [ASP.NET Core CORS Documentation](https://learn.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-10.0) — Official CORS configuration
-- [Nuxt UI Documentation](https://ui.nuxt.com/) — Component library, Tailwind-based
-- [Pinia Documentation](https://pinia.vuejs.org/) — Official Vue 3 store
-- [VueUse Documentation](https://vueuse.org/) — Composition utilities, browser APIs
+- [pub.dev/packages/flutter_riverpod](https://pub.dev/packages/flutter_riverpod) — v3.2.1 verified, 2026 standard for state management
+- [pub.dev/packages/firebase_messaging](https://pub.dev/packages/firebase_messaging) — v16.1.1, iOS + FCM confirmed, Flutter Favorite
+- [pub.dev/packages/fl_chart](https://pub.dev/packages/fl_chart) — v1.1.1, line chart + scatter confirmed, MIT license
+- [pub.dev/packages/flutter_secure_storage](https://pub.dev/packages/flutter_secure_storage) — v10.0.0, iOS Keychain confirmed
+- [pub.dev/packages/go_router](https://pub.dev/packages/go_router) — v17.1.0, Flutter Favorite, official Flutter team package
+- [pub.dev/packages/dio](https://pub.dev/packages/dio) — v5.9.1, interceptor support confirmed
+- [pub.dev/packages/infinite_scroll_pagination](https://pub.dev/packages/infinite_scroll_pagination) — v5.1.1, Flutter Favorite, cursor pagination confirmed
+- [nuget.org/packages/FirebaseAdmin](https://www.nuget.org/packages/FirebaseAdmin) — v3.4.0, .NET 10.0 compatible confirmed
+- [firebase.flutter.dev/docs/messaging/apple-integration](https://firebase.flutter.dev/docs/messaging/apple-integration/) — APNs .p8 setup requirements, official FlutterFire docs
+- [firebase.google.com/docs/cloud-messaging/manage-tokens](https://firebase.google.com/docs/cloud-messaging/manage-tokens) — FCM token lifecycle official guidance
+- [github.com/firebase/flutterfire/issues/10920](https://github.com/firebase/flutterfire/issues/10920) — Confirmed .p12 FCM iOS silent failure bug
+- [github.com/flutter/flutter/issues/178524](https://github.com/flutter/flutter/issues/178524) — CanvasKit iOS Safari memory leak (web only, future consideration)
+- [docs.flutter.dev/app-architecture/recommendations](https://docs.flutter.dev/app-architecture/recommendations) — Official Flutter repository + provider pattern recommendation
 
 ### Secondary (MEDIUM confidence)
-- [Best Chart Libraries for Vue 2026 - Weavelinx](https://weavelinx.com/best-chart-libraries-for-vue-projects-in-2026/) — lightweight-charts recommendation, 2kb vs ApexCharts 320kb
-- [SignalR + Vue.js Integration - Medium](https://medium.com/@simo.matijevic/real-time-communication-with-signalr-integrating-net-and-vue-js-2b0522904c67) — .NET Hub to Vue composable pattern
-- [Crypto Bot UI/UX Design Best Practices - CompanionLink](https://www.companionlink.com/blog/2025/01/crypto-bot-ui-ux-design-best-practices/) — Transparency before control, error states, mobile-first
-- [DCA Bot Guide - DappFort](https://www.dappfort.com/blog/dca-trading-bot-development/) — Portfolio overview, purchase history, backtest validation as table stakes
-- [3Commas DCA Bot Features](https://3commas.io/dca-bots) — Feature comparison (bot status, price display, history)
-- [Crypto.com DCA Bot Help](https://help.crypto.com/en/articles/6172353-dca-trading-bot) — Config management patterns
-- [How to Backtest Crypto Trading Strategy - Coinbureau](https://coinbureau.com/guides/how-to-backtest-your-crypto-trading-strategy/) — Equity curve visualization, comparison to baseline
-- [Crypto Portfolio Tracker Apps 2026 - VentureBurn](https://ventureburn.com/best-crypto-portfolio-tracker/) — P&L display, cost basis, unrealized gains
-- [Custom Analytics Dashboards - Mevx](https://blog.mevx.io/guide/how-to-build-your-custom-analytics-dashboards) — Real-time monitoring patterns
-
-### Tertiary (LOW confidence, used for validation only)
-- [5 Best Crypto Trading Bot Platforms 2026 - Medium](https://medium.com/coinmonks/5-best-crypto-trading-bot-platforms-for-2026-top-automated-trading-tools-b5cf60ffd433) — General feature landscape
-- [9 Common Crypto Trading Mistakes - Trakx](https://trakx.io/resources/insights/9-common-crypto-trading-mistakes-to-avoid/) — Pitfall validation (emotional trading, overtrading)
-- [Crypto Trading Mistakes - Asturati](https://www.asturati.com/2026/02/common-crypto-trading-mistakes-that.html) — Risk management anti-patterns
+- [foresightmobile.com — Best Flutter State Management 2026](https://foresightmobile.com/blog/best-flutter-state-management) — Riverpod 3.x community consensus
+- [medium.com — Mastering HTTP Calls in Flutter 2025](https://medium.com/@pv.jassim/mastering-http-calls-in-flutter-2025-edition-http-vs-dio-vs-retrofit-1962ec46be43) — Dio vs alternatives analysis
+- [codewithandrea.com — Flutter bottom navigation + GoRouter](https://codewithandrea.com/articles/flutter-bottom-navigation-bar-nested-routes-gorouter/) — StatefulShellRoute for persistent tab state
+- [magicbell.com — Alert Fatigue](https://www.magicbell.com/blog/alert-fatigue) — 64% of users delete apps sending 5+ notifications/week; validates minimal notification design
+- [nuget.org/packages/DebuggingMadeJoyful.Aspire.Hosting.Dart](https://www.nuget.org/packages/DebuggingMadeJoyful.Aspire.Hosting.Dart) — v1.0.0 community Aspire Dart integration (LOW maturity, ~165 downloads — treat as best-effort)
+- [freecodecamp.org — How to Secure Mobile APIs in Flutter](https://www.freecodecamp.org/news/how-to-secure-mobile-apis-in-flutter/) — Secure storage patterns for mobile API keys
 
 ---
-*Research completed: 2026-02-13*
-*Ready for roadmap: YES*
+*Research completed: 2026-02-20*
+*Scope: iOS native Flutter app (Flutter Web findings retained in STACK.md/PITFALLS.md as future-consideration annotations)*
+*Ready for roadmap: yes*
