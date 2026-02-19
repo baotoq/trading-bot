@@ -1,6 +1,5 @@
 using MediatR;
 using Microsoft.Extensions.Options;
-using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Configuration;
@@ -61,16 +60,9 @@ public class DcaSchedulerBackgroundService(
             catch (HyperliquidApiException ex) when (ex.StatusCode.HasValue && ex.StatusCode.Value >= 400 && ex.StatusCode.Value < 500)
             {
                 // Permanent error (4xx) — fail immediately, no retry
+                // Purchase-level failures are handled inside DcaExecutionService.
+                // Scheduler-level infrastructure errors are logged only (no Purchase aggregate exists here).
                 logger.LogError(ex, "Permanent error during DCA execution for {Date}, not retrying", purchaseDate);
-
-                // Publish failure event for Telegram notification
-                var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
-                await publisher.Publish(new PurchaseFailedEvent(
-                    "PermanentError",
-                    ex.Message,
-                    retryCount,
-                    DateTimeOffset.UtcNow
-                ), cancellationToken);
                 return;
             }
             catch (Exception ex) when (retryCount < MaxRetries)
@@ -88,16 +80,8 @@ public class DcaSchedulerBackgroundService(
             }
             catch (Exception ex)
             {
-                // Final retry exhausted
+                // Final retry exhausted — log only, no Purchase aggregate exists at scheduler level
                 logger.LogError(ex, "DCA execution failed for {Date} after {MaxRetries} retries", purchaseDate, MaxRetries);
-
-                var publisher = scope.ServiceProvider.GetRequiredService<IPublisher>();
-                await publisher.Publish(new PurchaseFailedEvent(
-                    ex.GetType().Name,
-                    ex.Message,
-                    retryCount,
-                    DateTimeOffset.UtcNow
-                ), cancellationToken);
                 return;
             }
         }

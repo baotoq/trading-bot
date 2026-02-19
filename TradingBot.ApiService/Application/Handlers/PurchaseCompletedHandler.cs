@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ApiService.Models;
 
@@ -10,6 +11,7 @@ namespace TradingBot.ApiService.Application.Handlers;
 public class PurchaseCompletedHandler(
     TelegramNotificationService telegramService,
     TradingBotDbContext dbContext,
+    HyperliquidClient hyperliquidClient,
     ILogger<PurchaseCompletedHandler> logger) : INotificationHandler<PurchaseCompletedEvent>
 {
     public async Task Handle(PurchaseCompletedEvent notification, CancellationToken cancellationToken)
@@ -18,6 +20,15 @@ public class PurchaseCompletedHandler(
 
         try
         {
+            var purchase = await dbContext.Purchases
+                .FirstOrDefaultAsync(p => p.Id == notification.PurchaseId, cancellationToken);
+
+            if (purchase is null)
+            {
+                logger.LogWarning("Purchase {PurchaseId} not found when handling PurchaseCompletedEvent", notification.PurchaseId);
+                return;
+            }
+
             // Query running totals from database (exclude dry-run purchases)
             var totals = await dbContext.Purchases
                 .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
@@ -35,20 +46,26 @@ public class PurchaseCompletedHandler(
             var totalUsd = totals?.TotalUsd ?? 0m;
             var avgCost = totalBtc > 0 ? totalUsd / totalBtc : 0m;
 
+            // Fetch remaining USDC balance
+            var remainingUsdc = await hyperliquidClient.GetBalancesAsync(cancellationToken);
+
+            // TODO: Phase 4 will track actual BTC balance, for now use filled quantity
+            var currentBtcBalance = purchase.Quantity;
+
             // Build multiplier reasoning
-            var reasoning = BuildMultiplierReasoning(notification);
+            var reasoning = BuildMultiplierReasoning(purchase);
 
             // Format message with rich content
-            var titlePrefix = notification.IsDryRun ? "[SIMULATION] " : "";
-            var simulationBanner = notification.IsDryRun ? "*⚠️ SIMULATION MODE - No real order placed*\n\n" : "";
+            var titlePrefix = purchase.IsDryRun ? "[SIMULATION] " : "";
+            var simulationBanner = purchase.IsDryRun ? "*⚠️ SIMULATION MODE - No real order placed*\n\n" : "";
 
             var message = $"""
                 {simulationBanner}*{titlePrefix}BTC Purchase Successful*
 
-                *Price:* `${notification.Price.Value:N2}`
-                *Bought:* `{notification.BtcAmount.Value:F5}` BTC
-                *Cost:* `${notification.UsdSpent.Value:F2}`
-                *Multiplier:* `{notification.Multiplier.Value:F1}x`
+                *Price:* `${purchase.Price.Value:N2}`
+                *Bought:* `{purchase.Quantity.Value:F5}` BTC
+                *Cost:* `${purchase.Cost.Value:F2}`
+                *Multiplier:* `{purchase.Multiplier.Value:F1}x`
 
                 {reasoning}
 
@@ -58,10 +75,10 @@ public class PurchaseCompletedHandler(
                 Avg Cost: `${avgCost:N2}`
 
                 *Balances*
-                BTC: `{notification.CurrentBtcBalance.Value:F5}` BTC
-                USDC: `${notification.RemainingUsdc:F2}`
+                BTC: `{currentBtcBalance.Value:F5}` BTC
+                USDC: `${remainingUsdc:F2}`
 
-                _{notification.ExecutedAt:yyyy-MM-dd HH:mm:ss} UTC_
+                _{purchase.ExecutedAt:yyyy-MM-dd HH:mm:ss} UTC_
                 """;
 
             await telegramService.SendMessageAsync(message, cancellationToken);
@@ -72,42 +89,42 @@ public class PurchaseCompletedHandler(
         }
     }
 
-    private string BuildMultiplierReasoning(PurchaseCompletedEvent e)
+    private string BuildMultiplierReasoning(Purchase p)
     {
         // Standard buy (no multiplier applied)
-        if (e.Multiplier.Value == 1.0m && (string.IsNullOrEmpty(e.MultiplierTier) || e.MultiplierTier == "None"))
+        if (p.Multiplier.Value == 1.0m && (string.IsNullOrEmpty(p.MultiplierTier) || p.MultiplierTier == "None"))
         {
             return "Standard buy (no dip detected)";
         }
 
         // Multiplier calculation had errors or limited data
-        if (e.MultiplierTier?.Contains("Error") == true || e.MultiplierTier?.Contains("N/A") == true)
+        if (p.MultiplierTier?.Contains("Error") == true || p.MultiplierTier?.Contains("N/A") == true)
         {
-            return $"Multiplier calculation had limited data, using {e.Multiplier.Value:F1}x";
+            return $"Multiplier calculation had limited data, using {p.Multiplier.Value:F1}x";
         }
 
         // Build natural language explanation for multiplier
         var parts = new List<string>();
 
         // Dip component (DropPercentage is in 0-1 format, multiply by 100 for display)
-        if (e.DropPercentage.Value > 0 && e.High30Day > 0)
+        if (p.DropPercentage.Value > 0 && p.High30Day > 0)
         {
-            parts.Add($"BTC is {e.DropPercentage.Value * 100:F1}% below 30-day high (${e.High30Day:N0})");
+            parts.Add($"BTC is {p.DropPercentage.Value * 100:F1}% below 30-day high (${p.High30Day:N0})");
         }
 
         // Bear market boost component
-        if (e.Ma200Day > 0 && e.Price.Value < e.Ma200Day)
+        if (p.Ma200Day > 0 && p.Price.Value < p.Ma200Day)
         {
-            parts.Add($"price below 200-day MA (${e.Ma200Day:N0}), bear boost active");
+            parts.Add($"price below 200-day MA (${p.Ma200Day:N0}), bear boost active");
         }
 
         if (parts.Count > 0)
         {
             var explanation = string.Join(" and ", parts);
-            return $"Buying {e.Multiplier.Value:F1}x: {explanation}";
+            return $"Buying {p.Multiplier.Value:F1}x: {explanation}";
         }
 
         // Fallback if multiplier > 1 but no clear reason
-        return $"Buying {e.Multiplier.Value:F1}x (tier: {e.MultiplierTier ?? "unknown"})";
+        return $"Buying {p.Multiplier.Value:F1}x (tier: {p.MultiplierTier ?? "unknown"})";
     }
 }

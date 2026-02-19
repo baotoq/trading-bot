@@ -10,7 +10,6 @@ using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Hyperliquid.Models;
 using TradingBot.ApiService.Models;
-using TradingBot.ApiService.Models.Ids;
 using TradingBot.ApiService.Models.Values;
 
 namespace TradingBot.ApiService.Application.Services;
@@ -134,34 +133,26 @@ public class DcaExecutionService(
         logger.LogInformation("Placing order: {UsdAmount} USD -> {BtcQty} BTC at {Price}",
             usdAmount, roundedQuantity, currentPriceDecimal);
 
-        // Step 6: Create purchase record and place order
-        var purchase = new Purchase
-        {
-            Id = PurchaseId.New(),
-            ExecutedAt = DateTimeOffset.UtcNow,
-            Price = currentPrice,
-            Quantity = Quantity.From(0), // Will be updated with actual fill
-            Cost = UsdAmount.From(usdAmount.Value), // Intended spend; updated on fill
-            Multiplier = multiplierResult.Multiplier,
-            MultiplierTier = multiplierResult.Tier,
-            DropPercentage = multiplierResult.DropPercentage,
-            High30Day = multiplierResult.High30Day,
-            Ma200Day = multiplierResult.Ma200Day,
-            IsDryRun = options.DryRun,
-            Status = PurchaseStatus.Pending
-        };
+        // Step 6: Create purchase aggregate via factory method
+        var purchase = Purchase.Create(
+            price: currentPrice,
+            cost: UsdAmount.From(usdAmount.Value),
+            multiplier: multiplierResult.Multiplier,
+            multiplierTier: multiplierResult.Tier,
+            dropPercentage: multiplierResult.DropPercentage,
+            high30Day: multiplierResult.High30Day,
+            ma200Day: multiplierResult.Ma200Day,
+            isDryRun: options.DryRun);
 
         try
         {
             if (options.DryRun)
             {
                 logger.LogInformation("[DRY RUN] Simulating order: {Quantity} BTC at {Price}", roundedQuantity, currentPriceDecimal);
-                purchase.Quantity = Quantity.From(roundedQuantity);
-                purchase.Price = currentPrice;
-                purchase.Cost = UsdAmount.From(roundedQuantity * currentPriceDecimal);
-                purchase.Status = PurchaseStatus.Filled;
-                purchase.OrderId = $"DRY-RUN-{Guid.NewGuid():N}";
-                purchase.IsDryRun = true;
+                purchase.RecordDryRunFill(
+                    Quantity.From(roundedQuantity),
+                    currentPrice,
+                    UsdAmount.From(roundedQuantity * currentPriceDecimal));
             }
             else
             {
@@ -174,55 +165,47 @@ public class DcaExecutionService(
                     limitPrice,
                     ct);
 
-            // Parse fill info from response
-            var status = orderResponse.Response?.Data?.Statuses.FirstOrDefault();
-            var filled = status?.Filled;
+                // Parse fill info from response
+                var status = orderResponse.Response?.Data?.Statuses.FirstOrDefault();
+                var filled = status?.Filled;
 
-            if (filled != null)
-            {
-                // Order filled (fully or partially)
-                var filledQty = decimal.Parse(filled.TotalSz, CultureInfo.InvariantCulture);
-                var avgPrice = decimal.Parse(filled.AvgPx, CultureInfo.InvariantCulture);
+                if (filled != null)
+                {
+                    // Order filled (fully or partially)
+                    var filledQty = decimal.Parse(filled.TotalSz, CultureInfo.InvariantCulture);
+                    var avgPrice = decimal.Parse(filled.AvgPx, CultureInfo.InvariantCulture);
 
-                purchase.Quantity = Quantity.From(filledQty);
-                purchase.Price = Price.From(avgPrice);
-                purchase.Cost = UsdAmount.From(filledQty * avgPrice);
-                purchase.OrderId = filled.Oid.ToString();
+                    purchase.RecordFill(
+                        Quantity.From(filledQty),
+                        Price.From(avgPrice),
+                        UsdAmount.From(filledQty * avgPrice),
+                        filled.Oid.ToString(),
+                        roundedQuantity);
 
-                // Consider filled if >= 95% of requested quantity
-                purchase.Status = filledQty >= roundedQuantity * 0.95m
-                    ? PurchaseStatus.Filled
-                    : PurchaseStatus.PartiallyFilled;
+                    logger.LogInformation("Order filled: {Quantity} BTC at {Price}, status: {Status}",
+                        filledQty, avgPrice, purchase.Status);
+                }
+                else if (status?.Resting != null)
+                {
+                    // Order is resting (not filled) — unusual for IOC, treat as partial
+                    purchase.RecordResting(status.Resting.Oid.ToString());
 
-                logger.LogInformation("Order filled: {Quantity} BTC at {Price}, status: {Status}",
-                    filledQty, avgPrice, purchase.Status);
-            }
-            else if (status?.Resting != null)
-            {
-                // Order is resting (not filled) — unusual for IOC, treat as partial
-                purchase.OrderId = status.Resting.Oid.ToString();
-                purchase.Status = PurchaseStatus.PartiallyFilled;
-                purchase.FailureReason = "Order resting instead of filling (IOC should not rest)";
+                    logger.LogWarning("Order resting unexpectedly: {OrderId}", purchase.OrderId);
+                }
+                else
+                {
+                    // No fill or resting status
+                    purchase.RecordFailure("No fill or resting status in order response");
 
-                logger.LogWarning("Order resting unexpectedly: {OrderId}", purchase.OrderId);
-            }
-            else
-            {
-                // No fill or resting status
-                purchase.Status = PurchaseStatus.Failed;
-                purchase.FailureReason = "No fill or resting status in order response";
+                    logger.LogError("Order response missing fill/resting status");
+                }
 
-                logger.LogError("Order response missing fill/resting status");
-            }
-
-                purchase.RawResponse = JsonSerializer.Serialize(orderResponse);
+                purchase.SetRawResponse(JsonSerializer.Serialize(orderResponse));
             }
         }
         catch (HyperliquidApiException ex)
         {
-            purchase.Status = PurchaseStatus.Failed;
-            purchase.FailureReason = ex.Message;
-            purchase.RawResponse = ex.Message;
+            purchase.RecordFailure(ex.Message, ex.Message);
 
             logger.LogError(ex, "Order placement failed: {Error}", ex.Message);
         }
@@ -233,42 +216,15 @@ public class DcaExecutionService(
 
         logger.LogInformation("Purchase persisted: {PurchaseId} with status {Status}", purchase.Id, purchase.Status);
 
-        // Step 8: Publish domain event AFTER database commit
-        if (purchase.Status == PurchaseStatus.Filled || purchase.Status == PurchaseStatus.PartiallyFilled)
+        // Step 8: Dispatch domain events accumulated by aggregate behavior methods
+        var eventsToDispatch = purchase.DomainEvents.ToList();
+        foreach (var domainEvent in eventsToDispatch)
         {
-            // Get updated balance for notification
-            var remainingUsdc = await hyperliquidClient.GetBalancesAsync(ct);
-
-            // TODO: Phase 4 will track actual BTC balance, for now use filled quantity
-            var currentBtcBalance = purchase.Quantity;
-
-            await publisher.Publish(new PurchaseCompletedEvent(
-                purchase.Id,
-                purchase.Quantity,
-                purchase.Price,
-                purchase.Cost,
-                remainingUsdc,
-                currentBtcBalance,
-                purchase.ExecutedAt,
-                purchase.Multiplier,
-                purchase.MultiplierTier,
-                purchase.DropPercentage,
-                purchase.High30Day,
-                purchase.Ma200Day,
-                purchase.IsDryRun), ct);
-
-            logger.LogInformation("Published PurchaseCompletedEvent for {PurchaseId}", purchase.Id);
+            await publisher.Publish(domainEvent, ct);
         }
-        else
-        {
-            await publisher.Publish(new PurchaseFailedEvent(
-                "OrderFailed",
-                purchase.FailureReason ?? "Unknown error",
-                0, // RetryCount — retries handled at scheduler level
-                DateTimeOffset.UtcNow), ct);
+        purchase.ClearDomainEvents();
 
-            logger.LogWarning("Published PurchaseFailedEvent: {Reason}", purchase.FailureReason);
-        }
+        logger.LogInformation("Dispatched {Count} domain events for {PurchaseId}", eventsToDispatch.Count, purchase.Id);
     }
 
     private async Task<MultiplierResult> CalculateMultiplierAsync(
