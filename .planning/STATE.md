@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 
 ## Current Position
 
-Phase: 18 of 18 (Specification Pattern -- In Progress)
-Plan: 1 of 2 in current phase (Plan 01 complete -- 18-01 done)
-Status: Phase 18 In Progress -- Plan 01 done; Plan 02 next
-Last activity: 2026-02-19 -- Completed 18-01 (Ardalis.Specification packages, WithSpecification extension, 7 spec classes)
+Phase: 19 of 19 (Dashboard Nullable Price Fix -- Complete)
+Plan: 1 of 1 in current phase (Plan 01 complete -- 19-01 done)
+Status: Phase 19 Complete -- All plans done
+Last activity: 2026-02-19 -- Completed 19-01 (nullable Price DTOs, null-safe endpoints, TypeScript/Vue null handling)
 
-Progress: [|||||||||||||||||||||||||||||||||||] 88% (42/~48 plans estimated)
+Progress: [||||||||||||||||||||||||||||||||||||] 90% (43/~48 plans estimated)
 
 ## Milestones Shipped
 
@@ -60,6 +60,7 @@ Progress: [|||||||||||||||||||||||||||||||||||] 88% (42/~48 plans estimated)
 | 17-domain-event-dispatch | 02 | 4min | 2 | 12 |
 | 17-domain-event-dispatch | 03 | 2min | 2 | 2 |
 | 18-specification-pattern | 01 | 2min | 2 | 8 |
+| 19-dashboard-nullable-price-fix | 01 | 4min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent for v2.0:
 - [Phase 18-specification-pattern]: PurchaseCursorSpec owns OrderByDescending because cursor comparison inherently assumes descending order
 - [Phase 18-specification-pattern]: AsNoTracking lives in ordering specs (PurchasesOrderedByDateSpec, DailyPriceByDateRangeSpec) as always-applied base for read queries
 - [Phase 18-specification-pattern]: WithSpecification uses SpecificationEvaluator.Default.GetQuery() on IQueryable<T> (not DbSet<T>) to enable multi-spec chaining
+- [Phase 19-dashboard-nullable-price-fix]: TotalCost is decimal (not UsdAmount) in PortfolioResponse DTO -- UsdAmount rejects zero; zero is valid when no purchases exist
+- [Phase 19-dashboard-nullable-price-fix]: AverageCostBasis and CurrentPrice are Price? -- null when no purchases or Hyperliquid unreachable; PnL is decimal? null when CurrentPrice unavailable
+- [Phase 19-dashboard-nullable-price-fix]: Explicit (decimal) casts before Sum() in endpoints avoid VogenInvalidValueException on empty set
 
 ### Known Risks
 
@@ -119,9 +123,9 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-19
-Stopped at: Completed 18-01-PLAN.md
-Resume file: .planning/phases/18-specification-pattern/18-01-SUMMARY.md
-Next step: Execute Phase 18 Plan 02 (call-site composition in endpoints)
+Stopped at: Completed 19-01-PLAN.md
+Resume file: .planning/phases/19-dashboard-nullable-price-fix/19-01-SUMMARY.md
+Next step: Phase 19 complete; v2.0 milestone gap closure done
 
 ---
-*State updated: 2026-02-19 after 18-01 (Ardalis.Specification packages, WithSpecification extension, 7 spec classes)*
+*State updated: 2026-02-19 after 19-01 (nullable Price DTOs, null-safe endpoints, TypeScript/Vue null handling for empty DB/unreachable exchange)*

@@ -50,7 +50,7 @@
 - [x] **Phase 16: Result Pattern** - Explicit error handling replacing exceptions in domain operations (completed 2026-02-19)
 - [x] **Phase 17: Domain Event Dispatch** - Aggregate-raised events dispatched after SaveChanges (completed 2026-02-19)
 - [x] **Phase 18: Specification Pattern** - Reusable, testable query composition (completed 2026-02-19)
-- [ ] **Phase 19: Dashboard Nullable Price Fix** - Fix runtime crash on empty DB/unreachable Hyperliquid (gap closure)
+- [x] **Phase 19: Dashboard Nullable Price Fix** - Fix runtime crash on empty DB/unreachable Hyperliquid (gap closure) (completed 2026-02-19)
 
 ## Phase Details
 
@@ -179,7 +179,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18 -> 19
 | 16. Result Pattern | 2/2 | Complete    | 2026-02-19 | - |
 | 17. Domain Event Dispatch | 3/3 | Complete    | 2026-02-19 | - |
 | 18. Specification Pattern | 3/3 | Complete    | 2026-02-19 | - |
-| 19. Dashboard Nullable Price Fix | 0/1 | Pending | - | - |
+| 19. Dashboard Nullable Price Fix | 1/1 | Complete   | 2026-02-19 | - |
 
 ---
 *Roadmap updated: 2026-02-20 after gap closure planning (Phase 19 added for INT-01/FLOW-01)*
