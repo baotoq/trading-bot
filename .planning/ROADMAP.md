@@ -149,7 +149,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17 -> 18
 | 12. Configuration Management | v1.2 | 2/2 | Complete | 2026-02-14 |
 | 13. Strongly-Typed IDs | 2/2 | Complete    | 2026-02-18 | - |
 | 14. Value Objects | 2/2 | Complete    | 2026-02-18 | - |
-| 15. Rich Aggregate Roots | 2/2 | Complete   | 2026-02-19 | - |
+| 15. Rich Aggregate Roots | 2/2 | Complete    | 2026-02-19 | - |
 | 16. Result Pattern | v2.0 | 0/? | Not started | - |
 | 17. Domain Event Dispatch | v2.0 | 0/? | Not started | - |
 | 18. Specification Pattern | v2.0 | 0/? | Not started | - |
