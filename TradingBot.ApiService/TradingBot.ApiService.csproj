@@ -12,6 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.0.2" />
     <PackageReference Include="Binance.Net" Version="11.11.0" />
     <PackageReference Include="CryptoExchange.Net" Version="10.5.4" />
