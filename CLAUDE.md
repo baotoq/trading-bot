@@ -10,7 +10,7 @@ BTC Smart DCA Bot - A .NET 10.0 application that automatically accumulates Bitco
 
 ```bash
 # Build the solution
-dotnet build TradingBot.sln
+dotnet build TradingBot.slnx
 
 # Run with Aspire (starts PostgreSQL, Redis, Dapr, Dashboard automatically)
 cd TradingBot.AppHost && dotnet run

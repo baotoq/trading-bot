@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TradingBot.ApiService.Application.Specifications;
+using TradingBot.ApiService.Application.Specifications.Purchases;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
@@ -65,9 +67,8 @@ public class MissedPurchaseVerificationService(
             var todayEnd = todayStart.AddDays(1);
 
             var todayPurchase = await dbContext.Purchases
-                .Where(p => p.ExecutedAt >= todayStart && p.ExecutedAt < todayEnd)
-                .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
-                .Where(p => !p.IsDryRun)
+                .WithSpecification(new PurchaseFilledStatusSpec())
+                .WithSpecification(new PurchaseDateRangeSpec(today, today))
                 .FirstOrDefaultAsync(cancellationToken);
 
             if (todayPurchase != null)

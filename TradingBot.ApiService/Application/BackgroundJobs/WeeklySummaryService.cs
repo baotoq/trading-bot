@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using TradingBot.ApiService.Application.Specifications;
+using TradingBot.ApiService.Application.Specifications.Purchases;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
@@ -54,13 +56,11 @@ public class WeeklySummaryService(
 
             // Calculate week boundaries (Monday 00:00 UTC to now)
             var weekStart = GetMondayOfWeek(today);
-            var weekStartDateTime = weekStart.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
 
             // Query this week's purchases
             var purchases = await dbContext.Purchases
-                .Where(p => p.ExecutedAt >= weekStartDateTime)
-                .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
-                .Where(p => !p.IsDryRun)
+                .WithSpecification(new PurchaseFilledStatusSpec())
+                .WithSpecification(new PurchaseDateRangeSpec(weekStart, today))
                 .OrderBy(p => p.ExecutedAt)
                 .ToListAsync(cancellationToken);
 
