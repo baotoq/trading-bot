@@ -132,7 +132,11 @@ Plans:
   1. Complex queries encapsulated in Specification classes using Ardalis.Specification (e.g., PurchasesByDateRangeSpec, DailyPricesByPeriodSpec)
   2. Specifications translate to server-side SQL -- no client-side evaluation (verified via EF Core query logging)
   3. Dashboard queries (purchases with filtering/pagination, daily prices by date range) use specifications instead of inline LINQ
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 18-01-PLAN.md -- Ardalis.Specification packages + WithSpecification extension + all composable spec classes
+- [ ] 18-02-PLAN.md -- Apply specs to DashboardEndpoints + WeeklySummaryService + MissedPurchaseVerificationService
+- [ ] 18-03-PLAN.md -- TestContainers integration tests for all specs against real PostgreSQL
 
 ## Progress
 
