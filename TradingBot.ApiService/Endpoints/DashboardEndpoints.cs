@@ -35,28 +35,33 @@ public static class DashboardEndpoints
             .WithSpecification(new PurchasesOrderedByDateSpec())
             .ToListAsync(ct);
 
-        var totalBtc = purchases.Sum(p => p.Quantity);
-        var totalCost = purchases.Sum(p => p.Cost);
-        var averageCostBasis = totalBtc > 0 ? totalCost / totalBtc : 0;
+        var totalBtc = purchases.Sum(p => (decimal)p.Quantity);
+        var totalCost = purchases.Sum(p => (decimal)p.Cost);
+        Price? averageCostBasis = totalBtc > 0 ? Price.From(totalCost / totalBtc) : null;
 
-        decimal currentPrice = 0;
+        Price? currentPrice = null;
         try
         {
-            currentPrice = await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct);
+            currentPrice = Price.From(await hyperliquidClient.GetSpotPriceAsync("BTC/USDC", ct));
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to fetch current BTC price for portfolio");
         }
 
-        var unrealizedPnl = (currentPrice * totalBtc) - totalCost;
-        var unrealizedPnlPercent = totalCost > 0 ? (unrealizedPnl / totalCost) * 100 : 0;
+        decimal? unrealizedPnl = null;
+        decimal? unrealizedPnlPercent = null;
+        if (currentPrice.HasValue)
+        {
+            unrealizedPnl = (currentPrice.Value.Value * totalBtc) - totalCost;
+            unrealizedPnlPercent = totalCost > 0 ? (unrealizedPnl.Value / totalCost) * 100 : 0;
+        }
 
         var firstPurchaseDate = purchases.Count > 0 ? purchases.Min(p => p.ExecutedAt) : (DateTimeOffset?)null;
         var lastPurchaseDate = purchases.Count > 0 ? purchases.Max(p => p.ExecutedAt) : (DateTimeOffset?)null;
 
         var response = new PortfolioResponse(
-            TotalBtc: totalBtc,
+            TotalBtc: Quantity.From(totalBtc),
             TotalCost: totalCost,
             AverageCostBasis: averageCostBasis,
             CurrentPrice: currentPrice,
@@ -228,9 +233,9 @@ public static class DashboardEndpoints
             .WithSpecification(new PurchasesOrderedByDateSpec())
             .ToListAsync(ct);
 
-        var totalBtc = allPurchases.Sum(p => p.Quantity);
-        var totalCost = allPurchases.Sum(p => p.Cost);
-        var averageCostBasis = totalBtc > 0 ? totalCost / totalBtc : 0;
+        var totalBtc = allPurchases.Sum(p => (decimal)p.Quantity);
+        var totalCost = allPurchases.Sum(p => (decimal)p.Cost);
+        Price? averageCostBasis = totalBtc > 0 ? Price.From(totalCost / totalBtc) : null;
 
         var response = new PriceChartResponse(
             Prices: prices,

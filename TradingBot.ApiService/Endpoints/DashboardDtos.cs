@@ -5,11 +5,11 @@ namespace TradingBot.ApiService.Endpoints;
 // Portfolio overview
 public record PortfolioResponse(
     Quantity TotalBtc,
-    UsdAmount TotalCost,
-    Price AverageCostBasis,
-    Price CurrentPrice,
-    decimal UnrealizedPnl,         // Stays decimal: can be negative (no value object fits)
-    decimal UnrealizedPnlPercent,  // Stays decimal: can be negative
+    decimal TotalCost,              // TotalCost is decimal (not UsdAmount) because zero is valid when no purchases exist
+    Price? AverageCostBasis,        // null when no purchases
+    Price? CurrentPrice,            // null when Hyperliquid unreachable
+    decimal? UnrealizedPnl,         // null when CurrentPrice unavailable
+    decimal? UnrealizedPnlPercent,  // null when CurrentPrice unavailable
     int TotalPurchaseCount,
     DateTimeOffset? FirstPurchaseDate,
     DateTimeOffset? LastPurchaseDate
@@ -48,7 +48,7 @@ public record LiveStatusResponse(
 public record PriceChartResponse(
     List<PricePointDto> Prices,
     List<PurchaseMarkerDto> Purchases,
-    Price AverageCostBasis
+    Price? AverageCostBasis        // null when no purchases
 );
 
 public record PricePointDto(string Date, Price Price);
