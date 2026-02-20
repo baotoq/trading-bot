@@ -192,3 +192,12 @@ Plans:
 
 ---
 *Roadmap updated: 2026-02-20 after Phase 25 completion -- v3.0 Flutter Mobile shipped*
+
+### Phase 25.1: Cross-Cutting Notification Handler Split (INSERTED)
+
+**Goal:** Split monolithic PurchaseCompleted/PurchaseFailed handlers into separate INotificationHandler<T> per notification channel (Telegram and FCM), with enriched PurchaseCompletedEvent carrying pre-computed running totals
+**Depends on:** Phase 25
+**Plans:** 1 plan
+
+Plans:
+- [ ] 25.1-01-PLAN.md — Enrich PurchaseCompletedEvent with running totals, split PurchaseCompletedHandler and PurchaseFailedHandler into per-channel INotificationHandler classes
