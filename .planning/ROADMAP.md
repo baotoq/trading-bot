@@ -59,7 +59,7 @@
 **Milestone Goal:** Replace Nuxt web dashboard with a native Flutter iOS app with full dashboard feature parity, add push notifications for buy events and health alerts, and remove the Nuxt dashboard from Aspire orchestration.
 
 - [x] **Phase 20: Flutter Project Setup + Core Infrastructure** - Scaffold Flutter project with secure API key storage, Dio HTTP client, and navigation (complete 2026-02-19)
-- [ ] **Phase 21: Portfolio + Status Screens** - Home screen with portfolio stats, live price, bot health badge, and countdown timer
+- [x] **Phase 21: Portfolio + Status Screens** - Home screen with portfolio stats, live price, bot health badge, and countdown timer (completed 2026-02-20)
 - [ ] **Phase 22: Price Chart + Purchase History** - Interactive price chart with purchase markers and scrollable purchase history
 - [ ] **Phase 23: Configuration Screen** - View and edit DCA configuration with server validation
 - [ ] **Phase 24: Push Notifications** - FCM push delivery for buy events and health alerts, with backend token management
@@ -184,7 +184,7 @@ Plans:
 | 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
 | 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
-| 21. Portfolio + Status Screens | v3.0 | 1/2 | In progress | - |
+| 21. Portfolio + Status Screens | 2/2 | Complete   | 2026-02-20 | - |
 | 22. Price Chart + Purchase History | v3.0 | 0/2 | Not started | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
 | 24. Push Notifications | v3.0 | 0/3 | Not started | - |

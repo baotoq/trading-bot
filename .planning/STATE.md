@@ -2,7 +2,7 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v3.0 Flutter Mobile
-**Updated:** 2026-02-20 (21-01 complete)
+**Updated:** 2026-02-20 (21-02 complete)
 
 ## Project Reference
 
@@ -14,11 +14,11 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 ## Current Position
 
 Phase: 21 of 25 (Portfolio + Status Screens)
-Plan: 01 of 02 complete
-Status: In progress
-Last activity: 2026-02-20 -- 21-01 complete: Dart DTO models, HomeRepository, homeDataProvider with 30s auto-refresh, LiveStatusResponse extended with multiplier/drop fields
+Plan: 02 of 02 complete (Phase 21 complete)
+Status: In progress (Phase 22 next)
+Last activity: 2026-02-20 -- 21-02 complete: HomeScreen UI with portfolio stats, health badge, countdown, last buy card widgets bound to homeDataProvider
 
-Progress: [░░░░░░░░░░] 27% (3/11 plans complete)
+Progress: [░░░░░░░░░░] 36% (4/11 plans complete)
 
 ## Milestones Shipped
 
@@ -66,6 +66,10 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Remove home_screen.g.dart and part directive: HomeScreen no longer has @riverpod annotations after moving provider to home_providers.dart; build_runner deletes the .g.dart automatically
 - Manual fromJson for DTO models: no json_serializable code generation dependency — simpler, explicit deserialization with (json['field'] as num).toDouble() for Vogen value objects that serialize as raw numbers
 
+**21-02 decisions:**
+- intl added as explicit dependency: was transitive via Flutter SDK; depend_on_referenced_packages lint flagged it; added intl: any to pubspec.yaml
+- SliverAppBar with floating+snap: gives portfolio content more vertical space on scroll while keeping health badge always accessible in actions slot
+
 ### Known Risks
 
 - Phase 24 (Push Notifications) requires a real physical iOS device -- APNs does not work on iOS Simulator
@@ -84,8 +88,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 21-01-PLAN.md (Dart DTO models, HomeRepository, Riverpod providers with 30s auto-refresh)
-Next step: Execute Phase 21 Plan 02 (Portfolio Status UI)
+Stopped at: Completed 21-02-PLAN.md (HomeScreen UI with portfolio stats, health badge, countdown, last buy card)
+Next step: Execute Phase 22 (Chart History Screen)
 
 ---
 *State updated: 2026-02-20 after 21-01 completion*
