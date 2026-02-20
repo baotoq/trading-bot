@@ -2,23 +2,23 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v3.0 Flutter Mobile (SHIPPED)
-**Updated:** 2026-02-20 (25-01 complete -- v3.0 shipped)
+**Updated:** 2026-02-20 (25.1-01 complete -- notification handler split)
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via mobile app
-**Current focus:** v3.0 complete -- all phases shipped
+**Current focus:** Phase 25.1 complete -- notification handler split
 
 ## Current Position
 
-Phase: 25 of 25 (Nuxt Deprecation)
-Plan: 01 of 01 complete (Phase 25 complete)
-Status: Complete -- v3.0 Flutter Mobile shipped
-Last activity: 2026-02-20 -- 25-01 complete: Removed Nuxt dashboard NodeApp resource from Aspire orchestration
+Phase: 25.1 (Cross-Cutting Notification Handler Split)
+Plan: 01 of 01 complete (Phase 25.1 complete)
+Status: Complete -- notification handlers split into per-channel implementations
+Last activity: 2026-02-20 -- 25.1-01 complete: Split PurchaseCompleted/PurchaseFailed handlers into Telegram and FCM, enriched PurchaseCompletedEvent with running totals
 
-Progress: [██████████] 100% (11/11 plans complete)
+Progress: [██████████] 100% (1/1 plans complete)
 
 ## Milestones Shipped
 
@@ -95,7 +95,7 @@ None.
 
 ### Roadmap Evolution
 
-- Phase 25.1 inserted after Phase 25: cross cutting concern with multiple INotificationHandler<PurchaseCompletedEvent> handlers instead, 1 handle telegram 1 handle firebase (URGENT)
+- Phase 25.1 inserted and completed after Phase 25: split monolithic notification handlers into per-channel INotificationHandler implementations
 
 ### Blockers/Concerns
 
@@ -104,8 +104,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 25.1 context gathered
-Next step: /gsd:plan-phase 25.1
+Stopped at: Phase 25.1 complete
+Next step: None -- all planned phases complete
 
 ---
-*State updated: 2026-02-20 after 25-01 completion -- v3.0 shipped*
+*State updated: 2026-02-20 after 25.1-01 completion -- notification handler split*

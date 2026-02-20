@@ -189,9 +189,10 @@ Plans:
 | 23. Configuration Screen | v3.0 | 1/1 | Complete | 2026-02-20 |
 | 24. Push Notifications | v3.0 | 3/3 | Complete | 2026-02-20 |
 | 25. Nuxt Deprecation | v3.0 | 1/1 | Complete | 2026-02-20 |
+| 25.1 Cross-Cutting Notification Handler Split | v3.0 | 1/1 | Complete | 2026-02-20 |
 
 ---
-*Roadmap updated: 2026-02-20 after Phase 25 completion -- v3.0 Flutter Mobile shipped*
+*Roadmap updated: 2026-02-20 after Phase 25.1 completion -- notification handler split*
 
 ### Phase 25.1: Cross-Cutting Notification Handler Split (INSERTED)
 
@@ -200,4 +201,4 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 25.1-01-PLAN.md — Enrich PurchaseCompletedEvent with running totals, split PurchaseCompletedHandler and PurchaseFailedHandler into per-channel INotificationHandler classes
+- [x] 25.1-01-PLAN.md — Enrich PurchaseCompletedEvent with running totals, split PurchaseCompletedHandler and PurchaseFailedHandler into per-channel INotificationHandler classes (completed 2026-02-20)
