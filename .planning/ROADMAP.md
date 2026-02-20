@@ -78,7 +78,7 @@
 - [x] **Phase 29: Flutter Portfolio UI** - Complete portfolio feature module in Flutter with currency toggle and staleness indicators
 - [x] **Phase 30: Critical Bug Fixes** - Enum mismatch, tooltip formatting, missing asset creation endpoint (completed 2026-02-20)
 - [x] **Phase 31: Milestone Verification** - VERIFICATION.md for all phases, traceability closure (completed 2026-02-21)
-- [ ] **Phase 32: Tech Debt Cleanup** - Tests, edge case handling, missing Flutter CRUD methods
+- [x] **Phase 32: Tech Debt Cleanup** - Tests, edge case handling, missing Flutter CRUD methods (completed 2026-02-20)
 
 ## Phase Details
 
@@ -233,7 +233,7 @@ Plans:
 | 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
 | 30. Critical Bug Fixes | 1/1 | Complete    | 2026-02-20 | - |
 | 31. Milestone Verification | v4.0 | Complete    | 2026-02-20 | 2026-02-21 |
-| 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
+| 32. Tech Debt Cleanup | v4.0 | Complete    | 2026-02-20 | 2026-02-21 |
 
 ---
 *Roadmap updated: 2026-02-21 after Phase 32 completion (tech debt cleanup — all 5 success criteria met: price feed tests, endpoint integration tests, exchange rate graceful degradation, Flutter fixed deposit CRUD, dynamic CoinGecko ID lookup)*
