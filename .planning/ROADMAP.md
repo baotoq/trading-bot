@@ -233,7 +233,7 @@ Plans:
 | 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
 | 30. Critical Bug Fixes | 1/1 | Complete    | 2026-02-20 | - |
 | 31. Milestone Verification | v4.0 | Complete    | 2026-02-20 | 2026-02-21 |
-| 32. Tech Debt Cleanup | 1/3 | In Progress|  | - |
+| 32. Tech Debt Cleanup | 2/3 | In Progress|  | - |
 
 ---
 *Roadmap updated: 2026-02-21 after Phase 31 completion (milestone verification — all 20 v4.0 requirements closed)*

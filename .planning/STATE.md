@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** Phase 32 tech debt cleanup — price feed unit tests and exchange rate graceful degradation
+**Current focus:** Phase 32 tech debt cleanup — Flutter fixed deposit CRUD + dynamic CoinGecko ID lookup complete
 
 ## Current Position
 
 Phase: 32 of 32+ (Tech Debt Cleanup) — IN PROGRESS
-Plan: 1 of N executed (32-01 complete)
-Status: Phase 32 in progress — 32-01 complete (price feed unit tests + exchange rate fix)
-Last activity: 2026-02-21 — 32-01 complete (14 unit tests for price feed providers, exchange rate fallback fix)
+Plan: 2 of N executed (32-01 and 32-02 complete)
+Status: Phase 32 in progress — 32-02 complete (Flutter fixed deposit edit/delete + dynamic CoinGecko ID lookup)
+Last activity: 2026-02-21 — 32-02 complete (Flutter edit/delete CRUD, SearchCoinIdAsync with well-known dict + Redis cache + search API)
 
-Progress: [##########] 32-01 complete (14 tests, exchange rate graceful degradation fixed)
+Progress: [####################] 32-01 + 32-02 complete
 
 ## Performance Metrics
 
@@ -32,7 +32,7 @@ Progress: [##########] 32-01 complete (14 tests, exchange rate graceful degradat
 - v4.0: 1 day (10 plans)
 - Phase 30: 1 day (1 plan)
 - Phase 31: 1 day (1 plan)
-- Phase 32: in progress (1 plan so far)
+- Phase 32: in progress (2 plans so far)
 
 **By Milestone:**
 
@@ -47,6 +47,7 @@ Progress: [##########] 32-01 complete (14 tests, exchange rate graceful degradat
 | Phase 30 (critical-bug-fixes) | 30 | 1 | Complete |
 | Phase 31 (milestone-verification) | 31 | 1 | Complete |
 | Phase 32 (tech-debt-cleanup) | 32 | 1+ | In Progress |
+| Phase 32 P02 | 5 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -116,6 +117,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - InvariantCulture required for decimal formatting in JSON fixture strings — locale comma separator causes wrong parse
 - IDistributedCache injected directly in minimal API method signature — auto-resolved from DI
 - Portfolio endpoint catch block reads Redis directly for exchange rate fallback — handles resilience pipeline exceptions
+- [Phase 32]: EditFixedDepositScreen maps 'None' compounding frequency to 'Simple' dropdown value for round-trip compatibility
+- [Phase 32]: SearchCoinIdAsync well-known dict resolves 10 common tickers instantly with no Redis or API overhead
+- [Phase 32]: Not-found sentinel (empty string) cached with 1-day TTL prevents repeated CoinGecko search API calls for unknown tickers
 
 ### Known Risks
 
@@ -130,13 +134,13 @@ None.
 v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped and completed.
 Phase 30: 1 critical bug fix phase, all 3 bugs resolved.
 Phase 31: 1 milestone verification phase, all 20 requirements formally verified and closed.
-Phase 32: tech debt cleanup — 32-01 complete (price feed unit tests + exchange rate graceful degradation).
+Phase 32: tech debt cleanup — 32-01 complete (price feed unit tests + exchange rate graceful degradation); 32-02 complete (Flutter fixed deposit edit/delete + dynamic CoinGecko ID lookup).
 
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 32 plan 01 complete — 14 unit tests for CoinGecko/VNDirect/OpenErApi price providers, exchange rate fallback fixed in PortfolioEndpoints.
-Next step: Phase 32 plan 02 (remaining 2 Phase 32 success criteria).
+Stopped at: Phase 32 plan 02 complete — Flutter fixed deposit edit/delete, EditFixedDepositScreen, dynamic CoinGecko ID lookup via SearchCoinIdAsync.
+Next step: Phase 32 plan 03 (if any remaining tech debt).
 
 ---
-*State updated: 2026-02-21 after Phase 32 plan 01 completion (14 price feed unit tests + exchange rate graceful degradation)*
+*State updated: 2026-02-21 after Phase 32 plan 02 completion (Flutter FD edit/delete + dynamic CoinGecko lookup)*
