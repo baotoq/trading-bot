@@ -1,7 +1,7 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** Phase 31 Milestone Verification
+**Milestone:** Phase 32 Tech Debt Cleanup
 **Updated:** 2026-02-21
 
 ## Project Reference
@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** v4.0 COMPLETE — milestone verification closed
+**Current focus:** Phase 32 tech debt cleanup — price feed unit tests and exchange rate graceful degradation
 
 ## Current Position
 
-Phase: 31 of 31 (Milestone Verification) — COMPLETE
-Plan: 1 of 1 (all executed)
-Status: Phase 31 complete — all 20 v4.0 requirements formally verified and closed
-Last activity: 2026-02-21 — Phase 31 complete (1 plan, 4 VERIFICATION.md files, 4 SUMMARY frontmatter updates, REQUIREMENTS.md fully closed)
+Phase: 32 of 32+ (Tech Debt Cleanup) — IN PROGRESS
+Plan: 1 of N executed (32-01 complete)
+Status: Phase 32 in progress — 32-01 complete (price feed unit tests + exchange rate fix)
+Last activity: 2026-02-21 — 32-01 complete (14 unit tests for price feed providers, exchange rate fallback fix)
 
-Progress: [##########] 100% (Phase 31 complete — v4.0 milestone verification closed)
+Progress: [##########] 32-01 complete (14 tests, exchange rate graceful degradation fixed)
 
 ## Performance Metrics
 
@@ -32,6 +32,7 @@ Progress: [##########] 100% (Phase 31 complete — v4.0 milestone verification c
 - v4.0: 1 day (10 plans)
 - Phase 30: 1 day (1 plan)
 - Phase 31: 1 day (1 plan)
+- Phase 32: in progress (1 plan so far)
 
 **By Milestone:**
 
@@ -45,6 +46,7 @@ Progress: [##########] 100% (Phase 31 complete — v4.0 milestone verification c
 | v4.0 | 26-29 | 10 | Complete |
 | Phase 30 (critical-bug-fixes) | 30 | 1 | Complete |
 | Phase 31 (milestone-verification) | 31 | 1 | Complete |
+| Phase 32 (tech-debt-cleanup) | 32 | 1+ | In Progress |
 
 ## Accumulated Context
 
@@ -107,6 +109,14 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Both 28-01 and 28-02 SUMMARY files list PORT-04/PORT-05 since event handler (plan 01) and endpoints (plan 02) both contribute to auto-import/migration
 - PORT-01 and PORT-03 traceability table updated to show Phase 26 as primary (Phase 30 was bug-fix)
 
+**Phase 32 decisions (32-01):**
+- MockHttpMessageHandler as shared helper rather than nested class — reduces duplication across 3 test files
+- ThrowingHttpMessageHandler separate class for cleaner API failure simulation vs delegate-that-throws
+- VNDirect stale SWR test: TaskCompletionSource with 3s timeout detects fire-and-forget background HTTP call
+- InvariantCulture required for decimal formatting in JSON fixture strings — locale comma separator causes wrong parse
+- IDistributedCache injected directly in minimal API method signature — auto-resolved from DI
+- Portfolio endpoint catch block reads Redis directly for exchange rate fallback — handles resilience pipeline exceptions
+
 ### Known Risks
 
 - VNDirect dchart-api is undocumented/unofficial — could change without notice (research valid until 2026-03-20)
@@ -120,12 +130,13 @@ None.
 v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped and completed.
 Phase 30: 1 critical bug fix phase, all 3 bugs resolved.
 Phase 31: 1 milestone verification phase, all 20 requirements formally verified and closed.
+Phase 32: tech debt cleanup — 32-01 complete (price feed unit tests + exchange rate graceful degradation).
 
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: Phase 31 complete — 31-01 plan executed (4 VERIFICATION.md files, 4 SUMMARY frontmatter updates, REQUIREMENTS.md fully closed with all 20 v4.0 requirements marked [x]).
-Next step: v4.0 milestone fully verified and closed. Define next milestone if needed.
+Stopped at: Phase 32 plan 01 complete — 14 unit tests for CoinGecko/VNDirect/OpenErApi price providers, exchange rate fallback fixed in PortfolioEndpoints.
+Next step: Phase 32 plan 02 (remaining 2 Phase 32 success criteria).
 
 ---
-*State updated: 2026-02-21 after Phase 31 completion (milestone verification — all 20 v4.0 requirements closed)*
+*State updated: 2026-02-21 after Phase 32 plan 01 completion (14 price feed unit tests + exchange rate graceful degradation)*
