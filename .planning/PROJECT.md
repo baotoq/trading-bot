@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A recurring buy bot that automatically accumulates BTC on Hyperliquid spot market using a smart DCA strategy with multipliers based on price dips and bear market conditions. Includes a backtesting engine for strategy validation, and a Flutter iOS app for portfolio monitoring, backtest visualization, configuration management, and push notifications.
+A personal investment platform: automated BTC DCA on Hyperliquid spot with smart dip-buying multipliers, backtesting engine, and a Flutter iOS app that serves as a unified portfolio tracker across crypto, Vietnamese ETFs, mutual funds, and fixed deposits — all in one place with live prices and multi-currency support (VND/USD).
 
 ## Core Value
 
-The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip-buying, so the user accumulates BTC at a better average cost than fixed DCA. The backtesting engine validates this advantage empirically. The mobile app provides real-time visibility, control, and push notifications wherever you are.
+The bot reliably executes daily BTC spot purchases with smart dip-buying, and the app gives a single view of all investments (crypto, ETF, savings) with real P&L so the user never needs to check multiple platforms.
 
 ## Requirements
 
@@ -54,18 +54,29 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - ✓ Specification pattern with 7 composable specs (Ardalis.Specification) for reusable query composition -- v2.0
 - ✓ AggregateRoot<TId> base class with domain event collection and IAggregateRoot marker -- v2.0
 
+- ✓ Flutter iOS app with full dashboard feature parity (portfolio, charts, history, backtest, config, status) -- v3.0
+- ✓ FCM push notifications for purchase executed, failed, and missed events with deep-link navigation -- v3.0
+- ✓ Backend device token management with auto-cleanup of stale FCM tokens -- v3.0
+- ✓ Nuxt dashboard deprecated from Aspire orchestration (code preserved) -- v3.0
+- ✓ Per-channel notification handlers (Telegram + FCM split) -- v3.0
+
 ### Active
 
-<!-- v3.0 Flutter Mobile -->
-- [ ] Flutter iOS app with full dashboard feature parity
-- [ ] Push notifications for buy executions and alerts
-- [ ] Deprecate Nuxt dashboard (keep code, remove from Aspire orchestration)
+<!-- v4.0 Portfolio Tracker -->
+- [ ] Multi-asset portfolio model (crypto, ETF, fixed deposit) with transaction history
+- [ ] Auto-fetch crypto prices (CoinGecko), auto-fetch VN asset prices where free APIs exist
+- [ ] Manual transaction entry (buy/sell for tradeable assets, deposit for savings)
+- [ ] Auto-import DCA bot purchases into portfolio + manual entry for other sources
+- [ ] Portfolio overview: total value (VND/USD toggle), per-asset P&L %, allocation %
+- [ ] Portfolio value chart over time and per-asset performance
+- [ ] Fixed deposit tracking with interest rate, maturity date, and accrued value
+- [ ] USD/VND currency conversion for unified portfolio view
 
 ### Out of Scope
 
 - Selling/take-profit logic -- this is accumulation only
 - Futures/perps trading -- spot only
-- Multi-asset support -- BTC only for now
+- ~~Multi-asset support~~ -- now building multi-asset portfolio tracker (v4.0)
 - Monthly spending caps -- daily amount + multipliers are the only controls
 - Monte Carlo simulation -- DCA is deterministic given price data
 - Slippage / fee modeling -- for small spot orders ($10-45/day), fees are <0.1%
@@ -80,26 +91,32 @@ The bot reliably executes daily BTC spot purchases on Hyperliquid with smart dip
 - Separate domain/persistence models -- over-engineering for this domain size
 - Cross-aggregate transactions -- use domain events for eventual consistency
 
-## Current Milestone: v3.0 Flutter Mobile
+## Current Milestone: v4.0 Portfolio Tracker
 
-**Goal:** Replace Nuxt web dashboard with Flutter iOS app, add push notifications
+**Goal:** Multi-asset portfolio tracking — crypto, VN30 ETF, fixed deposits — with live prices, P&L, and multi-currency support (VND/USD)
 
 **Target features:**
-- Flutter iOS app with full dashboard parity (portfolio, charts, history, backtest, config, status)
-- Push notifications for buy executions and alerts
-- Deprecate Nuxt dashboard from Aspire orchestration
+- Multi-asset portfolio model with transaction history (buy/sell/deposit)
+- Auto-fetch prices for crypto (CoinGecko) and VN assets where possible
+- Manual transaction entry for all asset types
+- Auto-import DCA bot purchases into portfolio
+- Portfolio overview with total value (VND/USD toggle), allocation %, per-asset P&L
+- Portfolio value chart over time and per-asset performance charts
+- Fixed deposit tracking with interest rate and accrued value
+- Currency conversion (USD/VND)
 
 ## Current State
 
-Shipped v2.0 DDD Foundation (2026-02-20). Starting v3.0 Flutter Mobile.
+Shipped v3.0 Flutter Mobile (2026-02-20). Starting v4.0 Portfolio Tracker.
 
 **Codebase:**
-- ~10,000+ lines of C# (backend, 19 phases, 45 plans)
-- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard — deprecating)
+- ~10,000+ lines of C# (backend, 25 phases, 56 plans)
+- ~4,500 lines of Dart (TradingBot.Mobile)
+- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard — deprecated)
 - 62 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 9 Specification integration, 1 existing)
 - Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot
-- DDD additions: Vogen 8.0.4, ErrorOr 2.0.1, Ardalis.Specification 9.3.1
-- Flutter: Dart 3.11, TradingBot.Mobile/ (fresh init)
+- DDD: Vogen 8.0.4, ErrorOr 2.0.1, Ardalis.Specification 9.3.1
+- Flutter: Dart 3.11, Riverpod, go_router, fl_chart, Dio
 
 **API Surface:**
 - POST /api/backtest -- single backtest with config overrides
@@ -127,11 +144,12 @@ Shipped v2.0 DDD Foundation (2026-02-20). Starting v3.0 Flutter Mobile.
 
 ## Constraints
 
-- **Tech Stack**: .NET 10.0 backend + Flutter iOS frontend -- migrating from Nuxt 4
-- **Exchange**: Hyperliquid spot market only -- no other exchanges
-- **Asset**: BTC only -- single trading pair
-- **Direction**: Buy only -- no sell logic
-- **Notifications**: Telegram + Serilog -- both required for every purchase
+- **Tech Stack**: .NET 10.0 backend + Flutter iOS frontend
+- **Exchange**: Hyperliquid spot market only -- no other exchanges (for DCA bot)
+- **DCA Direction**: Buy only -- no sell logic (DCA bot remains accumulation only)
+- **Portfolio Data**: Manual transaction entry for non-crypto assets, auto-fetch prices where free APIs exist
+- **Notifications**: Telegram + FCM -- both required for every purchase
+- **Single User**: No multi-user auth -- personal portfolio tracker
 
 ## Key Decisions
 
@@ -171,4 +189,4 @@ Shipped v2.0 DDD Foundation (2026-02-20). Starting v3.0 Flutter Mobile.
 | Nullable Price? in dashboard DTOs | Handles empty DB and unreachable exchange gracefully, no 500 errors | ✓ Good |
 
 ---
-*Last updated: 2026-02-20 after v3.0 milestone start*
+*Last updated: 2026-02-20 after v4.0 milestone start*
