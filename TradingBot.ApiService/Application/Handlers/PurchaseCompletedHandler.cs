@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
+using TradingBot.ApiService.Infrastructure.Firebase;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ApiService.Models;
 
@@ -10,6 +11,7 @@ namespace TradingBot.ApiService.Application.Handlers;
 
 public class PurchaseCompletedHandler(
     TelegramNotificationService telegramService,
+    FcmNotificationService fcmService,
     TradingBotDbContext dbContext,
     HyperliquidClient hyperliquidClient,
     ILogger<PurchaseCompletedHandler> logger) : INotificationHandler<PurchaseCompletedEvent>
@@ -82,6 +84,23 @@ public class PurchaseCompletedHandler(
                 """;
 
             await telegramService.SendMessageAsync(message, cancellationToken);
+
+            // Send FCM push notification
+            try
+            {
+                var pushTitle = purchase.IsDryRun ? "[SIM] BTC Purchased" : "BTC Purchased";
+                var pushBody = $"{purchase.Quantity.Value:F5} BTC at ${purchase.Price.Value:N2} ({purchase.Multiplier.Value:F1}x)";
+                var data = new Dictionary<string, string>
+                {
+                    ["type"] = "purchase_completed",
+                    ["route"] = "/history"
+                };
+                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+            }
+            catch (Exception fcmEx)
+            {
+                logger.LogError(fcmEx, "Error sending FCM notification for completed purchase");
+            }
         }
         catch (Exception ex)
         {

@@ -5,6 +5,7 @@ using TradingBot.ApiService.Application.Specifications.Purchases;
 using TradingBot.ApiService.BuildingBlocks;
 using TradingBot.ApiService.Configuration;
 using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Infrastructure.Firebase;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ApiService.Models;
 
@@ -20,13 +21,18 @@ public class MissedPurchaseVerificationService(
     IOptionsMonitor<DcaOptions> dcaOptions) : TimeBackgroundService(logger)
 {
     private DateOnly _lastAlertSent = DateOnly.MinValue;
+    private DateOnly _lastGapAlertDate = DateOnly.MinValue;
 
     protected override TimeSpan Interval => TimeSpan.FromMinutes(30);
 
     protected override async Task ProcessAsync(CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
+        var today = DateOnly.FromDateTime(now);
         var options = dcaOptions.CurrentValue;
+
+        // 36-hour gap check (runs independently of daily verification window)
+        await CheckGapAlertAsync(now, today, cancellationToken);
 
         // Calculate the expected purchase time for today
         var targetTime = new TimeOnly(options.DailyBuyHour, options.DailyBuyMinute);
@@ -48,7 +54,6 @@ public class MissedPurchaseVerificationService(
         }
 
         // Prevent duplicate alerts for the same day
-        var today = DateOnly.FromDateTime(now);
         if (_lastAlertSent == today)
         {
             return;
@@ -61,6 +66,7 @@ public class MissedPurchaseVerificationService(
             await using var scope = scopeFactory.CreateAsyncScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<TradingBotDbContext>();
             var telegramService = scope.ServiceProvider.GetRequiredService<TelegramNotificationService>();
+            var fcmService = scope.ServiceProvider.GetRequiredService<FcmNotificationService>();
 
             // Check if a purchase exists today (any status Filled/PartiallyFilled, IsDryRun=false)
             var todayStart = today.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
@@ -107,6 +113,23 @@ public class MissedPurchaseVerificationService(
 
             await telegramService.SendMessageAsync(message, cancellationToken);
 
+            // Send FCM push notification for missed purchase
+            try
+            {
+                var pushTitle = "Missed Purchase Alert";
+                var pushBody = "No BTC purchase recorded today. Check bot status.";
+                var data = new Dictionary<string, string>
+                {
+                    ["type"] = "missed_purchase",
+                    ["route"] = "/home"
+                };
+                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+            }
+            catch (Exception fcmEx)
+            {
+                logger.LogError(fcmEx, "Error sending FCM notification for missed purchase");
+            }
+
             _lastAlertSent = today;
 
             logger.LogWarning("Missed purchase alert sent for {Date}", today);
@@ -114,6 +137,77 @@ public class MissedPurchaseVerificationService(
         catch (Exception ex)
         {
             logger.LogError(ex, "Error checking for missed purchase");
+        }
+    }
+
+    private async Task CheckGapAlertAsync(DateTime now, DateOnly today, CancellationToken cancellationToken)
+    {
+        if (_lastGapAlertDate == today)
+        {
+            return;
+        }
+
+        try
+        {
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<TradingBotDbContext>();
+
+            var lastPurchase = await dbContext.Purchases
+                .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
+                .Where(p => !p.IsDryRun)
+                .OrderByDescending(p => p.ExecutedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (lastPurchase is null)
+            {
+                return;
+            }
+
+            var hoursSinceLast = (DateTimeOffset.UtcNow - lastPurchase.ExecutedAt).TotalHours;
+            if (hoursSinceLast <= 36)
+            {
+                return;
+            }
+
+            logger.LogWarning("No purchase in {Hours:F0} hours (>36h threshold)", hoursSinceLast);
+
+            var telegramService = scope.ServiceProvider.GetRequiredService<TelegramNotificationService>();
+            var fcmService = scope.ServiceProvider.GetRequiredService<FcmNotificationService>();
+
+            var message = $"""
+                *⚠️ No Purchase in 36+ Hours*
+
+                Last purchase was `{hoursSinceLast:F0}` hours ago.
+                Last purchase at: `{lastPurchase.ExecutedAt:yyyy-MM-dd HH:mm}` UTC
+
+                Please check the bot is running correctly.
+
+                _{now:yyyy-MM-dd HH:mm:ss} UTC_
+                """;
+
+            await telegramService.SendMessageAsync(message, cancellationToken);
+
+            try
+            {
+                var pushTitle = "No Purchase in 36+ Hours";
+                var pushBody = $"Last purchase was {hoursSinceLast:F0} hours ago. Check bot status.";
+                var data = new Dictionary<string, string>
+                {
+                    ["type"] = "missed_purchase",
+                    ["route"] = "/home"
+                };
+                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+            }
+            catch (Exception fcmEx)
+            {
+                logger.LogError(fcmEx, "Error sending FCM notification for 36-hour gap alert");
+            }
+
+            _lastGapAlertDate = today;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error checking 36-hour purchase gap");
         }
     }
 }

@@ -13,6 +13,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<DailyPrice> DailyPrices => Set<DailyPrice>();
     public DbSet<IngestionJob> IngestionJobs => Set<IngestionJob>();
     public DbSet<DcaConfiguration> DcaConfigurations => Set<DcaConfiguration>();
+    public DbSet<DeviceToken> DeviceTokens => Set<DeviceToken>();
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<DeadLetterMessage> DeadLetterMessages => Set<DeadLetterMessage>();
 
@@ -29,6 +30,8 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             .HaveConversion<IngestionJobId.EfCoreValueConverter, IngestionJobId.EfCoreValueComparer>();
         configurationBuilder.Properties<DcaConfigurationId>()
             .HaveConversion<DcaConfigurationId.EfCoreValueConverter, DcaConfigurationId.EfCoreValueComparer>();
+        configurationBuilder.Properties<DeviceTokenId>()
+            .HaveConversion<DeviceTokenId.EfCoreValueConverter, DeviceTokenId.EfCoreValueComparer>();
 
         // Phase 14 (value objects)
         configurationBuilder.Properties<Price>()
@@ -154,6 +157,14 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
 
             // Enforce single-row constraint
             entity.ToTable(t => t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid"));
+        });
+
+        modelBuilder.Entity<DeviceToken>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Token).HasMaxLength(512).IsRequired();
+            entity.Property(e => e.Platform).HasMaxLength(10).IsRequired();
+            entity.HasIndex(e => e.Token).IsUnique();
         });
 
         modelBuilder.AddOutboxMessageEntity();

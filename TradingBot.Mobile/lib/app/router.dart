@@ -7,7 +7,7 @@ import '../features/history/presentation/history_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../shared/navigation_shell.dart';
 
-final GlobalKey<NavigatorState> _rootNavigatorKey =
+final GlobalKey<NavigatorState> rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
 final GlobalKey<NavigatorState> _homeNavKey =
     GlobalKey<NavigatorState>(debugLabel: 'home');
@@ -19,7 +19,7 @@ final GlobalKey<NavigatorState> _configNavKey =
     GlobalKey<NavigatorState>(debugLabel: 'config');
 
 final GoRouter appRouter = GoRouter(
-  navigatorKey: _rootNavigatorKey,
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/home',
   routes: [
     StatefulShellRoute.indexedStack(

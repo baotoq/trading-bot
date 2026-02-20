@@ -18,6 +18,7 @@ using TradingBot.ApiService.Infrastructure.CoinGecko;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Locking;
+using TradingBot.ApiService.Infrastructure.Firebase;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ServiceDefaults;
 
@@ -89,6 +90,9 @@ try
 
     // Telegram notifications with MediatR
     builder.Services.AddTelegram(builder.Configuration);
+
+    // Firebase Cloud Messaging for push notifications
+    builder.Services.AddFirebase(builder.Configuration);
 
     // DCA execution service (scoped — uses DbContext)
     builder.Services.AddScoped<IDcaExecutionService, DcaExecutionService>();
@@ -168,6 +172,7 @@ try
     app.MapBacktestEndpoints();
     app.MapDashboardEndpoints();
     app.MapConfigurationEndpoints();
+    app.MapDeviceEndpoints();
 
     await app.RunAsync();
 

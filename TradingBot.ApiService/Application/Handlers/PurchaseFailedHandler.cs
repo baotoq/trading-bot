@@ -2,12 +2,14 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Infrastructure.Data;
+using TradingBot.ApiService.Infrastructure.Firebase;
 using TradingBot.ApiService.Infrastructure.Telegram;
 
 namespace TradingBot.ApiService.Application.Handlers;
 
 public class PurchaseFailedHandler(
     TelegramNotificationService telegramService,
+    FcmNotificationService fcmService,
     TradingBotDbContext dbContext,
     ILogger<PurchaseFailedHandler> logger) : INotificationHandler<PurchaseFailedEvent>
 {
@@ -45,6 +47,23 @@ public class PurchaseFailedHandler(
                 """;
 
             await telegramService.SendMessageAsync(message, cancellationToken);
+
+            // Send FCM push notification
+            try
+            {
+                var pushTitle = "Purchase Failed";
+                var pushBody = $"Error: {errorMessage}";
+                var data = new Dictionary<string, string>
+                {
+                    ["type"] = "purchase_failed",
+                    ["route"] = "/home"
+                };
+                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+            }
+            catch (Exception fcmEx)
+            {
+                logger.LogError(fcmEx, "Error sending FCM notification for failed purchase");
+            }
         }
         catch (Exception ex)
         {
