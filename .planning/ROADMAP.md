@@ -110,11 +110,11 @@ Plans:
   4. Touching the chart shows a tooltip with the price and date at the touched point
   5. User can scroll through the full purchase history as an infinite list using cursor pagination; new pages load automatically as the user scrolls
   6. User can open a bottom sheet to filter purchase history by date range and multiplier tier
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 22-01: Price chart screen (fl_chart line chart, 6 timeframes, purchase markers, avg cost line, touch tooltip)
-- [ ] 22-02: Purchase history screen (infinite scroll, cursor pagination, card design, bottom sheet filters)
+- [ ] 22-01-PLAN.md — Chart data layer + fl_chart price chart with timeframe selector, purchase markers, avg cost line, touch tooltip
+- [ ] 22-02-PLAN.md — Purchase history data layer + infinite scroll list with cursor pagination, purchase list items, filter bottom sheet
 
 ### Phase 23: Configuration Screen
 **Goal**: Users can view and edit their live DCA configuration parameters, including multiplier tiers, directly from the app
