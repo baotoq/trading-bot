@@ -242,3 +242,7 @@ _Pvt_Extensions
 # Verify
 *.received.*
 *.received/
+
+# Firebase
+**/GoogleService-Info.plist
+**/google-services.json
