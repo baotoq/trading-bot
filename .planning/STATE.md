@@ -2,23 +2,23 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v3.0 Flutter Mobile
-**Updated:** 2026-02-20 (22-02 complete)
+**Updated:** 2026-02-20 (23-01 complete)
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via mobile app
-**Current focus:** Phase 22 -- Price Chart + Purchase History (complete)
+**Current focus:** Phase 23 -- Configuration Screen (complete)
 
 ## Current Position
 
-Phase: 22 of 25 (Price Chart + Purchase History)
-Plan: 02 of 02 complete (Phase 22 complete)
-Status: In progress (Phase 23 next)
-Last activity: 2026-02-20 -- 22-02 complete: Purchase history screen with infinite scroll, cursor pagination, purchase list items, and filter bottom sheet
+Phase: 23 of 25 (Configuration Screen)
+Plan: 01 of 01 complete (Phase 23 complete)
+Status: In progress (Phase 24 next)
+Last activity: 2026-02-20 -- 23-01 complete: Config data layer + view/edit screen with numeric fields, time picker, tier list CRUD, inline server validation errors
 
-Progress: [███░░░░░░░] 55% (6/11 plans complete)
+Progress: [████░░░░░░] 64% (7/11 plans complete)
 
 ## Milestones Shipped
 
@@ -30,12 +30,12 @@ Progress: [███░░░░░░░] 55% (6/11 plans complete)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 48 (across v1.0-v3.0 so far)
+- Total plans completed: 49 (across v1.0-v3.0 so far)
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
-- v3.0: in progress (6 plans)
+- v3.0: in progress (7 plans)
 
 **By Milestone:**
 
@@ -78,6 +78,12 @@ All decisions logged in PROJECT.md Key Decisions table.
 **22-02 decisions:**
 - Replaced copyWithPrevious (internal Riverpod API) with explicit isLoadingMore boolean flag on AsyncNotifier — avoids invalid_use_of_internal_member warning while keeping existing items visible during page loads
 
+**23-01 decisions:**
+- ConfigEditForm takes ConfigRepository directly and handles all error cases internally (DioException 400 parsing + non-400 snackbar) — cleaner separation of concerns
+- MultiplierTierDto fields are mutable (not final) to support copyWith for in-place tier editing
+- Tier validation errors separated into two maps (fieldErrors for schedule/lookback/MA errors, tierErrors for tier-specific errors passed to TierListEditor)
+- No auto-refresh timer on configDataProvider — config is static, user manually refreshes or edits
+
 ### Known Risks
 
 - Phase 24 (Push Notifications) requires a real physical iOS device -- APNs does not work on iOS Simulator
@@ -95,8 +101,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 22-02-PLAN.md (Purchase history screen with infinite scroll, cursor pagination, filter bottom sheet)
-Next step: Execute Phase 23
+Stopped at: Completed 23-01-PLAN.md (Config data layer + view/edit screen with tier CRUD and inline server validation)
+Next step: Execute Phase 24 (Push Notifications)
 
 ---
-*State updated: 2026-02-20 after 22-02 completion*
+*State updated: 2026-02-20 after 23-01 completion*

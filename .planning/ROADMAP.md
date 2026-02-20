@@ -61,7 +61,7 @@
 - [x] **Phase 20: Flutter Project Setup + Core Infrastructure** - Scaffold Flutter project with secure API key storage, Dio HTTP client, and navigation (complete 2026-02-19)
 - [x] **Phase 21: Portfolio + Status Screens** - Home screen with portfolio stats, live price, bot health badge, and countdown timer (completed 2026-02-20)
 - [x] **Phase 22: Price Chart + Purchase History** - Interactive price chart with purchase markers and scrollable purchase history (completed 2026-02-20)
-- [ ] **Phase 23: Configuration Screen** - View and edit DCA configuration with server validation
+- [x] **Phase 23: Configuration Screen** - View and edit DCA configuration with server validation (completed 2026-02-20)
 - [ ] **Phase 24: Push Notifications** - FCM push delivery for buy events and health alerts, with backend token management
 - [ ] **Phase 25: Nuxt Deprecation** - Remove Nuxt dashboard from Aspire orchestration
 
@@ -128,7 +128,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 23-01-PLAN.md — Config data layer + view/edit screen with numeric fields, time picker, tier list CRUD, inline server validation errors
+- [x] 23-01-PLAN.md — Config data layer + view/edit screen with numeric fields, time picker, tier list CRUD, inline server validation errors
 
 ### Phase 24: Push Notifications
 **Goal**: Users receive push notifications on their iPhone when a BTC purchase executes, when a purchase fails, and when the bot has not bought in over 36 hours
@@ -186,9 +186,9 @@ Plans:
 | 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
 | 21. Portfolio + Status Screens | 2/2 | Complete    | 2026-02-20 | - |
 | 22. Price Chart + Purchase History | 2/2 | Complete    | 2026-02-20 | - |
-| 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
+| 23. Configuration Screen | v3.0 | 1/1 | Complete | 2026-02-20 |
 | 24. Push Notifications | v3.0 | 0/3 | Not started | - |
 | 25. Nuxt Deprecation | v3.0 | 0/1 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-20 after 21-01 completion (Phase 21 in progress)*
+*Roadmap updated: 2026-02-20 after Phase 23 completion*
