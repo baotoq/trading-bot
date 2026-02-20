@@ -41,6 +41,26 @@ public class FixedDeposit : AggregateRoot<FixedDepositId>
         };
     }
 
+    public void Update(string bankName, VndAmount principal, decimal annualInterestRate,
+        DateOnly startDate, DateOnly maturityDate, CompoundingFrequency compoundingFrequency)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(bankName);
+
+        if (maturityDate <= startDate)
+            throw new ArgumentException("Maturity date must be after start date");
+
+        if (annualInterestRate <= 0 || annualInterestRate > 1)
+            throw new ArgumentException("Annual interest rate must be between 0 and 1 (exclusive)");
+
+        BankName = bankName;
+        Principal = principal;
+        AnnualInterestRate = annualInterestRate;
+        StartDate = startDate;
+        MaturityDate = maturityDate;
+        CompoundingFrequency = compoundingFrequency;
+        UpdatedAt = DateTimeOffset.UtcNow;
+    }
+
     public void Mature()
     {
         Status = FixedDepositStatus.Matured;

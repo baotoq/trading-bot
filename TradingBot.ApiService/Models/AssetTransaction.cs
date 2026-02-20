@@ -16,9 +16,11 @@ public class AssetTransaction : BaseEntity<AssetTransactionId>
     public TransactionType Type { get; private set; }
     public decimal? Fee { get; private set; }
     public TransactionSource Source { get; private set; }
+    public PurchaseId? SourcePurchaseId { get; private set; }
 
     internal static AssetTransaction Create(PortfolioAssetId assetId, DateOnly date, decimal quantity,
-        decimal pricePerUnit, Currency currency, TransactionType type, decimal? fee, TransactionSource source)
+        decimal pricePerUnit, Currency currency, TransactionType type, decimal? fee, TransactionSource source,
+        PurchaseId? sourcePurchaseId = null)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(quantity);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pricePerUnit);
@@ -33,7 +35,8 @@ public class AssetTransaction : BaseEntity<AssetTransactionId>
             Currency = currency,
             Type = type,
             Fee = fee,
-            Source = source
+            Source = source,
+            SourcePurchaseId = sourcePurchaseId
         };
     }
 }

@@ -215,6 +215,10 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             entity.Property(e => e.Currency).HasMaxLength(5).HasConversion<string>();
             entity.Property(e => e.Type).HasMaxLength(10).HasConversion<string>();
             entity.Property(e => e.Source).HasMaxLength(10).HasConversion<string>();
+            entity.Property(e => e.SourcePurchaseId).IsRequired(false);
+            entity.HasIndex(e => e.SourcePurchaseId)
+                .IsUnique()
+                .HasFilter("\"SourcePurchaseId\" IS NOT NULL");
             entity.HasIndex(e => e.PortfolioAssetId);
             entity.HasIndex(e => e.Date);
         });

@@ -104,6 +104,9 @@ try
     // Configuration service (scoped — uses DbContext)
     builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
+    // Historical purchase migrator for portfolio import (scoped — uses DbContext)
+    builder.Services.AddScoped<HistoricalPurchaseMigrator>();
+
     // DCA scheduler (runs daily at configured time)
     builder.Services.AddHostedService<DcaSchedulerBackgroundService>();
 
@@ -175,6 +178,8 @@ try
     app.MapDataEndpoints();
     app.MapBacktestEndpoints();
     app.MapDashboardEndpoints();
+    app.MapPortfolioEndpoints();
+    app.MapFixedDepositEndpoints();
     app.MapConfigurationEndpoints();
     app.MapDeviceEndpoints();
 

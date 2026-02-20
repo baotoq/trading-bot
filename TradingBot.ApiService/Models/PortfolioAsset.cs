@@ -32,9 +32,10 @@ public class PortfolioAsset : AggregateRoot<PortfolioAssetId>
     }
 
     public AssetTransaction AddTransaction(DateOnly date, decimal quantity, decimal pricePerUnit,
-        Currency currency, TransactionType type, decimal? fee, TransactionSource source)
+        Currency currency, TransactionType type, decimal? fee, TransactionSource source,
+        PurchaseId? sourcePurchaseId = null)
     {
-        var tx = AssetTransaction.Create(Id, date, quantity, pricePerUnit, currency, type, fee, source);
+        var tx = AssetTransaction.Create(Id, date, quantity, pricePerUnit, currency, type, fee, source, sourcePurchaseId);
         _transactions.Add(tx);
         return tx;
     }
