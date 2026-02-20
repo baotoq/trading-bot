@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A personal investment platform: automated BTC DCA on Hyperliquid spot with smart dip-buying multipliers, backtesting engine, and a Flutter iOS app that serves as a unified portfolio tracker across crypto, Vietnamese ETFs, mutual funds, and fixed deposits — all in one place with live prices and multi-currency support (VND/USD).
+A personal investment platform: automated BTC DCA on Hyperliquid spot with smart dip-buying multipliers, backtesting engine, and a Flutter iOS app that serves as a unified portfolio tracker across crypto, Vietnamese ETFs, and fixed deposits -- with live prices from CoinGecko and VNDirect, multi-currency P&L (VND/USD), and 103 automated tests.
 
 ## Core Value
 
@@ -60,63 +60,57 @@ The bot reliably executes daily BTC spot purchases with smart dip-buying, and th
 - ✓ Nuxt dashboard deprecated from Aspire orchestration (code preserved) -- v3.0
 - ✓ Per-channel notification handlers (Telegram + FCM split) -- v3.0
 
+- ✓ Multi-asset portfolio model (crypto, ETF, fixed deposit) with transaction history -- v4.0
+- ✓ Auto-fetch crypto prices (CoinGecko), VN ETF prices (VNDirect), USD/VND exchange rate -- v4.0
+- ✓ Manual transaction entry (buy/sell for tradeable assets, deposit for savings) -- v4.0
+- ✓ Auto-import DCA bot purchases into portfolio + historical migration -- v4.0
+- ✓ Portfolio overview: total value (VND/USD toggle), per-asset P&L %, allocation donut chart -- v4.0
+- ✓ Fixed deposit tracking with interest rate, maturity date, accrued value, and compound interest -- v4.0
+- ✓ USD/VND currency conversion for unified portfolio view with staleness indicators -- v4.0
+- ✓ Price feed unit tests, endpoint integration tests (Testcontainers), exchange rate graceful degradation -- v4.0
+
 ### Active
 
-<!-- v4.0 Portfolio Tracker -->
-- [ ] Multi-asset portfolio model (crypto, ETF, fixed deposit) with transaction history
-- [ ] Auto-fetch crypto prices (CoinGecko), auto-fetch VN asset prices where free APIs exist
-- [ ] Manual transaction entry (buy/sell for tradeable assets, deposit for savings)
-- [ ] Auto-import DCA bot purchases into portfolio + manual entry for other sources
-- [ ] Portfolio overview: total value (VND/USD toggle), per-asset P&L %, allocation %
-- [ ] Portfolio value chart over time and per-asset performance
-- [ ] Fixed deposit tracking with interest rate, maturity date, and accrued value
-- [ ] USD/VND currency conversion for unified portfolio view
+(None -- define next milestone requirements via `/gsd:new-milestone`)
 
 ### Out of Scope
 
 - Selling/take-profit logic -- this is accumulation only
 - Futures/perps trading -- spot only
-- ~~Multi-asset support~~ -- now building multi-asset portfolio tracker (v4.0)
 - Monthly spending caps -- daily amount + multipliers are the only controls
 - Monte Carlo simulation -- DCA is deterministic given price data
 - Slippage / fee modeling -- for small spot orders ($10-45/day), fees are <0.1%
 - Genetic algorithm / ML optimization -- grid search is sufficient for ~5 DCA parameters
 - Backtest result persistence -- compute-on-fly is cheaper; user re-runs as needed
 - Multi-user authentication -- single-user bot, API key auth is sufficient
-- ~~Mobile app~~ -- now building Flutter mobile app (v3.0)
 - Real-time order book -- not relevant for DCA spot purchases
 - Manual buy/sell buttons -- bot is fully automated
 - Generic Repository<T> -- EF Core DbContext is already unit of work
 - Event Sourcing -- massive complexity for DCA bot state-based persistence
 - Separate domain/persistence models -- over-engineering for this domain size
 - Cross-aggregate transactions -- use domain events for eventual consistency
-
-## Current Milestone: v4.0 Portfolio Tracker
-
-**Goal:** Multi-asset portfolio tracking — crypto, VN30 ETF, fixed deposits — with live prices, P&L, and multi-currency support (VND/USD)
-
-**Target features:**
-- Multi-asset portfolio model with transaction history (buy/sell/deposit)
-- Auto-fetch prices for crypto (CoinGecko) and VN assets where possible
-- Manual transaction entry for all asset types
-- Auto-import DCA bot purchases into portfolio
-- Portfolio overview with total value (VND/USD toggle), allocation %, per-asset P&L
-- Portfolio value chart over time and per-asset performance charts
-- Fixed deposit tracking with interest rate and accrued value
-- Currency conversion (USD/VND)
+- Real-time price streaming (WebSocket) -- DCA bot buys once daily; 5-min polling sufficient
+- Broker/exchange API auto-sync -- Vietnamese brokers require in-person auth registration
+- Tax reporting / capital gains -- show P&L clearly for user to provide to tax advisor
+- Portfolio rebalancing suggestions -- financial advice requires regulatory licensing
+- FIFO/LIFO cost basis -- weighted average sufficient for DCA accumulation style
+- Historical VND/USD rate at transaction date -- display at today's rate with label
+- Multi-user / family portfolio -- single-user system by design
+- Portfolio value chart over time -- deferred to v4.x (CHART-01)
+- Per-asset performance chart -- deferred to v4.x (CHART-02)
 
 ## Current State
 
-Shipped v3.0 Flutter Mobile (2026-02-20). Starting v4.0 Portfolio Tracker.
+Shipped v4.0 Portfolio Tracker (2026-02-21). All milestones complete through v4.0.
 
 **Codebase:**
-- ~10,000+ lines of C# (backend, 25 phases, 56 plans)
-- ~4,500 lines of Dart (TradingBot.Mobile)
-- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard — deprecated)
-- 62 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 9 Specification integration, 1 existing)
-- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot
+- ~12,000+ lines of C# (backend, 32 phases, 71 plans)
+- ~5,500+ lines of Dart (TradingBot.Mobile -- portfolio tracker + DCA dashboard)
+- ~4,100 lines of TypeScript/Vue/CSS (TradingBot.Dashboard -- deprecated)
+- 103 automated tests (24 MultiplierCalculator, 28 BacktestSimulator, 14 InterestCalculator, 14 PriceFeed, 13 Endpoint integration, 9 Specification, 1 existing)
+- Tech stack: .NET 10.0, ASP.NET Core, EF Core, PostgreSQL, Redis, Aspire, MediatR, Serilog, Telegram.Bot, Firebase FCM
 - DDD: Vogen 8.0.4, ErrorOr 2.0.1, Ardalis.Specification 9.3.1
-- Flutter: Dart 3.11, Riverpod, go_router, fl_chart, Dio
+- Flutter: Dart 3.11, Riverpod, go_router, fl_chart, Dio, shared_preferences
 
 **API Surface:**
 - POST /api/backtest -- single backtest with config overrides
@@ -131,16 +125,16 @@ Shipped v3.0 Flutter Mobile (2026-02-20). Starting v4.0 Portfolio Tracker.
 - GET /api/dashboard/chart -- price chart with purchase markers
 - GET /api/dashboard/config -- DCA config for backtest pre-fill
 - GET /api/config -- full DCA configuration
-- PUT /api/config -- update DCA configuration with validation (ErrorOr result mapping)
+- PUT /api/config -- update DCA configuration with validation
 - GET /api/config/defaults -- appsettings.json default values
-
-**Dashboard Features:**
-- Portfolio overview (total BTC, cost, P&L, live price)
-- Interactive price chart (6 timeframes, purchase markers, avg cost line)
-- Purchase history (infinite scroll, cursor pagination, date/tier filters)
-- Backtest visualization (equity curves, metrics, parameter sweep, comparison)
-- Configuration management (view/edit, tiers table, server validation)
-- Live status (health badge, countdown timer, connection indicator)
+- GET /api/portfolio/summary -- multi-asset portfolio with P&L (USD + VND)
+- POST /api/portfolio/assets -- create portfolio asset
+- GET /api/portfolio/assets/{id}/transactions -- transaction history with filters
+- POST /api/portfolio/assets/{id}/transactions -- add buy/sell transaction
+- GET /api/portfolio/fixed-deposits -- list fixed deposits with accrued value
+- POST /api/portfolio/fixed-deposits -- create fixed deposit
+- PUT /api/portfolio/fixed-deposits/{id} -- update fixed deposit
+- DELETE /api/portfolio/fixed-deposits/{id} -- delete fixed deposit
 
 ## Constraints
 
@@ -187,6 +181,17 @@ Shipped v3.0 Flutter Mobile (2026-02-20). Starting v4.0 Portfolio Tracker.
 | AggregateRoot<TId> with IAggregateRoot marker | Interceptor queries ChangeTracker for IAggregateRoot, clean separation | ✓ Good |
 | Factory methods throw, behavior methods return ErrorOr | Create() path is startup/infrastructure, behavior is runtime with user input | ✓ Good |
 | Nullable Price? in dashboard DTOs | Handles empty DB and unreachable exchange gracefully, no 500 errors | ✓ Good |
+| Separate aggregate roots for PortfolioAsset and FixedDeposit | Avoids TPH nullable columns, each aggregate has distinct lifecycle | ✓ Good |
+| VndAmount value object with numeric(18,0) | Vietnamese currency has no decimals; prevents fractional VND | ✓ Good |
+| Store cost_native + cost_usd + exchange_rate at write time | P&L computed in native currency; avoids historical exchange rate dependency | ✓ Good |
+| DCA domain has zero knowledge of portfolio domain | Connected via PurchaseCompletedEvent only; clean bounded context boundary | ✓ Good |
+| API returns both valueUsd and valueVnd | Currency toggle is pure Flutter display logic; no extra API calls per toggle | ✓ Good |
+| VNDirect dchart-api (not finfo-api) | finfo times out externally; dchart verified live and reliable | ✓ Good |
+| PriceFeedEntry uses long for timestamps | Avoids MessagePack DateTimeOffset resolver issues | ✓ Good |
+| Stale-while-revalidate for VNDirect | Returns stale immediately, fire-and-forget refresh; ETF prices change rarely | ✓ Good |
+| Weighted average cost from buys only | Sells reduce position but don't change avg cost basis; standard DCA P&L | ✓ Good |
+| WebApplicationFactory + Testcontainers for integration tests | Real PostgreSQL, in-memory cache, no background services; fast and reliable | ✓ Good |
+| Dynamic CoinGecko ID lookup with not-found caching | Well-known dict for 10 common tickers; API search fallback with 1-day negative cache | ✓ Good |
 
 ---
-*Last updated: 2026-02-20 after v4.0 milestone start*
+*Last updated: 2026-02-21 after v4.0 milestone*

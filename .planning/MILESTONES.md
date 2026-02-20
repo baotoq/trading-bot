@@ -157,3 +157,33 @@ See `milestones/v3.0-MILESTONE-AUDIT.md` for full audit report.
 
 ---
 
+
+## v4.0 Portfolio Tracker (Shipped: 2026-02-21)
+
+**Delivered:** Multi-asset portfolio tracking across crypto, Vietnamese ETFs, and fixed deposits with live prices from CoinGecko/VNDirect, dual-currency P&L (VND/USD), and complete CRUD in the Flutter iOS app.
+
+**Phases completed:** 26-32 (7 phases, 15 plans total)
+
+**Key accomplishments:**
+
+- Multi-asset portfolio domain model with PortfolioAsset, AssetTransaction, and FixedDeposit aggregate roots, Vogen typed IDs, VndAmount value object, and compound/simple interest calculator
+- Price feed infrastructure -- CoinGecko crypto prices, VNDirect VN ETF prices, open.er-api.com exchange rates with Redis caching and stale-while-revalidate
+- Portfolio backend API -- summary endpoint with dual-currency P&L and allocation, transaction CRUD, fixed deposit lifecycle, DCA auto-import via domain events, historical purchase migration
+- Flutter portfolio UI -- VND/USD currency toggle with SharedPreferences persistence, allocation donut chart, per-asset P&L with expandable sections, transaction history with filters, fixed deposit detail with accrued value
+- Critical bug fixes and full milestone verification -- all 20 requirements formally verified with VERIFICATION.md files
+- 41 new automated tests (14 price feed unit tests, 13 endpoint integration tests via WebApplicationFactory + Testcontainers, 14 interest calculator tests) bringing total to 103
+
+**Stats:**
+
+- 136 files changed
+- 15,708 insertions / 1,578 deletions
+- 7 phases, 15 plans, 49 commits (18 feature/fix/refactor)
+- 2 days from start to ship (2026-02-20 → 2026-02-21)
+- 103 tests passing (62 existing + 41 new)
+
+**Git range:** `d2d3430` → `7712336`
+
+**What's next:** Charts & analytics (portfolio value over time, per-asset performance), advanced features (maturity alerts, balance reconciliation)
+
+---
+
