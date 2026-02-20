@@ -1,4 +1,6 @@
+using MessagePack;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using TradingBot.ApiService.Application.Services;
 using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.PriceFeeds;
@@ -37,6 +39,7 @@ public static class PortfolioEndpoints
         ICryptoPriceProvider cryptoPriceProvider,
         IEtfPriceProvider etfPriceProvider,
         IExchangeRateProvider exchangeRateProvider,
+        IDistributedCache cache,
         HistoricalPurchaseMigrator migrator,
         ILogger<Program> logger,
         CancellationToken ct)
@@ -74,6 +77,14 @@ public static class PortfolioEndpoints
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to fetch USD/VND exchange rate for portfolio summary");
+            // Fall back to last cached rate from Redis directly (handles resilience pipeline exceptions
+            // that bypass OpenErApiProvider's own stale fallback)
+            var cachedBytes = await cache.GetAsync("price:exchangerate:usd-vnd", ct);
+            if (cachedBytes is not null)
+            {
+                var cached = MessagePackSerializer.Deserialize<PriceFeedEntry>(cachedBytes, MessagePackSerializerOptions.Standard);
+                exchangeRate = PriceFeedResult.Stale(cached.Price, cached.FetchedAt, "VND");
+            }
         }
 
         var rate = exchangeRate?.Price ?? 0m;
@@ -180,6 +191,7 @@ public static class PortfolioEndpoints
         ICryptoPriceProvider cryptoPriceProvider,
         IEtfPriceProvider etfPriceProvider,
         IExchangeRateProvider exchangeRateProvider,
+        IDistributedCache cache,
         ILogger<Program> logger,
         CancellationToken ct)
     {
@@ -195,6 +207,14 @@ public static class PortfolioEndpoints
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Failed to fetch USD/VND exchange rate for asset breakdown");
+            // Fall back to last cached rate from Redis directly (handles resilience pipeline exceptions
+            // that bypass OpenErApiProvider's own stale fallback)
+            var cachedBytes = await cache.GetAsync("price:exchangerate:usd-vnd", ct);
+            if (cachedBytes is not null)
+            {
+                var cached = MessagePackSerializer.Deserialize<PriceFeedEntry>(cachedBytes, MessagePackSerializerOptions.Standard);
+                exchangeRate = PriceFeedResult.Stale(cached.Price, cached.FetchedAt, "VND");
+            }
         }
 
         var rate = exchangeRate?.Price ?? 0m;
