@@ -9,27 +9,27 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** Phase 29 — Flutter Portfolio UI
+**Current focus:** v4.0 COMPLETE
 
 ## Current Position
 
-Phase: 28 of 29 (Portfolio Backend API) — COMPLETE
-Plan: 2 of 2 (all executed)
-Status: Phase 28 complete
-Last activity: 2026-02-20 — Phase 28 complete (2 plans, domain model extensions + auto-import + 9 API endpoints)
+Phase: 29 of 29 (Flutter Portfolio UI) — COMPLETE
+Plan: 3 of 3 (all executed)
+Status: v4.0 milestone complete
+Last activity: 2026-02-20 — Phase 29 complete (3 plans, data layer + main screen + sub-screens)
 
-Progress: [#######░░░] 75% (v4.0)
+Progress: [##########] 100% (v4.0)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 63 (across v1.0-v4.0)
+- Total plans completed: 66 (across v1.0-v4.0)
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (11 plans)
-- v4.0: in progress (7 plans so far)
+- v4.0: 1 day (10 plans)
 
 **By Milestone:**
 
@@ -40,7 +40,7 @@ Progress: [#######░░░] 75% (v4.0)
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
 | v3.0 | 20-25 | 11 | Complete |
-| v4.0 | 26-29 | 7/TBD | Phase 28 complete |
+| v4.0 | 26-29 | 10 | Complete |
 
 ## Accumulated Context
 
@@ -80,6 +80,15 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Price feed failures use 0 for that asset, don't fail portfolio summary endpoint
 - Historical migration triggers automatically when BTC asset has no bot-imported transactions on first summary call
 
+**Phase 29 decisions:**
+- SharedPreferences pre-loaded in main() before runApp() to keep CurrencyPreference synchronous (not AsyncValue)
+- AllocationDonutChart uses StatefulWidget (not HookConsumerWidget) to isolate touch state rebuilds
+- Transaction history fetches per-asset in parallel and merges client-side (no cross-asset backend endpoint)
+- Fixed deposit detail reads from existing portfolioPageDataProvider (no extra API call)
+- Unified add entry form uses SegmentedButton<FormMode> for Buy/Sell vs Fixed Deposit mode switching
+- Bot badge: Container with bitcoinOrange.withAlpha(40) background and border
+- DropdownButtonFormField uses initialValue (not deprecated value) for Flutter 3.33+ compatibility
+
 **v3.0 Flutter conventions carried forward:**
 - Dark-only theme, NavigationBar (Material 3) + CupertinoIcons, StatefulShellRoute
 - Manual fromJson for DTO models (no json_serializable), intl as explicit dependency
@@ -96,13 +105,13 @@ None.
 
 ### Roadmap Evolution
 
-v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped.
+v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped and completed.
 
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 28 complete — all 2 plans executed (domain model extensions + auto-import handler + migration service, portfolio + fixed deposit API endpoints)
-Next step: `/gsd:plan-phase 29` (Flutter Portfolio UI)
+Stopped at: Phase 29 complete — all 3 plans executed (data layer + main screen + sub-screens). v4.0 milestone complete.
+Next step: All milestones complete. Define next milestone if needed.
 
 ---
-*State updated: 2026-02-20 after Phase 28 completion*
+*State updated: 2026-02-20 after Phase 29 completion (v4.0 complete)*
