@@ -62,7 +62,7 @@
 - [x] **Phase 21: Portfolio + Status Screens** - Home screen with portfolio stats, live price, bot health badge, and countdown timer (completed 2026-02-20)
 - [x] **Phase 22: Price Chart + Purchase History** - Interactive price chart with purchase markers and scrollable purchase history (completed 2026-02-20)
 - [x] **Phase 23: Configuration Screen** - View and edit DCA configuration with server validation (completed 2026-02-20)
-- [ ] **Phase 24: Push Notifications** - FCM push delivery for buy events and health alerts, with backend token management
+- [x] **Phase 24: Push Notifications** - FCM push delivery for buy events and health alerts, with backend token management (completed 2026-02-20)
 - [ ] **Phase 25: Nuxt Deprecation** - Remove Nuxt dashboard from Aspire orchestration
 
 ## Phase Details
@@ -143,9 +143,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 24-01-PLAN.md -- Backend FCM infrastructure (DeviceToken entity, EF migration, POST/DELETE device endpoints, FirebaseAdmin NuGet, FcmNotificationService)
-- [ ] 24-02-PLAN.md -- Backend notification hooks (PurchaseCompletedHandler, PurchaseFailedHandler, MissedPurchaseVerificationService send FCM push with deep-link data)
-- [ ] 24-03-PLAN.md -- Flutter FCM integration (firebase_messaging, FcmService token registration, foreground display, deep-link tap handler via go_router)
+- [x] 24-01-PLAN.md -- Backend FCM infrastructure (DeviceToken entity, EF migration, POST/DELETE device endpoints, FirebaseAdmin NuGet, FcmNotificationService)
+- [x] 24-02-PLAN.md -- Backend notification hooks (PurchaseCompletedHandler, PurchaseFailedHandler, MissedPurchaseVerificationService send FCM push with deep-link data)
+- [x] 24-03-PLAN.md -- Flutter FCM integration (firebase_messaging, FcmService token registration, foreground display, deep-link tap handler via go_router)
 
 ### Phase 25: Nuxt Deprecation
 **Goal**: The Nuxt dashboard is no longer started by Aspire, removing it from the local development orchestration while preserving the code
@@ -187,8 +187,8 @@ Plans:
 | 21. Portfolio + Status Screens | 2/2 | Complete    | 2026-02-20 | - |
 | 22. Price Chart + Purchase History | 2/2 | Complete    | 2026-02-20 | - |
 | 23. Configuration Screen | v3.0 | 1/1 | Complete | 2026-02-20 |
-| 24. Push Notifications | v3.0 | 0/3 | Not started | - |
+| 24. Push Notifications | v3.0 | 3/3 | Complete | 2026-02-20 |
 | 25. Nuxt Deprecation | v3.0 | 0/1 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-20 after Phase 23 completion*
+*Roadmap updated: 2026-02-20 after Phase 24 completion*
