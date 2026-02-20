@@ -31,7 +31,7 @@ cd TradingBot.ApiService && dotnet ef migrations add <MigrationName>
 ## Architecture
 
 **Layered Structure:**
-- `Application/` - Business logic (background jobs, services, event handlers, health checks)
+- `Application/` - Business logic (background jobs, services, event handlers, health checks, specifications)
 - `BuildingBlocks/` - Reusable infrastructure (pub-sub, outbox, distributed locks, base entities)
 - `Configuration/` - Strongly-typed options classes bound from appsettings.json
 - `Endpoints/` - Minimal API endpoint definitions (backtest, data, dashboard)
@@ -43,6 +43,7 @@ cd TradingBot.ApiService && dotnet ef migrations add <MigrationName>
 - `TradingBot.AppHost` - Aspire orchestration (PostgreSQL, Redis, Dapr, Dashboard)
 - `TradingBot.ServiceDefaults` - Shared service configuration extensions
 - `TradingBot.Dashboard` - Nuxt 4 web dashboard (Vue 3, @nuxt/ui v4, Chart.js)
+- `TradingBot.Mobile` - Flutter mobile app (Dart)
 
 **Key Patterns:**
 - Event-driven architecture with MediatR (in-process) and Dapr (cross-service)
@@ -58,7 +59,7 @@ Domain Event → OutboxMessage (DB) → OutboxMessageProcessor → DaprMessageBr
 **Naming:**
 - Entities: PascalCase, singular nouns (`Purchase`, `DailyPrice`, `IngestionJob`)
 - Options classes: Suffix with `Options` (`DcaOptions`, `HyperliquidOptions`)
-- Interfaces: Prefix with `I` (`IHyperliquidClient`, `IMessageBroker`)
+- Interfaces: Prefix with `I` (`IMessageBroker`, `IDomainEvent`)
 - Background services: Suffix with `Service` or `BackgroundService`
 
 **Entity Design:**
@@ -83,7 +84,7 @@ _logger.LogInformation($"Placing order for {symbol} at {price}");
 
 ## Key Dependencies
 
-- **Binance.Net** - Price data source (not for trading)
+- **Binance.Net** - Declared but currently unused (price data now from Hyperliquid candle API)
 - **CoinGecko** (direct HttpClient) - Historical OHLCV data for backtesting
 - **Telegram.Bot** - Notifications and weekly summaries
 - **Nethereum** - EIP-712 signing for Hyperliquid authentication
@@ -92,6 +93,10 @@ _logger.LogInformation($"Placing order for {symbol} at {price}");
 - **EFCore.BulkExtensions** - Bulk upsert for historical data ingestion
 - **MessagePack** - Binary serialization for Redis caching
 - **Snapper** - Snapshot testing for deterministic backtest validation
+- **Vogen** - Strongly-typed value objects (`PurchaseId`, `Symbol`, `UsdAmount`, `Price`)
+- **ErrorOr** - Discriminated union error handling
+- **Ardalis.Specification** - Specification pattern for EF Core queries
+- **DistributedLock.Postgres** - PostgreSQL advisory lock abstraction
 
 ## Key Files
 
@@ -131,7 +136,7 @@ dotnet user-secrets set "Dashboard:ApiKey" "<any-secret>"  # required for dashbo
 - Snapper for snapshot testing (golden file comparison)
 - NSubstitute for mocking
 - Tests in `tests/TradingBot.ApiService.Tests/`
-- 53 tests: 24 MultiplierCalculator, 28 BacktestSimulator, 1 integration
+- 62 test cases: MultiplierCalculator (24 via theories), BacktestSimulator (28), PurchaseSpecs (7), DailyPriceSpecs (2), 1 placeholder
 - CI: GitHub Actions (`.github/workflows/test.yml`) — runs on push and PR
 
 ```bash
