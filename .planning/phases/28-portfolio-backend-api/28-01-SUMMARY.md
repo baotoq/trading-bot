@@ -1,3 +1,7 @@
+---
+requirements-completed: [PORT-04, PORT-05]
+---
+
 # Phase 28 Plan 01 — Summary
 
 **Completed:** 2026-02-20

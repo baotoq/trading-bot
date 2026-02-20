@@ -1,3 +1,7 @@
+---
+requirements-completed: [PRICE-02, PRICE-03, PRICE-04]
+---
+
 # Phase 27 Plan 02 — Summary
 
 **Completed:** 2026-02-20
