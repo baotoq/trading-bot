@@ -93,11 +93,11 @@ Plans:
   3. Bot health status badge (healthy/warning/down) is always visible and reflects the current API health response
   4. A countdown timer shows time remaining until the next scheduled buy, counting down in real time client-side
   5. A last buy detail card shows the most recent purchase's date, price, BTC amount, multiplier used, and drop percentage
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 21-01: Portfolio overview screen (stats cards, 30s polling, P&L coloring, pull-to-refresh, error snackbar)
-- [ ] 21-02: Bot status screen (health badge, countdown timer, last buy detail card)
+- [ ] 21-01-PLAN.md — Data layer: extend LiveStatusResponse, Dart DTO models, HomeRepository, Riverpod providers with 30s auto-refresh
+- [ ] 21-02-PLAN.md — UI layer: portfolio stats section, health badge, countdown text, last buy card, assemble HomeScreen
 
 ### Phase 22: Price Chart + Purchase History
 **Goal**: Users can visually explore their DCA performance on a price chart with purchase markers and scroll through the full purchase history
