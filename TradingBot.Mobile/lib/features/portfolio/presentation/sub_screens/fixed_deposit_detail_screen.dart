@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -24,13 +27,73 @@ class FixedDepositDetailScreen extends ConsumerWidget {
     final isVnd = ref.watch(currencyPreferenceProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Fixed Deposit')),
+      appBar: AppBar(
+        title: const Text('Fixed Deposit'),
+        actions: [
+          if (pageData.value != null) ...[
+            IconButton(
+              icon: const Icon(CupertinoIcons.pencil),
+              tooltip: 'Edit',
+              onPressed: () {
+                context.push('/portfolio/fixed-deposit/$id/edit');
+              },
+            ),
+            IconButton(
+              icon: const Icon(CupertinoIcons.trash),
+              tooltip: 'Delete',
+              onPressed: () => _confirmDelete(context, ref),
+            ),
+          ],
+        ],
+      ),
       body: switch (pageData) {
         AsyncData(:final value) => _buildBody(context, value, isVnd),
         AsyncError() => const Center(child: Text('Could not load data')),
         _ => const Center(child: CircularProgressIndicator()),
       },
     );
+  }
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Fixed Deposit'),
+        content: const Text(
+            'Are you sure you want to delete this fixed deposit? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => ctx.pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => ctx.pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(portfolioRepositoryProvider).deleteFixedDeposit(id);
+      if (context.mounted) {
+        ref.invalidate(portfolioPageDataProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Fixed deposit deleted')),
+        );
+        context.pop();
+      }
+    } on DioException catch (e) {
+      if (context.mounted) {
+        final msg = e.response?.data?.toString() ?? 'Failed to delete';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg)),
+        );
+      }
+    }
   }
 
   Widget _buildBody(

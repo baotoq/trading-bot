@@ -7,6 +7,7 @@ import '../features/history/presentation/history_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/portfolio/presentation/portfolio_screen.dart';
 import '../features/portfolio/presentation/sub_screens/add_transaction_screen.dart';
+import '../features/portfolio/presentation/sub_screens/edit_fixed_deposit_screen.dart';
 import '../features/portfolio/presentation/sub_screens/fixed_deposit_detail_screen.dart';
 import '../features/portfolio/presentation/sub_screens/transaction_history_screen.dart';
 import '../shared/navigation_shell.dart';
@@ -91,6 +92,15 @@ final GoRouter appRouter = GoRouter(
                   builder: (context, state) => FixedDepositDetailScreen(
                     id: state.pathParameters['id']!,
                   ),
+                  routes: [
+                    GoRoute(
+                      path: 'edit',
+                      parentNavigatorKey: rootNavigatorKey,
+                      builder: (context, state) => EditFixedDepositScreen(
+                        id: state.pathParameters['id']!,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

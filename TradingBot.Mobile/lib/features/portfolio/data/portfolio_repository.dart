@@ -79,4 +79,20 @@ class PortfolioRepository {
     final response = await _dio.post('/api/portfolio/assets', data: body);
     return response.data as Map<String, dynamic>;
   }
+
+  Future<FixedDepositResponse> updateFixedDeposit(
+    String id,
+    Map<String, dynamic> body,
+  ) async {
+    final response = await _dio.put(
+      '/api/portfolio/fixed-deposits/$id',
+      data: body,
+    );
+    return FixedDepositResponse.fromJson(
+        response.data as Map<String, dynamic>);
+  }
+
+  Future<void> deleteFixedDeposit(String id) async {
+    await _dio.delete('/api/portfolio/fixed-deposits/$id');
+  }
 }
