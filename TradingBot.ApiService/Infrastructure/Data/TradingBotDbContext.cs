@@ -17,6 +17,11 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<DeadLetterMessage> DeadLetterMessages => Set<DeadLetterMessage>();
 
+    // Phase 26 (portfolio entities)
+    public DbSet<PortfolioAsset> PortfolioAssets => Set<PortfolioAsset>();
+    public DbSet<AssetTransaction> AssetTransactions => Set<AssetTransaction>();
+    public DbSet<FixedDeposit> FixedDeposits => Set<FixedDeposit>();
+
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
@@ -46,6 +51,16 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             .HaveConversion<Percentage.EfCoreValueConverter, Percentage.EfCoreValueComparer>();
         configurationBuilder.Properties<Symbol>()
             .HaveConversion<Symbol.EfCoreValueConverter, Symbol.EfCoreValueComparer>();
+
+        // Phase 26 (portfolio typed IDs + value objects)
+        configurationBuilder.Properties<PortfolioAssetId>()
+            .HaveConversion<PortfolioAssetId.EfCoreValueConverter, PortfolioAssetId.EfCoreValueComparer>();
+        configurationBuilder.Properties<AssetTransactionId>()
+            .HaveConversion<AssetTransactionId.EfCoreValueConverter, AssetTransactionId.EfCoreValueComparer>();
+        configurationBuilder.Properties<FixedDepositId>()
+            .HaveConversion<FixedDepositId.EfCoreValueConverter, FixedDepositId.EfCoreValueComparer>();
+        configurationBuilder.Properties<VndAmount>()
+            .HaveConversion<VndAmount.EfCoreValueConverter, VndAmount.EfCoreValueComparer>();
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -175,6 +190,44 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.EventName);
             entity.HasIndex(e => e.FailedAt);
+        });
+
+        // Phase 26: Portfolio entities
+        modelBuilder.Entity<PortfolioAsset>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Ticker).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.AssetType).HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.NativeCurrency).HasMaxLength(5).HasConversion<string>();
+            entity.HasMany(e => e.Transactions)
+                .WithOne()
+                .HasForeignKey(t => t.PortfolioAssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AssetTransaction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Quantity).HasPrecision(18, 8);
+            entity.Property(e => e.PricePerUnit).HasPrecision(18, 8);
+            entity.Property(e => e.Fee).HasPrecision(18, 2);
+            entity.Property(e => e.Currency).HasMaxLength(5).HasConversion<string>();
+            entity.Property(e => e.Type).HasMaxLength(10).HasConversion<string>();
+            entity.Property(e => e.Source).HasMaxLength(10).HasConversion<string>();
+            entity.HasIndex(e => e.PortfolioAssetId);
+            entity.HasIndex(e => e.Date);
+        });
+
+        modelBuilder.Entity<FixedDeposit>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.BankName).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.Principal).HasPrecision(18, 0);
+            entity.Property(e => e.AnnualInterestRate).HasPrecision(8, 6);
+            entity.Property(e => e.CompoundingFrequency).HasMaxLength(20).HasConversion<string>();
+            entity.Property(e => e.Status).HasMaxLength(10).HasConversion<string>();
+            entity.HasIndex(e => e.Status);
         });
     }
 }

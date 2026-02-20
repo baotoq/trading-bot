@@ -9,26 +9,27 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** Phase 26 — Portfolio Domain Foundation
+**Current focus:** Phase 27 — Price Feeds & Market Data
 
 ## Current Position
 
-Phase: 26 of 29 (Portfolio Domain Foundation)
+Phase: 27 of 29 (Price Feeds & Market Data)
 Plan: 0 of TBD
 Status: Ready to plan
-Last activity: 2026-02-20 — v4.0 roadmap created (4 phases, 20 requirements mapped)
+Last activity: 2026-02-20 — Phase 26 complete (3 plans, 7 entities, 14 new tests)
 
-Progress: [░░░░░░░░░░] 0% (v4.0)
+Progress: [##░░░░░░░░] 25% (v4.0)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (across v1.0-v3.0)
+- Total plans completed: 59 (across v1.0-v4.0)
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (11 plans)
+- v4.0: in progress (3 plans so far)
 
 **By Milestone:**
 
@@ -39,7 +40,7 @@ Progress: [░░░░░░░░░░] 0% (v4.0)
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
 | v3.0 | 20-25 | 11 | Complete |
-| v4.0 | 26-29 | TBD | Not started |
+| v4.0 | 26-29 | 3/TBD | Phase 26 complete |
 
 ## Accumulated Context
 
@@ -54,6 +55,13 @@ All decisions logged in PROJECT.md Key Decisions table.
 - DCA domain has zero knowledge of portfolio domain — connected via PurchaseCompletedEvent only
 - API always returns both valueUsd and valueVnd; currency toggle is pure Flutter display logic
 - VN ETF prices: best-effort only, 48h Redis TTL, staleness indicator always shown
+
+**Phase 26 decisions:**
+- VndAmount allows zero (non-negative) for zero-fee scenarios
+- AssetTransaction.Create is internal to enforce PortfolioAsset aggregate boundary
+- InterestCalculator uses 365-day year convention (Vietnamese banking standard)
+- Compound interest test tolerance: 500 VND on 10M deposits (double-precision variance from Math.Pow)
+- VND Principal: numeric(18,0); Crypto Quantity: numeric(18,8); Fee: numeric(18,2); Rate: numeric(8,6)
 
 **v3.0 Flutter conventions carried forward:**
 - Dark-only theme, NavigationBar (Material 3) + CupertinoIcons, StatefulShellRoute
@@ -76,8 +84,8 @@ v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: v4.0 roadmap created — ready to plan Phase 26
-Next step: `/gsd:plan-phase 26`
+Stopped at: Phase 26 complete — all 3 plans executed (domain models, interest calculator, EF Core persistence)
+Next step: `/gsd:research-phase 27` (verify VNDirect API before planning)
 
 ---
-*State updated: 2026-02-20 after v4.0 roadmap creation*
+*State updated: 2026-02-20 after Phase 26 completion*
