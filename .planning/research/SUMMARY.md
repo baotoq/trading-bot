@@ -1,250 +1,248 @@
 # Project Research Summary
 
-**Project:** BTC Smart DCA Bot — Flutter iOS App
-**Domain:** Native iOS mobile dashboard + push notifications for single-user Bitcoin DCA trading bot
+**Project:** BTC Smart DCA Bot — v4.0 Multi-Asset Portfolio Tracker
+**Domain:** Personal portfolio tracker (crypto, VN30 ETF, fixed deposits) integrated into existing .NET 10 / Flutter DCA bot
 **Researched:** 2026-02-20
-**Confidence:** HIGH
+**Confidence:** HIGH for crypto/architecture; MEDIUM for VN stock price APIs
 
 ## Executive Summary
 
-This milestone adds a native iOS Flutter app to the existing .NET 10.0 BTC DCA trading bot. The app replaces the Nuxt 4 web dashboard as the primary monitoring interface, providing portfolio visibility, purchase history, bot health monitoring, and — critically — push notifications delivered via Firebase Cloud Messaging and Apple Push Notification service (APNs). The backend API surface is already complete and compatible; the primary development effort is Flutter-side UI plus two targeted backend additions: FCM token registration endpoints and a `FcmNotificationService` that hooks into the existing purchase event pipeline alongside the current Telegram notifier.
+The v4.0 milestone extends the existing BTC DCA bot into a unified personal portfolio tracker covering crypto, Vietnamese ETFs, and fixed deposits — all displayed in both VND and USD. The recommended approach requires zero new NuGet packages and zero new Flutter packages: all required capabilities (price fetching, currency conversion, chart rendering, number formatting) are covered by extending existing infrastructure with three new HTTP client registrations and one EF Core migration. The architecture stays entirely within `TradingBot.ApiService` by adding a new portfolio domain alongside the existing DCA domain, connected only via domain events — the DCA domain has zero awareness of the portfolio domain.
 
-The recommended approach is: Flutter + Riverpod 3.x + Dio + fl_chart + firebase_messaging, with the iOS Keychain via `flutter_secure_storage` handling the API key. All core packages are verified against pub.dev as of 2026-02-20. The feature set maps to four tabs — Portfolio, History, Config, and Backtest — mirroring the web dashboard sections with mobile-native adaptations (cards instead of tables, bottom sheets instead of sidebars, 30s polling instead of 10s). Push notifications cover two categories: transactional (buy executed, buy failed, high-multiplier triggers) and operational (missed buy health alerts). Telegram remains as the fallback notification channel and must not be removed until the iOS app is confirmed stable in production.
+The critical design constraint is that crypto (BTC/ETH), VN30 ETFs, and fixed deposits are fundamentally different asset classes that must not be unified into a single model. Crypto assets are market-priced in USD with buy/sell transactions. VN30 ETFs are market-priced in VND with end-of-day close prices from an unofficial API. Fixed deposits are not market-priced at all — their value is a deterministic interest calculation. This heterogeneity drives two separate aggregate roots (`PortfolioAsset` for tradeable assets, `FixedDeposit` for term deposits) merged only at the read/DTO layer by `PortfolioCalculationService`.
 
-The primary risks are: (1) API key security — the key must be stored in iOS Keychain via `flutter_secure_storage`, never in `--dart-define` or source code; (2) APNs configuration — use `.p8` auth key exclusively, never the deprecated `.p12` certificate (confirmed FlutterFire bug with `.p12`); (3) FCM token lifecycle — tokens must be stored in PostgreSQL and refreshed on every app launch, not hardcoded; (4) testing push notifications requires a real physical iOS device, not a simulator. Flutter Web findings are retained in the research files as future-consideration context but are explicitly out of scope for this milestone — the iOS native path avoids all CanvasKit, Safari, and web push pitfalls entirely.
+The primary risk is VN stock price data fragility: there is no official, free, production-grade JSON API for HOSE-listed ETFs. The VNDirect finfo API (reverse-engineered from the vnstock Python community) works without authentication but carries no SLA. The mitigation is mandatory: treat VN prices as best-effort end-of-day data with Redis caching (48-hour TTL), always show a staleness indicator, and degrade gracefully to cached prices rather than erroring. The second major risk is multi-currency P&L correctness — cost basis and current value must be compared in the same native currency, with USD display being a conversion-only concern.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The Flutter stack is anchored on Riverpod 3.x for state management (2026 community standard, compile-time safety, no BuildContext dependency), Dio 5.x for HTTP (global interceptor for `x-api-key` injection), fl_chart 1.1.1 for line charts with purchase markers, and `flutter_secure_storage` 10.0.0 for iOS Keychain. Navigation uses go_router 17.1.0 (official Flutter team package). All versions verified from pub.dev on 2026-02-20.
-
-For push notifications, `firebase_messaging` 16.1.1 mediates APNs on iOS. `flutter_local_notifications` 20.1.0 handles foreground notification display (FCM suppresses the system banner when the app is in the foreground — this must be handled manually). On the backend, `FirebaseAdmin` NuGet 3.4.0 sends FCM messages from .NET 10.0 via the FCM HTTP v1 API. JSON serialization uses `json_annotation` + `json_serializable` with `build_runner` codegen. The `intl` package handles BTC/USD number formatting.
+The stack requires no new dependencies. Existing infrastructure handles all v4.0 needs: the CoinGecko HTTP client is extended for multi-coin current prices; a new typed `HttpClient` registration wraps the VNDirect finfo API for VN ETF prices; a second typed `HttpClient` calls the key-free `open.er-api.com` for USD/VND rates. All three benefit from `Microsoft.Extensions.Http.Resilience` already in the project. Redis provides price caching with type-specific TTLs. Separate aggregate tables (not TPH) are used for portfolio assets and fixed deposits — TPH would introduce nullable columns for FD-specific fields on every asset row, which is the anti-pattern the architecture research explicitly identifies.
 
 **Core technologies:**
-- `flutter_riverpod` ^3.2.1: State management — compile-time safety, async providers, no BuildContext leaks
-- `dio` ^5.9.1: HTTP client — single global interceptor injects `x-api-key` on every request
-- `firebase_messaging` ^16.1.1: FCM push notifications — mediates APNs for iOS, Flutter Favorite
-- `flutter_local_notifications` ^20.1.0: Foreground notification display — FCM suppresses banners on iOS foreground
-- `fl_chart` ^1.1.1: Line chart with scatter purchase markers, 6 timeframes, touch tooltips (MIT license)
-- `flutter_secure_storage` ^10.0.0: iOS Keychain storage for the `x-api-key` API key
-- `go_router` ^17.1.0: URL-based navigation, deep linking from notification taps to specific screens
-- `FirebaseAdmin` (NuGet) 3.4.0: .NET backend FCM sender, fully compatible with .NET 10.0
-
-**Backend additions required (minimal scope):**
-- `POST /api/devices/register` + `DELETE /api/devices/{token}` — FCM token lifecycle endpoints, protected by existing `ApiKeyEndpointFilter`
-- `DeviceToken` entity + EF Core migration — follows existing `AuditedEntity` + UUIDv7 pattern
-- `FcmNotificationService` — hooks into `PurchaseCompletedHandler` MediatR handler (parallel to existing `TelegramNotificationService`)
-
-**What does NOT change:** All existing dashboard API endpoints are fully compatible with Flutter as-is. No changes to `GET /api/dashboard/portfolio`, `purchases`, `status`, `chart`, `config`, or any backtest endpoint.
+- **CoinGecko `/simple/price` extension** — multi-coin current prices in USD; 30 calls/min free tier; already integrated for historical data; extend with a new method on the existing `CoinGeckoClient`
+- **VNDirect finfo API (named HttpClient)** — VN30 ETF end-of-day prices in VND; unofficial, no auth required; must use with resilience handler and stale-value fallback; MEDIUM confidence
+- **open.er-api.com (typed HttpClient)** — USD/VND exchange rate; key-free; VND confirmed in live response (25,905.86 VND/USD on 2026-02-20); cache 12 hours in Redis
+- **EF Core separate tables** — two new aggregate roots with separate DB tables; three new DbSets in `TradingBotDbContext`; no new NuGet package
+- **Redis (existing)** — price cache with type-specific TTLs (5-min crypto, 60-min VN ETF, 12-hour exchange rate)
+- **`intl` Flutter package (already present)** — `NumberFormat.currency(locale: 'vi_VN', symbol: '₫', decimalDigits: 0)` for VND formatting
+- **`fl_chart` Flutter package (already present)** — `PieChartData` for asset allocation chart; `LineChart` for portfolio value over time
 
 ### Expected Features
 
-Features are scoped to iOS only. Flutter Web findings are retained in FEATURES.md as future considerations.
+**Must have (P1 — v4.0 launch):**
+- Total portfolio value with VND/USD toggle (persisted as Riverpod `StateProvider<Currency>` in `core/providers/`)
+- Per-asset holdings view: quantity, current price, total value, P&L (absolute + percent) grouped by asset type
+- Unrealized P&L per asset — weighted average cost basis; computed at request time from cached prices, never persisted
+- Manual transaction entry for crypto and ETF assets (Buy/Sell) with date, quantity, price per unit, currency
+- Fixed deposit entry: principal (VND), annual rate, start date, maturity date, compounding frequency (None/Monthly/Quarterly/SemiAnnual/Annual)
+- Auto-import DCA bot purchases into BTC portfolio position — idempotent via `source_reference_id` = `PurchaseId`
+- Asset allocation pie chart by asset type (Crypto / ETF / Fixed Deposit) using existing `fl_chart` `PieChartData`
+- Auto-fetch crypto prices via CoinGecko (existing integration extended for multi-coin)
+- USD/VND exchange rate daily fetch and cache (open.er-api.com, 12h Redis TTL)
+- Transaction history list filterable by asset, type, and date range
 
-**Must have — P1 (Nuxt parity on iOS):**
-- Portfolio Overview: BTC accumulated, cost basis, unrealized P&L, live price (30s polling, not 10s — battery)
-- Price Chart: 6 timeframes (7D/1M/3M/6M/1Y/All), fl_chart line chart, scatter purchase markers by tier, avg cost dashed line, touch tooltip, pinch-to-zoom
-- Purchase History: infinite scroll, cursor pagination via `infinite_scroll_pagination`, card design (not table rows)
-- Bot Status + Next Buy Countdown: health badge always visible, client-side timer from `nextBuyTime`
-- Pull-to-Refresh: `RefreshIndicator` on all data screens — standard mobile gesture
-- API Key Auth: `flutter_secure_storage` (Keychain) + first-run setup screen for base URL + key entry
-- Dark Mode: `ThemeData` brightness, charts respect theme
-- Error/Offline Handling: cached data with stale indicator, snackbars for transient failures
+**Should have (P2 — v4.x):**
+- VN30 ETF price auto-fetch (VNDirect finfo API — requires implementation-phase API schema verification)
+- Portfolio value chart over time (on-demand computation with Redis cache + invalidation on transaction save)
+- Per-asset performance chart (drill-down to individual asset history)
+- BTC portfolio quantity reconciliation vs. Hyperliquid spot balance (UI warning on mismatch)
+- Fixed deposit maturity alerts via push notification
 
-**Should have — P2 (mobile enhancements, ship after parity):**
-- Push Notification: Buy Executed — FCM, includes cost/price/BTC amount/multiplier tier in body
-- Push Notification: Bot Health Alert — triggers when no purchase in >36h
-- Push Notification: Buy Failed — critical alert from DCA engine catch block
-- Config Edit Form: full-screen form with numeric keyboards, `TimePickerDialog` for schedule, tier list add/remove, `Slider` for cap, inline server validation errors
-- Haptic Feedback: `HapticFeedback.lightImpact()` on refresh, `mediumImpact()` on config save
-- Bottom Sheet Filters on Purchase History: date range + tier filter chips
-- Last Buy Detail Card on Home Screen: expandable card from `GET /api/dashboard/status` fields
+**Defer (v5+):**
+- Manual price entry as ETF price fallback when API is unavailable
+- Historical VN ETF price chart (requires separate data ingestion pipeline)
+- Additional crypto assets beyond BTC (multi-coin CoinGecko call already architected; coin ID search endpoint needed)
+- CSV export for tax advisor use
 
-**Defer — P3/v2+:**
-- Backtest Run from Mobile: complex form + 30-45s async response + fl_chart equity curve
-- Parameter Sweep Results as Card List (mobile-adapted ranked cards)
-- Notification History Log (sqflite local storage)
-- Home Screen Widget (native Swift, significant platform effort)
-
-**Confirmed anti-features (do not build):**
-- Real-time WebSocket price feed (battery drain; 30s polling adequate for once-daily DCA bot)
-- Candlestick charts (DCA does not use OHLC; line chart fully sufficient)
-- Price alerts / threshold notifications (undermines DCA discipline, encourages market timing)
-- Manual Buy Button (defeats DCA automation — the automation IS the feature)
-- Background price polling when app is closed (iOS background fetch limits; FCM push is the correct pattern)
-
-**Push notification scenarios (scoped to what makes sense for a single-user daily DCA bot):**
-- Category 1 — Transactional (always deliver): Buy Executed, Buy Failed, High-Multiplier Triggered (>=2x)
-- Category 2 — Operational (informational): Missed Buy Alert (>36h), Bot Recovered, Data Ingestion Complete
-- Category 3 — Excluded: Price alerts, weekly summary (Telegram already sends), "next buy in 30 min" reminders
+**Anti-features to exclude:**
+- Real-time price streaming via WebSocket (VN market closes at 14:45 ICT; crypto polling every 5 minutes adequate; battery and complexity concern)
+- Broker/exchange API sync (Vietnamese brokers require in-person auth registration; out of scope)
+- Tax reporting / capital gains calculations (regulatory risk; show P&L clearly for user to provide to tax advisor)
+- Portfolio rebalancing suggestions (financial advice, regulatory licensing required)
+- FIFO/LIFO cost basis (weighted average is sufficient and far simpler for DCA accumulation style)
+- Historical VND/USD rate at transaction time (historical rate APIs require paid tier; display at today's rate with clear label is correct scope)
 
 ### Architecture Approach
 
-The architecture is a feature-first Flutter project consuming the existing .NET API via Dio, with Riverpod providers as the state layer. Each feature follows repository + provider + UI separation: repositories make Dio calls and return typed DTOs (json_serializable), providers expose `AsyncValue<T>` to UI, screens use `ConsumerWidget` to react to async state. A single `ApiKeyInterceptor` on the Dio instance reads from `flutter_secure_storage` and injects `x-api-key` on every outbound request, and redirects to the setup screen on 401/403 responses.
-
-On the backend, `FcmNotificationService` integrates at the `PurchaseCompletedHandler` MediatR handler level — the same integration point as `TelegramNotificationService` — meaning the existing event pipeline (domain event → outbox → Dapr → MediatR) requires zero structural changes. Invalid FCM tokens are cleaned up automatically on each send by inspecting `MessagingErrorCode.Unregistered` in the multicast response. The `DeviceToken` table follows the existing `AuditedEntity` + UUIDv7 conventions.
+The portfolio domain sits alongside the existing DCA domain within a single `TradingBot.ApiService`, connected only via the `PurchaseCompletedEvent` domain event already flowing through Dapr pub-sub. A new `PurchaseCompletedPortfolioHandler` consumes this event to auto-import DCA fills — the DCA domain has zero knowledge of the portfolio domain. All price fetching is parallelised via `Task.WhenAll` in `PriceProviderFactory`, with per-provider graceful degradation (each provider returns a Redis-cached stale value on HTTP failure rather than propagating errors). The Flutter side adds a single `currency_provider.dart` Riverpod `StateProvider` in `core/providers/` — a global toggle persisting VND/USD preference across all screens. The API always returns both `valueUsd` and `valueVnd` in every response; currency toggling is pure Flutter display logic with no re-fetch.
 
 **Major components:**
-1. `core/api/` — Dio singleton + `ApiKeyInterceptor` (reads Keychain, injects header, handles 401/403 redirect to setup)
-2. `core/notifications/` — `FcmService` (permission request, token retrieval, `POST /api/devices/register`, `onTokenRefresh` listener, `onMessage` → `flutter_local_notifications` foreground display)
-3. `core/router/` — `app_router.dart` with redirect guard (no key → `/setup`) + deep link routes from notification taps (`/purchases/:id`)
-4. `features/{portfolio|purchases|status|config}/` — Repository + Riverpod provider + UI screen per feature, following official Flutter architecture recommendations
-5. `.NET FcmNotificationService` — Sends FCM via FirebaseAdmin `SendEachForMulticastAsync`, cleans stale tokens on `Unregistered` errors
-6. `.NET DeviceEndpoints` — `POST /api/devices/register` (upsert LastSeenAt) + `DELETE /api/devices/{token}`, protected by existing `ApiKeyEndpointFilter`
+1. **`PortfolioAsset` aggregate root** — owns `AssetTransaction` child entities; maintains weighted average cost basis computed on every `AddTransaction` call; stores `NativeCurrency` ("USD" or "VND") and optional `CoinGeckoId`
+2. **`FixedDeposit` aggregate root** — separate table; `AccruedValueVnd(DateOnly asOf)` is a computed method (never persisted), calculated as `PrincipalVnd * (1 + r/n)^(n*t)` or simple interest for non-cumulative; has explicit `CompoundingFrequency` enum field
+3. **`PriceProviderFactory`** — dispatches to `ICryptoPriceProvider`, `IVnStockPriceProvider`, `IExchangeRateProvider` in parallel; each provider checks Redis via `PriceCacheService` before making HTTP call
+4. **`PortfolioCalculationService`** — pure service combining prices + transactions to compute per-asset P&L in native currency, allocation %, and total value in both USD and VND
+5. **`PurchaseCompletedPortfolioHandler`** — idempotent MediatR `INotificationHandler`; upserts BTC `PortfolioAsset`; adds `AssetTransaction` with `ExternalReference = purchaseId.ToString()`; skips dry-run purchases
+6. **`currency_provider.dart`** — Riverpod global `StateProvider<Currency>`; currency toggle is pure UI concern; no API re-fetch on toggle
 
-**Data flow (end-to-end push notification):**
-```
-DCA Scheduler fires daily
-→ DcaExecutionService places order on Hyperliquid
-→ Purchase entity created, domain event raised
-→ DomainEventOutboxInterceptor saves OutboxMessage
-→ OutboxMessageProcessor → Dapr → PurchaseCompletedHandler (MediatR)
-  ├─ TelegramNotificationService.SendMessageAsync() [unchanged]
-  └─ FcmNotificationService.SendPurchaseNotificationAsync() [NEW]
-    → FirebaseAdmin SDK → FCM HTTP v1 API → APNs → iOS device
-→ Flutter receives FCM message
-  ├─ App in foreground: flutter_local_notifications shows banner
-  ├─ App in background: FCM shows system notification
-  └─ App terminated: FCM shows system notification; tap cold-starts app
-→ Notification tap → go_router navigates to /purchases
-```
+**Build order (hard dependency chain):**
+1. Domain models + EF migration (all else depends on this)
+2. Price provider infrastructure (independently testable)
+3. Portfolio calculation service + read endpoints (unblocks Flutter development)
+4. DCA auto-import handler + historical migration (parallelizable with step 3)
+5. Manual transaction entry endpoints
+6. Flutter portfolio feature module (built last — after API shape is stable)
 
 ### Critical Pitfalls
 
-1. **API Key in Flutter Binary** — Never use `--dart-define`, `flutter_dotenv`, or hardcoded constants. These are recoverable from the compiled binary with tools like `strings` or `jadx`. Use `flutter_secure_storage` (iOS Keychain) entered by user on first launch. Enable `flutter build --obfuscate` on release builds. Must be addressed in Phase 1 — if the HTTP client is built incorrectly from the start, the pattern propagates everywhere.
+1. **Currency conversion timing corrupts P&L** — Multi-currency P&L is only meaningful when cost basis and current value use the same currency snapshot. Store `cost_native`, `cost_usd`, and `exchange_rate_at_transaction` at write time. Compute P&L in the asset's native currency only; USD display is conversion-only at read time. Never recompute historical cost basis using today's exchange rate. Must be resolved in the data model phase — retrofitting requires re-entering all transaction history.
 
-2. **APNs `.p12` Certificate vs `.p8` Auth Key** — Firebase FCM configured with a `.p12` certificate has a confirmed FlutterFire bug (issue #10920) causing silent iOS push failure. Apple deprecated `.p12` authentication in 2025. Always upload a `.p8` APNs Auth Key in Firebase Console (does not expire, works across dev + prod environments). Address before any Flutter notification code is written.
+2. **DCA auto-import duplicates** — Store `source_type` (enum: `DcaBot | Manual`) and `source_reference_id` on every `PortfolioTransaction`. Add a unique index on `(asset_id, source_type, source_reference_id)`. Auto-import uses `INSERT ... ON CONFLICT DO NOTHING`. Must be idempotent before the first import run executes. Lock auto-imported transactions as read-only in the UI (not editable/deletable by the user).
 
-3. **FCM Token Not Refreshed on Rotation** — FCM tokens rotate on app reinstall, OS updates, and after 270+ days of inactivity. Backend must upsert on every app launch (not insert once). Flutter must listen to `FirebaseMessaging.instance.onTokenRefresh` stream and re-register. Backend must inspect `MessagingErrorCode.Unregistered` on each send and delete stale tokens. Address in push notification backend phase before FCM send logic.
+3. **VN price API fragility** — VNDirect finfo API is unofficial with no SLA; breaks silently. Mitigation: Redis cache with 48-hour TTL; "price as of [date]" staleness indicator on all VN asset prices; graceful degradation returning last cached price on HTTP failure; never attempt intraday fetches. Accept end-of-day-only as a product decision, not a limitation to hide. Must be designed into `IVnStockPriceProvider` contract from day one.
 
-4. **Simulator Cannot Test Push Notifications** — APNs does not work on iOS Simulator at all. All push notification verification requires a real physical iOS device. For automated tests, mock `FcmService` with a test double. This is a "looks done but isn't" trap if only tested on simulator.
+4. **Fixed deposit compounding frequency mismatch** — Vietnamese banks use simple interest for non-cumulative FDs and compound interest (monthly/quarterly) for cumulative FDs. Model must have `CompoundingFrequency` enum (`None | Monthly | Quarterly | SemiAnnual | Annual`). Formula differs materially: `None` uses `P * r * (days/365)`, compound uses `P * (1 + r/n)^(n*t)`. Must be modelled correctly at schema design time.
 
-5. **FCM Foreground Notification Not Displayed Automatically** — FCM does not auto-display a system notification banner when the iOS app is in the foreground. `flutter_local_notifications` must be used to show the banner manually from the `FirebaseMessaging.onMessage` stream listener. Missing this means notifications only work when the app is not open, which fails the most common case (user has app open at time of daily buy).
+5. **Vogen `ConfigureConventions()` omission** — Every new Vogen `[ValueObject]` ID type (`PortfolioAssetId`, `AssetTransactionId`, `FixedDepositId`) requires explicit registration in `TradingBotDbContext.ConfigureConventions()`. Missing registration causes EF Core to silently use raw `Guid`, producing runtime conversion errors. Write a round-trip EF test for each new entity type — catches this at test time, not in production.
 
-**Web-specific pitfalls (noted for future reference, do not affect iOS scope):**
-- CanvasKit memory leak crashing iOS Safari (Flutter Web only, active confirmed bug as of 2026-02-20 in Flutter 3.27.4-3.38.1)
-- 1.5MB CanvasKit cold load on web before any pixels render
-- Safari web push requiring PWA installation to home screen (iOS 16.4+ only)
+6. **Mixed quantity/precision for multi-currency amounts** — Do not reuse `UsdAmount` for VND values or `Quantity` (8 decimal places) for ETF shares (always whole integers). Introduce `VndAmount` with `HasPrecision(18, 0)` (VND has no subunit in practice) and use `int` for ETF share quantities. Must be resolved at schema design time.
+
+7. **Portfolio chart performance trap** — Chart endpoint without a cache degrades to O(days × assets) query; becomes noticeable after 90 days of history. Solution: compute on demand and cache in Redis with 25-hour TTL; invalidate cache when a transaction with a date >= cached start is saved. Must be designed before building the chart endpoint, not added when performance issues appear.
 
 ## Implications for Roadmap
 
-Based on combined research, the recommended phase structure follows a dependency-driven order: foundational infrastructure first (API security must be correct from day one), then read-only screens (prove the app works), then write operations (config edit after read screens validated), then push notifications (requires both Flutter + backend readiness and physical device testing), and finally the optional backtest feature. All phases build on the preceding ones with no rework required.
+The portfolio tracker has hard dependency ordering driven by the data model: 4 of 7 critical pitfalls must be resolved at schema design time and cannot be retrofitted without requiring users to re-enter financial history. The recommended phase structure flows strictly from that constraint.
 
-### Phase 1: Flutter Project Setup + Core Infrastructure
-**Rationale:** All subsequent phases depend on secure API communication. The API key security pitfall must be resolved here — if the HTTP client is built incorrectly, the mistake is copied into every feature. The Dio interceptor + secure storage pattern is the project's equivalent of setting up CI: foundational, not glamorous, must be right.
-**Delivers:** Flutter project scaffold (`TradingBot.Mobile/`), Dio + `ApiKeyInterceptor`, `flutter_secure_storage` wrapper for Keychain, first-run setup screen (API key + base URL entry), go_router with redirect guard, app theme (light/dark), Riverpod `ProviderScope`, `json_serializable` codegen setup, `build_runner` configured.
-**Addresses:** API key auth (P1), Dark Mode (P1), first-run UX, project structure for all features to follow.
-**Avoids:** Pitfall 1 (API key in binary) — establishes `flutter_secure_storage` as the mandatory pattern before any feature copies the wrong approach.
-**Research flag:** Standard patterns, skip `/gsd:research-phase`. Dio interceptors, flutter_secure_storage, go_router redirect guards all have official documentation and pub.dev examples.
+### Phase 1: Portfolio Domain Foundation (Data Model + Migration)
 
-### Phase 2: Portfolio + Status Screens (Read-Only Core)
-**Rationale:** Highest-value, lowest-complexity screens. Portfolio overview is the primary reason to open the app. Status + countdown establishes trust that the bot is running. Both consume existing API endpoints with zero backend changes. Builds confidence in the Flutter/Riverpod pattern before tackling more complex screens like the price chart.
-**Delivers:** Portfolio Overview screen (stats cards for total BTC, cost basis, P&L, live price at 30s polling, green/red color on P&L), Bot Status health badge (always visible), Next Buy Countdown (client-side timer from `nextBuyTime`), Last Buy Detail Card (expandable, data from `GET /api/dashboard/status`), Pull-to-Refresh on all screens, offline/stale state handling, error snackbars.
-**Addresses:** Portfolio Overview (P1), Bot Status + Countdown (P1), Pull-to-Refresh (P1), Last Buy Detail Card (P2).
-**Uses:** `flutter_riverpod` + `dio` + `intl` (BTC formatting to 8 decimal places, USD formatting).
-**Research flag:** Standard patterns, skip `/gsd:research-phase`. Riverpod `FutureProvider` + `ConsumerWidget` is well-documented; `when(data:, loading:, error:)` is the standard pattern.
+**Rationale:** Every other component depends on the database schema. Pitfalls #1, #4, #5, and #6 must be resolved here — they cannot be retrofitted after transaction data has been entered. This is the highest-risk design phase despite being the lowest in external API complexity.
 
-### Phase 3: Price Chart + Purchase History
-**Rationale:** fl_chart has a learning curve for scatter overlay + touch interaction. Cursor-based infinite scroll pagination is moderately complex. Grouping these two screens together is efficient because they share the "data list from existing API" pattern and both need `fl_chart` as a dependency. Chart depends on the API client established in Phase 1.
-**Delivers:** Price Chart (6 timeframes, fl_chart line chart, scatter purchase markers colored by multiplier tier, avg cost dashed line overlay, touch tooltip with price/date, pinch-to-zoom via `InteractiveViewer`), Purchase History (infinite scroll via `infinite_scroll_pagination`, cursor pagination matching existing `.NET` `GET /api/dashboard/purchases`, card design showing date/cost/BTC/tier/drop%, bottom sheet filters for date range + tier, pull-to-refresh).
-**Addresses:** Price Chart (P1), Average Cost Basis Line (P1), Purchase History (P1), Pinch-to-Zoom (P2), Bottom Sheet Filters (P2).
-**Uses:** `fl_chart` ^1.1.1, `infinite_scroll_pagination` (add to pubspec — v5.1.1, Flutter Favorite).
-**Research flag:** Verify fl_chart scatter + line overlay before implementation. The combination of `LineChartData` + `ScatterChartData` on a single chart widget is not the default usage pattern. Confirm the API supports this before committing to the approach; if not, fall back to vertical line markers which are simpler.
+**Delivers:** `PortfolioAsset` and `FixedDeposit` aggregate roots; `AssetTransaction` child entity; Vogen typed IDs (`PortfolioAssetId`, `AssetTransactionId`, `FixedDepositId`); `AssetType` and `TransactionType` enums; `CompoundingFrequency` enum; `VndAmount` value object; `TradingBotDbContext` extensions with `ConfigureConventions()` entries; EF Core migration; round-trip EF tests for all new entities
 
-### Phase 4: Configuration Screen (Read + Edit)
-**Rationale:** Config reading is trivial (existing `GET /api/config`). Config editing (`PUT /api/config`) is more complex due to multiplier tier list management (reorderable tiles, add/remove, validation) and inline server-side error display. Placed after read-only screens are stable — configuration changes affect live bot behavior and should only be accessible once the app has been validated working. Haptic feedback is naturally included here as it applies to save actions.
-**Delivers:** Config View screen (all DCA params visible: base amount, schedule, tiers, bear market settings), Config Edit Form (numeric keyboards with formatters, `TimePickerDialog` for `DailyBuyHour`/`DailyBuyMinute`, multiplier tier list with add/remove/reorder, `Slider` for `MaxMultiplierCap`, inline server validation error display matching `DcaOptionsValidator` rules), Haptic Feedback on save (`mediumImpact()`), Haptic on pull-to-refresh (`lightImpact()`).
-**Addresses:** DCA Config View (P1), Config Edit Form (P2), Haptic Feedback (P2).
-**Uses:** `dio` PUT to existing `PUT /api/config` endpoint (no backend changes), form validation logic mirroring `DcaOptionsValidator`.
-**Research flag:** Standard patterns, skip `/gsd:research-phase`. Flutter `TextFormField` with formatters and `PUT` endpoint validation are documented patterns. `DcaOptionsValidator` rules are already implemented in the backend.
+**Addresses:** Foundation for all P1 features (per-asset holdings, fixed deposit entry, transaction history)
 
-### Phase 5: Push Notifications (FCM + APNs Integration)
-**Rationale:** Highest-complexity phase — requires coordinated changes to both Flutter and the .NET backend, Apple Developer account prerequisites, Firebase project setup, and physical device testing. Must come after the app has stable screens to deep-link into (Phases 2-3). APNs `.p8` configuration is a strict prerequisite before any Flutter notification code is written. Token lifecycle management on the backend must be built before the Flutter token registration flow.
-**Delivers (backend):** `DeviceToken` entity + EF Core migration (`device_tokens` table with unique index on Token), `POST /api/devices/register` (upsert pattern, updates `LastSeenAt`) + `DELETE /api/devices/{token}` (protected by existing `ApiKeyEndpointFilter`), `FcmNotificationService` (hooks into `PurchaseCompletedHandler`, sends FCM multicast, cleans `Unregistered` tokens on error), `FirebaseAdmin` NuGet 3.4.0 added to `TradingBot.ApiService`, Firebase service account JSON stored via .NET User Secrets.
-**Delivers (Flutter):** Firebase project configuration (`.p8` APNs Auth Key uploaded, `GoogleService-Info.plist` downloaded), Xcode capabilities (Push Notifications + Background Modes → Remote Notifications), `FcmService` class (permission request, token retrieval, `POST /api/devices/register` on launch, `onTokenRefresh` listener, `onMessage` → `flutter_local_notifications` foreground banner), `onMessageOpenedApp` handler → go_router deep link to `/purchases`, notification payload design (title/body includes cost/price/BTC/tier).
-**Addresses:** Push: Buy Executed (P2), Push: Health Alert (P2), Push: Buy Failed (P2), FCM token lifecycle management, Notification tap deep-linking.
-**Avoids:** Pitfall 2 (`.p12` — must use `.p8`), Pitfall 3 (FCM token lifecycle — upsert + cleanup + refresh listener), Pitfall 4 (must test on physical device, not simulator), Pitfall 5 (foreground display — `flutter_local_notifications` required).
-**Research flag:** Needs `/gsd:research-phase` before implementation. APNs `.p8` key upload steps, Firebase console iOS app registration, `GoogleService-Info.plist` placement, Xcode entitlements for Push Notifications capability, `flutter_local_notifications` iOS notification categories with deep-link actions — procedurally dense, many steps that silently fail if done out of order.
+**Avoids:** Pitfall #1 (dual-currency cost basis fields from day one), Pitfall #4 (CompoundingFrequency field required), Pitfall #5 (Vogen convention registration tested), Pitfall #6 (VndAmount and integer ShareQuantity from day one)
 
-### Phase 6: Backtest (Defer, Ship Separately)
-**Rationale:** Backtest run from mobile requires a complex multi-field form (all DCA params as numeric inputs), a potentially long async wait (30-45s for parameter sweeps), and equity curve visualization using fl_chart. It is a P3 feature with no dependency on Phase 5 push notifications. Safe to defer as a follow-on milestone — the existing Nuxt dashboard handles backtest until this phase ships.
-**Delivers:** Backtest Run form (all DCA params as inputs with numeric keyboards), data ingestion status check (`GET /api/backtest/data/status` before allowing run), Backtest Results screen (metric cards + equity curve via `fl_chart`, Smart vs Fixed DCA comparison), Parameter Sweep ranked card list (mobile-adapted alternative to table — rank badge, key KPIs per card).
-**Addresses:** Backtest Run (P3), Parameter Sweep Cards (P3).
-**Uses:** `fl_chart` equity curve (same library as Phase 3), `POST /api/backtest` + `POST /api/backtest/sweep` (no backend changes needed).
-**Research flag:** Standard patterns for form and fl_chart. Dio `receiveTimeout` must be set to 60s minimum for sweep requests (30-45s server-side execution).
+**Research flag:** Standard patterns — EF Core separate table aggregates and Vogen typed IDs are identical to existing `Purchase`, `DcaConfiguration` patterns in the codebase. Skip `/gsd:research-phase`.
+
+### Phase 2: Price Feed Infrastructure
+
+**Rationale:** All read features (portfolio overview, P&L display, currency toggle) depend on price providers. Building this as a standalone layer before read endpoints keeps concerns clean and allows the calculation service to be tested against mocked provider interfaces.
+
+**Delivers:** `ICryptoPriceProvider`, `IVnStockPriceProvider`, `IExchangeRateProvider` interfaces; `CoinGeckoPriceProvider` (extends existing `CoinGeckoClient`); `VnStockClient` (new VNDirect finfo named HttpClient with resilience handler); `ExchangeRateClient` (open.er-api.com typed HttpClient); `PriceCacheService` (Redis TTL wrapper); `PriceProviderFactory` with parallel `Task.WhenAll`
+
+**Addresses:** Auto-fetch crypto prices, VND/USD exchange rate, VN30 ETF price fetch (best-effort with graceful degradation)
+
+**Avoids:** Pitfall #3 (VN API fragility — cache-first, staleness metadata, graceful null return on HTTP failure all designed into provider interface contract from day one)
+
+**Research flag:** NEEDS `/gsd:research-phase` for VNDirect finfo API exact JSON response schema. The endpoint timed out during research; field names for close price are inferred from the vnstock Python library source, not confirmed by live request. All other providers are HIGH confidence and need no additional research.
+
+### Phase 3: Portfolio Read API + DCA Auto-Import
+
+**Rationale:** Once the domain model and price providers exist, the calculation service and read endpoints can be built. Auto-import belongs in this phase because it shares the BTC `PortfolioAsset` entity that the read endpoints expose, and historical purchases must be imported before any P&L display is meaningful for BTC.
+
+**Delivers:** `PortfolioCalculationService`; `GET /api/portfolio/summary`, `GET /api/portfolio/assets`, `GET /api/portfolio/assets/{id}`, `GET /api/portfolio/fixed-deposits` endpoints; `PurchaseCompletedPortfolioHandler` (idempotent, skips dry-runs); one-time historical purchase migration importing existing `Purchases` table into `AssetTransactions` using `PurchaseId` as `ExternalReference`
+
+**Addresses:** Total portfolio value (VND/USD toggle), per-asset P&L, allocation %, auto-import DCA bot purchases (all P1 features visible in the UI)
+
+**Avoids:** Pitfall #2 (auto-import idempotency via `source_reference_id` unique constraint designed before first import run)
+
+**Research flag:** Standard patterns — MediatR event handler and minimal API endpoint patterns match existing `DashboardEndpoints` exactly. Skip `/gsd:research-phase`.
+
+### Phase 4: Manual Transaction Entry + Fixed Deposit API
+
+**Rationale:** Manual entry endpoints build on the stable read API. Fixed deposit CRUD is the simplest phase — no price dependencies, pure calculation. This phase completes all P1 backend work and enables full Flutter portfolio feature development.
+
+**Delivers:** `POST /api/portfolio/assets` (create asset), `POST /api/portfolio/assets/{id}/transactions` (manual Buy/Sell), `DELETE /api/portfolio/assets/{id}/transactions/{txId}` (manual only — rejects auto-imported transactions), `POST /api/portfolio/fixed-deposits`, `GET/PUT/DELETE /api/portfolio/fixed-deposits/{id}`; backend validation rejecting fractional ETF share quantities; backend validation rejecting future transaction dates
+
+**Addresses:** Manual transaction entry (crypto/ETF Buy/Sell), fixed deposit entry with accrued value display
+
+**Avoids:** Pitfall #4 (FD compounding formula validated here against both cumulative and non-cumulative scenarios)
+
+**Research flag:** Standard patterns — CRUD endpoints with `ErrorOr` validation follow existing codebase patterns exactly. Skip `/gsd:research-phase`.
+
+### Phase 5: Flutter Portfolio Feature
+
+**Rationale:** Flutter UI is built last — after all backend endpoints are stable — to prevent repeated UI rework from API shape changes. This phase delivers the user-visible milestone.
+
+**Delivers:** `features/portfolio/` module (portfolio screen, asset cards with P&L color coding, allocation pie chart, add transaction bottom sheet, fixed deposit display with maturity countdown); `currency_provider.dart` global Riverpod `StateProvider<Currency>` in `core/providers/`; navigation shell update (Portfolio tab); VND number formatting with thousands separator via `intl`; "price as of [date]" staleness indicator for VN assets; "converted at today's rate" label for cross-currency display
+
+**Addresses:** Total portfolio value with VND/USD toggle, per-asset holdings view, allocation pie chart, transaction history list, fixed deposit display — all P1 features now visible to the user
+
+**Avoids:** Currency toggle as a re-fetch trigger (API always returns both `valueUsd` and `valueVnd`; toggle is pure display logic); VND amounts without thousands separator (UX pitfall)
+
+**Research flag:** Standard patterns — feature folder structure and Riverpod `StateProvider` are identical to existing `features/home/`, `features/chart/` conventions. Skip `/gsd:research-phase`.
+
+### Phase 6: Portfolio Chart (v4.x — Deferred)
+
+**Rationale:** The portfolio value chart is the highest-complexity P2 feature. It requires both the caching strategy (designed upfront to avoid Pitfall #7) and sufficient transaction history to make the chart meaningful. Deferred until P1 features are validated in production.
+
+**Delivers:** `GET /api/portfolio/chart` with on-demand computation and Redis cache (25-hour TTL); cache invalidation triggered when a transaction with a date >= cached chart start is saved; Flutter chart screen using `fl_chart` `LineChart`; "updated X minutes ago" staleness indicator
+
+**Addresses:** Portfolio value chart over time, per-asset performance chart
+
+**Avoids:** Pitfall #7 (chart performance — compute-on-demand with cache-first and transaction-triggered invalidation designed before endpoint is built)
+
+**Research flag:** NEEDS `/gsd:research-phase` for backdated transaction cache invalidation strategy. The edge case of a user entering a past transaction invalidating all chart snapshots from that date forward requires careful design. Standard chart rendering pattern otherwise.
 
 ### Phase Ordering Rationale
 
-- **Infrastructure before features:** Phase 1 is a strict prerequisite. API key security cannot be retrofitted after feature screens are built — the wrong pattern propagates into every repository and interceptor.
-- **Read before write:** Phases 2-3 (read-only) must be stable before Phase 4 (config edit). Prevents incorrect config changes during validation of core app behavior.
-- **Stable screens before push:** Phase 5 notification taps deep-link into specific screens — those screens must exist and be stable first (Phases 2-3). The backend notification infrastructure (Phase 5) is also a dependency for deep links.
-- **Physical device availability for Phase 5:** APNs does not work on iOS Simulator. Plan for access to a real iPhone during Phase 5 development and testing. This is not optional.
-- **Telegram stays live throughout all phases:** Do not remove or modify the existing `TelegramNotificationService` until Phase 5 push notifications have been confirmed delivering reliably on the physical device over at least one full daily buy cycle.
-- **Backtest is an independent stream:** Phase 6 has no dependency on Phase 5. Could be worked in parallel if resources allow, but Phases 1-5 deliver higher user value in sequence.
-- **Nuxt dashboard as fallback:** Keep the Nuxt dashboard running until the Flutter app is confirmed stable in production. Both can coexist on different ports. Do not deprecate Nuxt prematurely.
+- **Data model first** — 4 of 7 critical pitfalls must be resolved at schema design time; retroactively adding `exchange_rate_at_transaction`, `CompoundingFrequency`, or `VndAmount` after data has been entered requires user re-entry of financial history
+- **Price providers before calculation service** — the `PortfolioCalculationService` depends on provider interfaces; those interfaces must be stable before the service can be built against mocked implementations
+- **Read endpoints before write endpoints** — the portfolio overview validates domain model correctness before mutation surface is exposed to users
+- **DCA auto-import alongside read API** — both share the BTC `PortfolioAsset` entity; historical import must complete before BTC P&L can be displayed correctly
+- **Flutter last** — backend API shape must be stable to avoid repeated UI rework; Flutter has zero dependency risk because it consumes a completed API
+- **Portfolio chart deferred** — complexity is HIGH, user value is P2; ship and validate all P1 features before investing in chart complexity
 
 ### Research Flags
 
-**Needs `/gsd:research-phase` before planning:**
-- **Phase 5 (Push Notifications):** APNs `.p8` key generation + Firebase upload procedure, Firebase iOS app registration steps, Xcode Push Notifications + Background Modes entitlements setup, `flutter_local_notifications` notification categories with iOS actionable buttons, FCM token registration endpoint design for token rotation edge cases. This phase has the highest surface area of procedural configuration steps that must be done in a specific order.
-- **Phase 3 (fl_chart scatter + line overlay):** Verify that `fl_chart` 1.1.1 supports rendering scatter purchase markers overlaid on a line price chart within a single chart widget. If the API does not cleanly support this combination, the fallback approach (vertical dashed lines for purchase markers) must be chosen before implementation begins.
+**Needs `/gsd:research-phase` during planning:**
+- **Phase 2 (Price Feed):** VNDirect finfo API exact JSON response schema requires live request verification during implementation. Endpoint timed out during research; close price field names inferred from vnstock Python source.
+- **Phase 6 (Portfolio Chart):** Backdated transaction cache invalidation strategy needs careful design to ensure correctness without full recomputation on every chart load.
 
-**Standard patterns, skip `/gsd:research-phase`:**
-- **Phase 1:** Flutter project setup, Dio interceptors, `flutter_secure_storage`, go_router redirect guards — official documentation and pub.dev examples are comprehensive.
-- **Phase 2:** Riverpod `FutureProvider` + `ConsumerWidget` + `AsyncValue.when()` — the canonical Riverpod 3.x pattern, documented on riverpod.dev.
-- **Phase 4:** Flutter `TextFormField` + `PUT` endpoint validation — standard Flutter form patterns.
-- **Phase 6:** Backtest form is a straightforward Flutter form; fl_chart equity curve is the same library as Phase 3, just a different chart type.
+**Standard patterns (skip `/gsd:research-phase`):**
+- **Phase 1 (Domain Model):** EF Core aggregate patterns, Vogen typed IDs — identical conventions to existing `Purchase` and `DcaConfiguration` entities
+- **Phase 3 (Read API + Auto-Import):** MediatR `INotificationHandler`, minimal API endpoint groups — exact same pattern as existing `DashboardEndpoints`
+- **Phase 4 (Manual Entry + FD API):** CRUD endpoints with `ErrorOr` validation — identical pattern to existing endpoints
+- **Phase 5 (Flutter):** Riverpod feature module — identical folder structure to `features/home/`, `features/chart/`
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All package versions verified directly from pub.dev and nuget.org on 2026-02-20. No inferred or estimated versions. flutter_riverpod 3.2.1 published 16 days prior. FirebaseAdmin 3.4.0 verified .NET 10 compatible. |
-| Features | HIGH | Feature set derived from the existing Nuxt dashboard API surface (no guessing about endpoints). Mobile adaptations follow established finance app UX patterns (Robinhood, Coinbase, Delta, 3Commas). Anti-features validated against DCA discipline principles. |
-| Architecture | HIGH | Repository + Riverpod + Dio interceptor is the Flutter official recommended architecture per docs.flutter.dev/app-architecture. FCM integration patterns from official FlutterFire docs. Backend FcmNotificationService hooks into the exact same MediatR integration point as the existing Telegram service. |
-| Pitfalls | HIGH | APNs `.p12` bug verified against FlutterFire GitHub issue #10920 (confirmed). CanvasKit iOS Safari memory leak verified against Flutter GitHub issue #178524 (confirmed active, Flutter 3.27.4-3.38.1). FCM token lifecycle best practices from official Firebase docs. iOS Simulator APNs limitation is documented engineering fact. |
+| Stack | HIGH | No new packages required. CoinGecko and open.er-api.com verified against official docs and live API calls. VNDirect finfo API is MEDIUM due to unofficial, undocumented status. |
+| Features | HIGH | P1 feature set well-defined from competitor analysis (Delta, Kubera, CoinGecko Portfolio) and existing codebase API surface. VN ETF auto-fetch flagged MEDIUM — API stability unconfirmed. |
+| Architecture | HIGH | All patterns match existing codebase conventions exactly. Code samples in research are valid C# against confirmed project structure. Build order reflects hard dependency analysis. |
+| Pitfalls | HIGH | Critical pitfalls drawn from direct codebase inspection (`TradingBotDbContext.cs`, `Purchase.cs`, `UsdAmount.cs`) plus financial domain literature. Phase-to-pitfall mapping is explicit and actionable. |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH for architecture and implementation approach; MEDIUM for VN stock price data reliability (single undocumented API source, no SLA)
 
 ### Gaps to Address
 
-- **fl_chart 1.1.1 scatter overlay on line chart:** Research confirmed support for line charts and scatter charts separately, but the specific combination of scatter purchase markers overlaid on a line price chart within a single widget needs hands-on verification. If the combined `LineChartData` + scatter approach does not work cleanly, the fallback is vertical dashed lines for purchase markers, which fl_chart does support via `LineChartBarData` with `dashArray`. Resolve before Phase 3 planning.
+- **VNDirect finfo API response schema** — JSON field names for VN ETF close price unconfirmed (endpoint timed out during research). Must verify with a live request at Phase 2 implementation start. Design `IVnStockPriceProvider` to return `null` (not throw) on failure; UI shows "price unavailable" for affected assets. ETF symbol mapping (`E1VFVN30`, `FUESSV30`) confirmed correct from Yahoo Finance cross-reference.
 
-- **Apple Developer account prerequisites:** Phase 5 assumes an active Apple Developer account with the ability to create a `.p8` APNs Auth Key and register an App ID with Push Notifications capability. If the account is not set up or the app bundle ID is not registered, this blocks Phase 5 entirely. Verify account status and bundle ID registration before beginning Phase 5 planning.
+- **VN market hours guard** — VN stock price fetcher should only call VNDirect during HOSE trading hours (09:00–11:30 and 13:00–14:45 ICT, Mon–Fri). Timezone: `Asia/Ho_Chi_Minh` (UTC+7, no DST). Outside these hours, return cached last close price. Implement as a schedule guard in `VnStockClient`. Decision for Phase 2 planning.
 
-- **Firebase project creation:** No Firebase project currently exists for this bot. Creating the project, registering the iOS app bundle ID, downloading `GoogleService-Info.plist`, and configuring the `.p8` APNs Auth Key are all manual steps that must be completed before any Flutter notification code is written. These steps cannot be automated and are the first dependency of Phase 5.
+- **CoinGecko ID mapping UX** — When a user creates a new crypto asset (non-BTC), they must supply the CoinGecko ID (e.g., `"ethereum"`). Either provide a search endpoint calling CoinGecko `/search`, or document the ID field requirement clearly in the Flutter add-asset form. Decision for Phase 5 planning.
 
-- **Aspire Flutter dev integration:** The `DebuggingMadeJoyful.Aspire.Hosting.Dart` community NuGet package (v1.0.0, ~165 downloads) is very low maturity. If it does not work reliably in practice, the fallback is running Flutter outside Aspire as a separate process (Option B: `flutter run -d chrome` independently, with the .NET API URL configured via environment). This only affects the development inner loop, not production behavior.
+- **BTC quantity reconciliation tolerance** — Portfolio BTC quantity (sum of auto-imported DCA transactions) may differ slightly from Hyperliquid spot balance due to exchange fees and rounding. Define an acceptable tolerance (e.g., 0.00000001 BTC) and surface any discrepancy as a UI info indicator, not an error. Decision for Phase 5 planning.
 
-- **`infinite_scroll_pagination` version:** The `infinite_scroll_pagination` package (v5.1.1, Flutter Favorite) is referenced in FEATURES.md but not included in the STACK.md pubspec.yaml block. Add it explicitly when creating the pubspec: `infinite_scroll_pagination: ^5.1.1`.
+- **Portfolio snapshot vs. on-demand chart** — Research recommends on-demand computation with Redis cache and transaction-triggered invalidation. This approach handles backdated transaction entry naturally. Confirm the invalidation logic handles the edge case where the user enters a transaction dated months ago (should invalidate the entire chart range from that date forward). Must be confirmed correct before Phase 6 implementation begins.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [pub.dev/packages/flutter_riverpod](https://pub.dev/packages/flutter_riverpod) — v3.2.1 verified, 2026 standard for state management
-- [pub.dev/packages/firebase_messaging](https://pub.dev/packages/firebase_messaging) — v16.1.1, iOS + FCM confirmed, Flutter Favorite
-- [pub.dev/packages/fl_chart](https://pub.dev/packages/fl_chart) — v1.1.1, line chart + scatter confirmed, MIT license
-- [pub.dev/packages/flutter_secure_storage](https://pub.dev/packages/flutter_secure_storage) — v10.0.0, iOS Keychain confirmed
-- [pub.dev/packages/go_router](https://pub.dev/packages/go_router) — v17.1.0, Flutter Favorite, official Flutter team package
-- [pub.dev/packages/dio](https://pub.dev/packages/dio) — v5.9.1, interceptor support confirmed
-- [pub.dev/packages/infinite_scroll_pagination](https://pub.dev/packages/infinite_scroll_pagination) — v5.1.1, Flutter Favorite, cursor pagination confirmed
-- [nuget.org/packages/FirebaseAdmin](https://www.nuget.org/packages/FirebaseAdmin) — v3.4.0, .NET 10.0 compatible confirmed
-- [firebase.flutter.dev/docs/messaging/apple-integration](https://firebase.flutter.dev/docs/messaging/apple-integration/) — APNs .p8 setup requirements, official FlutterFire docs
-- [firebase.google.com/docs/cloud-messaging/manage-tokens](https://firebase.google.com/docs/cloud-messaging/manage-tokens) — FCM token lifecycle official guidance
-- [github.com/firebase/flutterfire/issues/10920](https://github.com/firebase/flutterfire/issues/10920) — Confirmed .p12 FCM iOS silent failure bug
-- [github.com/flutter/flutter/issues/178524](https://github.com/flutter/flutter/issues/178524) — CanvasKit iOS Safari memory leak (web only, future consideration)
-- [docs.flutter.dev/app-architecture/recommendations](https://docs.flutter.dev/app-architecture/recommendations) — Official Flutter repository + provider pattern recommendation
+- CoinGecko `/simple/price` official docs — multi-coin, VND as supported `vs_currency`, 30 calls/min free tier
+- open.er-api.com v6 live response verified 2026-02-20 — VND: 25,905.86 confirmed, no API key required
+- EF Core inheritance/table-per-type documentation — separate aggregate table strategy confirmed
+- Vogen GitHub (SteveDunn/Vogen) — EF Core value converter pattern; existing codebase usage verified
+- Flutter `intl` `NumberFormat.currency` documentation — `vi_VN` locale, `decimalDigits: 0` for VND confirmed
+- ExchangeRate-API free tier documentation — no key required; ~1500 req/month; VND in supported currencies
+- Existing codebase inspection (`TradingBotDbContext.cs`, `Purchase.cs`, `AggregateRoot.cs`, `DashboardEndpoints.cs`, `PriceDataService.cs`) — HIGH confidence; direct code analysis
+- DDD aggregate design (Fowler, Ardalis.Specification patterns) — matches existing codebase conventions exactly
 
 ### Secondary (MEDIUM confidence)
-- [foresightmobile.com — Best Flutter State Management 2026](https://foresightmobile.com/blog/best-flutter-state-management) — Riverpod 3.x community consensus
-- [medium.com — Mastering HTTP Calls in Flutter 2025](https://medium.com/@pv.jassim/mastering-http-calls-in-flutter-2025-edition-http-vs-dio-vs-retrofit-1962ec46be43) — Dio vs alternatives analysis
-- [codewithandrea.com — Flutter bottom navigation + GoRouter](https://codewithandrea.com/articles/flutter-bottom-navigation-bar-nested-routes-gorouter/) — StatefulShellRoute for persistent tab state
-- [magicbell.com — Alert Fatigue](https://www.magicbell.com/blog/alert-fatigue) — 64% of users delete apps sending 5+ notifications/week; validates minimal notification design
-- [nuget.org/packages/DebuggingMadeJoyful.Aspire.Hosting.Dart](https://www.nuget.org/packages/DebuggingMadeJoyful.Aspire.Hosting.Dart) — v1.0.0 community Aspire Dart integration (LOW maturity, ~165 downloads — treat as best-effort)
-- [freecodecamp.org — How to Secure Mobile APIs in Flutter](https://www.freecodecamp.org/news/how-to-secure-mobile-apis-in-flutter/) — Secure storage patterns for mobile API keys
+- vnstock GitHub (thinh-vu/vnstock) — VNDirect finfo API endpoint pattern confirmed by open-source community; unofficial
+- VNDirect finfo-api.vndirect.com.vn v4 — unofficial API; no documentation; endpoint pattern inferred from Python library
+- Delta, Kubera, CoinGecko Portfolio, Sharesight feature analysis — P1/P2 feature set and multi-currency display patterns
+- Riverpod 3.0 (riverpod.dev) — `StateProvider<Currency>` for global currency toggle is idiomatic; confirmed pattern
+- Bryt Software interest accrual methods — compound vs. simple interest formula differences for Vietnamese FD types
+- CoinTracking realized vs. unrealized gains methodology — multi-currency P&L correctness approach
+
+### Tertiary (LOW confidence)
+- Yahoo Finance E1VFVN30.VN, FUESSV30.VN — ETF ticker symbol format confirmed; unofficial JSON endpoint not selected as primary data source due to scraping risk
+- vnstock data disclaimer — explicit "data may be incomplete/inaccurate" warning from official vnstock documentation; confirms fragility assessment
 
 ---
 *Research completed: 2026-02-20*
-*Scope: iOS native Flutter app (Flutter Web findings retained in STACK.md/PITFALLS.md as future-consideration annotations)*
 *Ready for roadmap: yes*
