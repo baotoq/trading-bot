@@ -18,11 +18,11 @@ Requirements for Flutter iOS mobile app milestone. Each maps to roadmap phases.
 
 ### Portfolio & Status
 
-- [ ] **PORT-01**: User can view total BTC accumulated, total cost, and unrealized P&L on home screen
-- [ ] **PORT-02**: User can see live BTC price updated every 30 seconds
-- [ ] **PORT-03**: User can see bot health status badge (healthy/warning/down) always visible
-- [ ] **PORT-04**: User can see countdown timer to next scheduled buy
-- [ ] **PORT-05**: User can see last buy detail card (date, price, BTC amount, multiplier, drop %)
+- [x] **PORT-01**: User can view total BTC accumulated, total cost, and unrealized P&L on home screen
+- [x] **PORT-02**: User can see live BTC price updated every 30 seconds
+- [x] **PORT-03**: User can see bot health status badge (healthy/warning/down) always visible
+- [x] **PORT-04**: User can see countdown timer to next scheduled buy
+- [x] **PORT-05**: User can see last buy detail card (date, price, BTC amount, multiplier, drop %)
 
 ### Charts & History
 
@@ -95,11 +95,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | APP-04 | Phase 20 | Complete |
 | APP-05 | Phase 20 | Complete |
 | APP-06 | Phase 20 | Complete |
-| PORT-01 | Phase 21 | Pending |
-| PORT-02 | Phase 21 | Pending |
-| PORT-03 | Phase 21 | Pending |
-| PORT-04 | Phase 21 | Pending |
-| PORT-05 | Phase 21 | Pending |
+| PORT-01 | Phase 21 | Complete |
+| PORT-02 | Phase 21 | Complete |
+| PORT-03 | Phase 21 | Complete |
+| PORT-04 | Phase 21 | Complete |
+| PORT-05 | Phase 21 | Complete |
 | CHART-01 | Phase 22 | Pending |
 | CHART-02 | Phase 22 | Pending |
 | CHART-03 | Phase 22 | Pending |

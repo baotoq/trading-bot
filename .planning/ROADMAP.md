@@ -96,7 +96,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Data layer: extend LiveStatusResponse, Dart DTO models, HomeRepository, Riverpod providers with 30s auto-refresh
+- [x] 21-01-PLAN.md — Data layer: extend LiveStatusResponse, Dart DTO models, HomeRepository, Riverpod providers with 30s auto-refresh
 - [ ] 21-02-PLAN.md — UI layer: portfolio stats section, health badge, countdown text, last buy card, assemble HomeScreen
 
 ### Phase 22: Price Chart + Purchase History
@@ -184,11 +184,11 @@ Plans:
 | 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
 | 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
-| 21. Portfolio + Status Screens | v3.0 | 0/2 | Not started | - |
+| 21. Portfolio + Status Screens | v3.0 | 1/2 | In progress | - |
 | 22. Price Chart + Purchase History | v3.0 | 0/2 | Not started | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
 | 24. Push Notifications | v3.0 | 0/3 | Not started | - |
 | 25. Nuxt Deprecation | v3.0 | 0/1 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-20 after 20-02 completion (Phase 20 complete)*
+*Roadmap updated: 2026-02-20 after 21-01 completion (Phase 21 in progress)*
