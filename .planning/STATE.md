@@ -9,22 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** Defining requirements
+**Current focus:** Phase 26 — Portfolio Domain Foundation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-20 — Milestone v4.0 started
+Phase: 26 of 29 (Portfolio Domain Foundation)
+Plan: 0 of TBD
+Status: Ready to plan
+Last activity: 2026-02-20 — v4.0 roadmap created (4 phases, 20 requirements mapped)
 
-## Milestones Shipped
-
-- v1.0 Daily BTC Smart DCA (2026-02-12) -- 4 phases, 11 plans
-- v1.1 Backtesting Engine (2026-02-13) -- 4 phases, 7 plans, 53 tests
-- v1.2 Web Dashboard (2026-02-14) -- 5 phases, 12 plans
-- v2.0 DDD Foundation (2026-02-20) -- 7 phases, 15 plans, 62 tests
-- v3.0 Flutter Mobile (2026-02-20) -- 6 phases, 11 plans
+Progress: [░░░░░░░░░░] 0% (v4.0)
 
 ## Performance Metrics
 
@@ -45,6 +39,7 @@ Last activity: 2026-02-20 — Milestone v4.0 started
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
 | v3.0 | 20-25 | 11 | Complete |
+| v4.0 | 26-29 | TBD | Not started |
 
 ## Accumulated Context
 
@@ -52,16 +47,23 @@ Last activity: 2026-02-20 — Milestone v4.0 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-**v3.0 Flutter decisions carried forward:**
+**v4.0 architecture decisions (from research):**
+- Separate aggregate roots for PortfolioAsset and FixedDeposit (not TPH — avoids nullable columns)
+- VndAmount value object with HasPrecision(18, 0); integer share quantities for ETF
+- store cost_native + cost_usd + exchange_rate_at_transaction at write time (P&L computed in native currency only)
+- DCA domain has zero knowledge of portfolio domain — connected via PurchaseCompletedEvent only
+- API always returns both valueUsd and valueVnd; currency toggle is pure Flutter display logic
+- VN ETF prices: best-effort only, 48h Redis TTL, staleness indicator always shown
+
+**v3.0 Flutter conventions carried forward:**
 - Dark-only theme, NavigationBar (Material 3) + CupertinoIcons, StatefulShellRoute
 - Manual fromJson for DTO models (no json_serializable), intl as explicit dependency
 - SliverAppBar with floating+snap, fl_chart with two-LineChartBarData approach
 - Explicit isLoadingMore boolean (not copyWithPrevious) for pagination state
-- ConfigEditForm handles all error cases internally
 
 ### Known Risks
 
-None.
+- Phase 27: VNDirect finfo API JSON schema unconfirmed (endpoint timed out during research). Needs live request verification at Phase 27 planning start. Use `/gsd:research-phase` before planning Phase 27.
 
 ### Pending Todos
 
@@ -69,17 +71,13 @@ None.
 
 ### Roadmap Evolution
 
-Starting fresh for v4.0.
-
-### Blockers/Concerns
-
-None.
+v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped.
 
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Milestone v4.0 started — defining requirements
-Next step: Research → Requirements → Roadmap
+Stopped at: v4.0 roadmap created — ready to plan Phase 26
+Next step: `/gsd:plan-phase 26`
 
 ---
-*State updated: 2026-02-20 after v4.0 milestone start*
+*State updated: 2026-02-20 after v4.0 roadmap creation*

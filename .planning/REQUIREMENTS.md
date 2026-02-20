@@ -72,32 +72,32 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PORT-01 | — | Pending |
-| PORT-02 | — | Pending |
-| PORT-03 | — | Pending |
-| PORT-04 | — | Pending |
-| PORT-05 | — | Pending |
-| PORT-06 | — | Pending |
-| PRICE-01 | — | Pending |
-| PRICE-02 | — | Pending |
-| PRICE-03 | — | Pending |
-| PRICE-04 | — | Pending |
-| DISP-01 | — | Pending |
-| DISP-02 | — | Pending |
-| DISP-03 | — | Pending |
-| DISP-04 | — | Pending |
-| DISP-05 | — | Pending |
-| DISP-06 | — | Pending |
-| DISP-07 | — | Pending |
-| DISP-08 | — | Pending |
-| DISP-09 | — | Pending |
-| DISP-10 | — | Pending |
+| PORT-01 | Phase 26 | Pending |
+| PORT-02 | Phase 26 | Pending |
+| PORT-03 | Phase 26 | Pending |
+| PORT-04 | Phase 28 | Pending |
+| PORT-05 | Phase 28 | Pending |
+| PORT-06 | Phase 26 | Pending |
+| PRICE-01 | Phase 27 | Pending |
+| PRICE-02 | Phase 27 | Pending |
+| PRICE-03 | Phase 27 | Pending |
+| PRICE-04 | Phase 27 | Pending |
+| DISP-01 | Phase 29 | Pending |
+| DISP-02 | Phase 29 | Pending |
+| DISP-03 | Phase 29 | Pending |
+| DISP-04 | Phase 29 | Pending |
+| DISP-05 | Phase 29 | Pending |
+| DISP-06 | Phase 29 | Pending |
+| DISP-07 | Phase 29 | Pending |
+| DISP-08 | Phase 29 | Pending |
+| DISP-09 | Phase 29 | Pending |
+| DISP-10 | Phase 29 | Pending |
 
 **Coverage:**
 - v4.0 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after initial definition*
+*Last updated: 2026-02-20 after roadmap creation (all 20 requirements mapped)*
