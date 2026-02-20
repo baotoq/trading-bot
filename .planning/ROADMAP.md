@@ -192,9 +192,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — Price feed unit tests + exchange rate graceful degradation
-- [ ] 32-02-PLAN.md — Flutter fixed deposit CRUD completion + CoinGecko dynamic ID lookup
-- [ ] 32-03-PLAN.md — Integration tests for portfolio and fixed deposit endpoints
+- [x] 32-01-PLAN.md — Price feed unit tests + exchange rate graceful degradation
+- [x] 32-02-PLAN.md — Flutter fixed deposit CRUD completion + CoinGecko dynamic ID lookup
+- [x] 32-03-PLAN.md — Integration tests for portfolio and fixed deposit endpoints
 
 ## Progress
 
@@ -233,7 +233,7 @@ Plans:
 | 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
 | 30. Critical Bug Fixes | 1/1 | Complete    | 2026-02-20 | - |
 | 31. Milestone Verification | v4.0 | Complete    | 2026-02-20 | 2026-02-21 |
-| 32. Tech Debt Cleanup | 2/3 | In Progress|  | - |
+| 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
 
 ---
-*Roadmap updated: 2026-02-21 after Phase 31 completion (milestone verification — all 20 v4.0 requirements closed)*
+*Roadmap updated: 2026-02-21 after Phase 32 completion (tech debt cleanup — all 5 success criteria met: price feed tests, endpoint integration tests, exchange rate graceful degradation, Flutter fixed deposit CRUD, dynamic CoinGecko ID lookup)*
