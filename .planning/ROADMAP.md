@@ -140,12 +140,12 @@ Plans:
   3. User receives a push notification when a purchase attempt fails
   4. Tapping any notification opens the app and navigates to the relevant screen (e.g., purchases screen for a buy executed notification)
   5. The backend stores the device FCM token and automatically removes stale tokens when FCM reports them as unregistered
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 24-01: Backend FCM infrastructure (DeviceToken entity, EF migration, POST /api/devices/register, DELETE /api/devices/{token}, FirebaseAdmin NuGet)
-- [ ] 24-02: Backend FcmNotificationService (hooks into PurchaseCompletedHandler, multicast send, stale token cleanup, missed buy alert)
-- [ ] 24-03: Flutter FCM integration (Firebase project setup, GoogleService-Info.plist, Xcode entitlements, FcmService, foreground display via flutter_local_notifications, deep-link tap handler)
+- [ ] 24-01-PLAN.md -- Backend FCM infrastructure (DeviceToken entity, EF migration, POST/DELETE device endpoints, FirebaseAdmin NuGet, FcmNotificationService)
+- [ ] 24-02-PLAN.md -- Backend notification hooks (PurchaseCompletedHandler, PurchaseFailedHandler, MissedPurchaseVerificationService send FCM push with deep-link data)
+- [ ] 24-03-PLAN.md -- Flutter FCM integration (firebase_messaging, FcmService token registration, foreground display, deep-link tap handler via go_router)
 
 ### Phase 25: Nuxt Deprecation
 **Goal**: The Nuxt dashboard is no longer started by Aspire, removing it from the local development orchestration while preserving the code
