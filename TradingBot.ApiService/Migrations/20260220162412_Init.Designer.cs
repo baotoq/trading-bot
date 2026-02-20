@@ -11,11 +11,11 @@ using TradingBot.ApiService.Models;
 
 #nullable disable
 
-namespace TradingBot.ApiService.Infrastructure.Data.Migrations
+namespace TradingBot.ApiService.Migrations
 {
     [DbContext(typeof(TradingBotDbContext))]
-    [Migration("20260220121317_AddPortfolioEntities")]
-    partial class AddPortfolioEntities
+    [Migration("20260220162412_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -137,6 +137,9 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
+                    b.Property<Guid?>("SourcePurchaseId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(10)
@@ -150,6 +153,10 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                     b.HasIndex("Date");
 
                     b.HasIndex("PortfolioAssetId");
+
+                    b.HasIndex("SourcePurchaseId")
+                        .IsUnique()
+                        .HasFilter("\"SourcePurchaseId\" IS NOT NULL");
 
                     b.ToTable("AssetTransactions");
                 });
@@ -245,7 +252,7 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
 
                     b.ToTable("DcaConfigurations", t =>
                         {
-                            t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid");
+                            t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "\"Id\" = '00000000-0000-0000-0000-000000000001'::uuid");
                         });
                 });
 

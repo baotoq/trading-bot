@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TradingBot.ApiService.Infrastructure.Data;
@@ -11,14 +10,12 @@ using TradingBot.ApiService.Models;
 
 #nullable disable
 
-namespace TradingBot.ApiService.Infrastructure.Data.Migrations
+namespace TradingBot.ApiService.Migrations
 {
     [DbContext(typeof(TradingBotDbContext))]
-    [Migration("20260220090850_AddDeviceToken")]
-    partial class AddDeviceToken
+    partial class TradingBotDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,6 +96,66 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                     b.HasIndex("ProcessingStatus");
 
                     b.ToTable("OutboxMessages", (string)null);
+                });
+
+            modelBuilder.Entity("TradingBot.ApiService.Models.AssetTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date");
+
+                    b.Property<decimal?>("Fee")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("PortfolioAssetId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("PricePerUnit")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 8)
+                        .HasColumnType("numeric(18,8)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<Guid?>("SourcePurchaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Date");
+
+                    b.HasIndex("PortfolioAssetId");
+
+                    b.HasIndex("SourcePurchaseId")
+                        .IsUnique()
+                        .HasFilter("\"SourcePurchaseId\" IS NOT NULL");
+
+                    b.ToTable("AssetTransactions");
                 });
 
             modelBuilder.Entity("TradingBot.ApiService.Models.DailyPrice", b =>
@@ -192,7 +249,7 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
 
                     b.ToTable("DcaConfigurations", t =>
                         {
-                            t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid");
+                            t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "\"Id\" = '00000000-0000-0000-0000-000000000001'::uuid");
                         });
                 });
 
@@ -223,6 +280,53 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("DeviceTokens");
+                });
+
+            modelBuilder.Entity("TradingBot.ApiService.Models.FixedDeposit", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AnnualInterestRate")
+                        .HasPrecision(8, 6)
+                        .HasColumnType("numeric(8,6)");
+
+                    b.Property<string>("BankName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CompoundingFrequency")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly>("MaturityDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Principal")
+                        .HasPrecision(18)
+                        .HasColumnType("numeric(18,0)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status");
+
+                    b.ToTable("FixedDeposits");
                 });
 
             modelBuilder.Entity("TradingBot.ApiService.Models.IngestionJob", b =>
@@ -273,6 +377,42 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                     b.HasIndex("Status");
 
                     b.ToTable("IngestionJobs");
+                });
+
+            modelBuilder.Entity("TradingBot.ApiService.Models.PortfolioAsset", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("NativeCurrency")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
+
+                    b.Property<string>("Ticker")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PortfolioAssets");
                 });
 
             modelBuilder.Entity("TradingBot.ApiService.Models.Purchase", b =>
@@ -347,6 +487,20 @@ namespace TradingBot.ApiService.Infrastructure.Data.Migrations
                     b.HasIndex("ExecutedAt");
 
                     b.ToTable("Purchases");
+                });
+
+            modelBuilder.Entity("TradingBot.ApiService.Models.AssetTransaction", b =>
+                {
+                    b.HasOne("TradingBot.ApiService.Models.PortfolioAsset", null)
+                        .WithMany("Transactions")
+                        .HasForeignKey("PortfolioAssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TradingBot.ApiService.Models.PortfolioAsset", b =>
+                {
+                    b.Navigation("Transactions");
                 });
 #pragma warning restore 612, 618
         }

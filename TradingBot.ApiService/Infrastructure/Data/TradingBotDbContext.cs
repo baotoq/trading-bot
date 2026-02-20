@@ -171,7 +171,7 @@ public class TradingBotDbContext(DbContextOptions<TradingBotDbContext> options) 
                 .HasColumnType("jsonb");
 
             // Enforce single-row constraint
-            entity.ToTable(t => t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "id = '00000000-0000-0000-0000-000000000001'::uuid"));
+            entity.ToTable(t => t.HasCheckConstraint("CK_DcaConfiguration_SingleRow", "\"Id\" = '00000000-0000-0000-0000-000000000001'::uuid"));
         });
 
         modelBuilder.Entity<DeviceToken>(entity =>
