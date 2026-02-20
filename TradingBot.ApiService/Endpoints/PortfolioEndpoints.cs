@@ -14,12 +14,6 @@ namespace TradingBot.ApiService.Endpoints;
 
 public static class PortfolioEndpoints
 {
-    private static readonly Dictionary<string, string> CoinGeckoIds = new()
-    {
-        ["BTC"] = "bitcoin",
-        ["ETH"] = "ethereum"
-    };
-
     public static WebApplication MapPortfolioEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/portfolio")
@@ -418,13 +412,14 @@ public static class PortfolioEndpoints
         {
             if (asset.AssetType == AssetType.Crypto)
             {
-                if (CoinGeckoIds.TryGetValue(asset.Ticker, out var coinGeckoId))
+                var coinGeckoId = await cryptoPriceProvider.SearchCoinIdAsync(asset.Ticker, ct);
+                if (coinGeckoId is not null)
                 {
                     var result = await cryptoPriceProvider.GetPriceAsync(coinGeckoId, ct);
                     return (result.Price, result);
                 }
 
-                logger.LogWarning("No CoinGecko ID mapping for crypto ticker {Ticker}", asset.Ticker);
+                logger.LogWarning("No CoinGecko ID found for crypto ticker {Ticker}", asset.Ticker);
                 return (0m, null);
             }
 

@@ -21,4 +21,13 @@ public interface ICryptoPriceProvider
     /// <param name="ct">Cancellation token</param>
     /// <returns>Dictionary of coin ID to price result</returns>
     Task<Dictionary<string, PriceFeedResult>> GetPricesAsync(IEnumerable<string> coinGeckoIds, CancellationToken ct);
+
+    /// <summary>
+    /// Searches for a CoinGecko coin ID by ticker symbol.
+    /// Uses the CoinGecko /search endpoint. Results are cached in Redis for 7 days.
+    /// </summary>
+    /// <param name="ticker">Ticker symbol (e.g., "SOL", "ADA")</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>CoinGecko coin ID (e.g., "solana"), or null if not found</returns>
+    Task<string?> SearchCoinIdAsync(string ticker, CancellationToken ct);
 }

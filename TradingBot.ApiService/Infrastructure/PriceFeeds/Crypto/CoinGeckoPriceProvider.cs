@@ -20,8 +20,28 @@ public class CoinGeckoPriceProvider(
 {
     private static readonly TimeSpan FreshnessWindow = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan PhysicalTtl = TimeSpan.FromDays(30);
+    private static readonly TimeSpan TickerCacheTtl = TimeSpan.FromDays(7);
+    private static readonly TimeSpan TickerNotFoundCacheTtl = TimeSpan.FromDays(1);
     private const string CacheKeyPrefix = "price:crypto:";
+    private const string TickerCacheKeyPrefix = "coingecko:ticker:";
     private const string Currency = "USD";
+
+    /// <summary>
+    /// Well-known coin ID mappings for common tickers. These resolve instantly without any API or cache call.
+    /// </summary>
+    private static readonly Dictionary<string, string> WellKnownCoinIds = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["BTC"] = "bitcoin",
+        ["ETH"] = "ethereum",
+        ["SOL"] = "solana",
+        ["ADA"] = "cardano",
+        ["DOT"] = "polkadot",
+        ["AVAX"] = "avalanche-2",
+        ["LINK"] = "chainlink",
+        ["MATIC"] = "matic-network",
+        ["UNI"] = "uniswap",
+        ["ATOM"] = "cosmos",
+    };
 
     /// <inheritdoc />
     public async Task<PriceFeedResult> GetPriceAsync(string coinGeckoId, CancellationToken ct)
@@ -168,6 +188,78 @@ public class CoinGeckoPriceProvider(
         return data.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Usd);
     }
 
+    /// <inheritdoc />
+    public async Task<string?> SearchCoinIdAsync(string ticker, CancellationToken ct)
+    {
+        // Fast path: check well-known dictionary first (no API or cache call)
+        if (WellKnownCoinIds.TryGetValue(ticker, out var wellKnownId))
+        {
+            return wellKnownId;
+        }
+
+        var upperTicker = ticker.ToUpperInvariant();
+        var cacheKey = $"{TickerCacheKeyPrefix}{upperTicker}";
+
+        // Check Redis cache
+        var cachedBytes = await cache.GetAsync(cacheKey, ct);
+        if (cachedBytes is not null)
+        {
+            var cachedId = System.Text.Encoding.UTF8.GetString(cachedBytes);
+            // Empty string is the sentinel for "not found"
+            return string.IsNullOrEmpty(cachedId) ? null : cachedId;
+        }
+
+        // Call CoinGecko /search endpoint
+        try
+        {
+            var url = $"search?query={Uri.EscapeDataString(ticker)}";
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+
+            var apiKey = options.CurrentValue.ApiKey;
+            if (!string.IsNullOrEmpty(apiKey))
+            {
+                request.Headers.Add("x-cg-demo-api-key", apiKey);
+            }
+
+            using var response = await httpClient.SendAsync(request, ct);
+            response.EnsureSuccessStatusCode();
+
+            var searchResult = await response.Content.ReadFromJsonAsync<CoinSearchResponse>(ct);
+            var match = searchResult?.Coins?
+                .FirstOrDefault(c => string.Equals(c.Symbol, ticker, StringComparison.OrdinalIgnoreCase));
+
+            if (match is not null)
+            {
+                logger.LogInformation(
+                    "Found CoinGecko ID '{CoinId}' for ticker {Ticker} via search API",
+                    match.Id, ticker);
+
+                var idBytes = System.Text.Encoding.UTF8.GetBytes(match.Id);
+                await cache.SetAsync(cacheKey, idBytes, new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TickerCacheTtl
+                }, ct);
+
+                return match.Id;
+            }
+
+            // Not found — cache sentinel to avoid repeated API calls
+            logger.LogWarning("No CoinGecko coin found for ticker {Ticker}", ticker);
+            var sentinelBytes = System.Text.Encoding.UTF8.GetBytes(string.Empty);
+            await cache.SetAsync(cacheKey, sentinelBytes, new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TickerNotFoundCacheTtl
+            }, ct);
+
+            return null;
+        }
+        catch (HttpRequestException ex)
+        {
+            logger.LogWarning(ex, "CoinGecko search API failed for ticker {Ticker}", ticker);
+            return null;
+        }
+    }
+
     private async Task<PriceFeedEntry?> ReadCacheAsync(string key, CancellationToken ct)
     {
         var bytes = await cache.GetAsync(key, ct);
@@ -192,4 +284,18 @@ public class CoinGeckoPriceProvider(
     private record CoinPriceData(
         [property: JsonPropertyName("usd")] decimal Usd,
         [property: JsonPropertyName("last_updated_at")] long LastUpdatedAt);
+
+    /// <summary>
+    /// JSON DTO for CoinGecko /search response.
+    /// </summary>
+    private record CoinSearchResponse(
+        [property: JsonPropertyName("coins")] List<CoinSearchItem>? Coins);
+
+    /// <summary>
+    /// JSON DTO for a single coin in the CoinGecko /search response.
+    /// </summary>
+    private record CoinSearchItem(
+        [property: JsonPropertyName("id")] string Id,
+        [property: JsonPropertyName("symbol")] string Symbol,
+        [property: JsonPropertyName("market_cap_rank")] int? MarketCapRank);
 }
