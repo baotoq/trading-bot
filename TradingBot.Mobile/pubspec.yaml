@@ -17,6 +17,7 @@ dependencies:
   dio: ^5.9.1
   timeago: ^3.7.0
   intl: any
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:
