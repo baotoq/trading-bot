@@ -106,10 +106,11 @@ Plans:
   2. VN30 ETF prices are fetched from VNDirect finfo API and cached in Redis with a 48-hour TTL; HTTP failure returns last cached value, not an error
   3. USD/VND exchange rate is fetched from open.er-api.com and cached in Redis with a 12-hour TTL
   4. Every price type exposes a last-updated timestamp so consumers can surface staleness to the user
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 27-01: TBD
+- [ ] 27-01-PLAN.md — Shared price feed types (PriceFeedEntry, PriceFeedResult, interfaces) + CoinGecko crypto provider
+- [ ] 27-02-PLAN.md — VNDirect ETF provider, exchange rate provider, DI registration + Program.cs wiring
 
 ### Phase 28: Portfolio Backend API
 **Goal**: All backend endpoints exist for portfolio read, manual write, DCA auto-import, and fixed deposit management — the complete API surface the Flutter app will consume
