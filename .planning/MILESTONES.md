@@ -117,9 +117,9 @@
 
 ## v3.0 Flutter Mobile (Shipped: 2026-02-20)
 
-**Delivered:** Native Flutter iOS app replacing the Nuxt web dashboard with full feature parity -- portfolio monitoring, interactive price chart, purchase history, DCA configuration management, and FCM push notifications for buy events and health alerts.
+**Delivered:** Native Flutter iOS app replacing the Nuxt web dashboard with full feature parity -- portfolio monitoring, interactive price chart, purchase history, DCA configuration management, and FCM push notifications for buy events and health alerts. Per-channel notification handler split for clean architecture.
 
-**Phases completed:** 20-25 (6 phases, 11 plans total)
+**Phases completed:** 20-25.1 (7 phases, 12 plans total)
 
 **Key accomplishments:**
 
@@ -131,18 +131,29 @@
 - FCM push notifications for purchase executed, purchase failed, and missed purchase events with deep-link tap navigation
 - Backend device token management with auto-cleanup of stale FCM tokens
 - Nuxt dashboard removed from Aspire orchestration (code preserved for reference)
+- Per-channel INotificationHandler split (Telegram + FCM) with enriched domain events
 
 **Stats:**
 
-- 63 files created/modified
-- 4,533 insertions / 341 deletions (Dart, C#, YAML, JSON)
-- 6 phases, 11 plans, 44 commits (14 feature/fix/refactor)
-- 1 day from start to ship (2026-02-20)
+- 189 files changed, 10,167 insertions / 3,649 deletions
+- 3,752 lines of Dart (TradingBot.Mobile)
+- 7 phases, 12 plans, 16 feature commits
+- Timeline: 2026-02-19 → 2026-02-20
 - 62 tests passing (unchanged from v2.0)
 
-**Git range:** `5a9a55d` → `HEAD`
+**Git range:** `e401314` → `43aec61`
 
-**What's next:** Runtime testing on physical device, potential multi-asset support, advanced analytics
+### Known Gaps
+
+Milestone completed with 10 process-level gaps (no functional gaps). All 27 requirements confirmed working by integration checker (27/27 wired, 7/7 E2E flows complete).
+
+- CONF-01 to CONF-04: Missing VERIFICATION.md for Phase 23 (code implemented, REQUIREMENTS.md unchecked)
+- PUSH-01 to PUSH-05: Missing VERIFICATION.md for Phase 24 (code implemented, REQUIREMENTS.md unchecked)
+- DEPR-01: Missing VERIFICATION.md for Phase 25 (code implemented, REQUIREMENTS.md unchecked)
+
+See `milestones/v3.0-MILESTONE-AUDIT.md` for full audit report.
+
+**What's next:** v4.0 Portfolio Tracker -- multi-asset portfolio tracking
 
 ---
 
