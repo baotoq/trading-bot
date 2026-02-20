@@ -93,6 +93,10 @@ None.
 
 None.
 
+### Roadmap Evolution
+
+- Phase 25.1 inserted after Phase 25: cross cutting concern with multiple INotificationHandler<PurchaseCompletedEvent> handlers instead, 1 handle telegram 1 handle firebase (URGENT)
+
 ### Blockers/Concerns
 
 None.
@@ -100,8 +104,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 25-01-PLAN.md (Nuxt dashboard removed from Aspire orchestration) -- v3.0 Flutter Mobile milestone shipped
-Next step: Plan next milestone (if any)
+Stopped at: Phase 25.1 context gathered
+Next step: /gsd:plan-phase 25.1
 
 ---
 *State updated: 2026-02-20 after 25-01 completion -- v3.0 shipped*
