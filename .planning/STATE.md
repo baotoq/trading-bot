@@ -2,23 +2,23 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v3.0 Flutter Mobile
-**Updated:** 2026-02-20 (21-02 complete)
+**Updated:** 2026-02-20 (22-02 complete)
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via mobile app
-**Current focus:** Phase 21 -- Portfolio + Status Screens (in progress)
+**Current focus:** Phase 22 -- Price Chart + Purchase History (complete)
 
 ## Current Position
 
-Phase: 21 of 25 (Portfolio + Status Screens)
-Plan: 02 of 02 complete (Phase 21 complete)
-Status: In progress (Phase 22 next)
-Last activity: 2026-02-20 -- 21-02 complete: HomeScreen UI with portfolio stats, health badge, countdown, last buy card widgets bound to homeDataProvider
+Phase: 22 of 25 (Price Chart + Purchase History)
+Plan: 02 of 02 complete (Phase 22 complete)
+Status: In progress (Phase 23 next)
+Last activity: 2026-02-20 -- 22-02 complete: Purchase history screen with infinite scroll, cursor pagination, purchase list items, and filter bottom sheet
 
-Progress: [░░░░░░░░░░] 36% (4/11 plans complete)
+Progress: [███░░░░░░░] 55% (6/11 plans complete)
 
 ## Milestones Shipped
 
@@ -35,7 +35,7 @@ Progress: [░░░░░░░░░░] 36% (4/11 plans complete)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
-- v3.0: in progress (3 plans)
+- v3.0: in progress (6 plans)
 
 **By Milestone:**
 
@@ -70,12 +70,19 @@ All decisions logged in PROJECT.md Key Decisions table.
 - intl added as explicit dependency: was transitive via Flutter SDK; depend_on_referenced_packages lint flagged it; added intl: any to pubspec.yaml
 - SliverAppBar with floating+snap: gives portfolio content more vertical space on scroll while keeping health badge always accessible in actions slot
 
+**22-01 decisions:**
+- purchaseSpots uses actual purchase prices (not close prices) for second LineChartBarData — ensures markers appear at correct y-position (price paid) rather than daily close price
+- Two-LineChartBarData approach confirmed valid without fallback: checkToShowDot + purchaseDayIndexSet resolves the STATE.md risk about scatter markers needing fallback
+- chartDataProvider takes String timeframe (not enum) to match backend query param string directly
+
+**22-02 decisions:**
+- Replaced copyWithPrevious (internal Riverpod API) with explicit isLoadingMore boolean flag on AsyncNotifier — avoids invalid_use_of_internal_member warning while keeping existing items visible during page loads
+
 ### Known Risks
 
 - Phase 24 (Push Notifications) requires a real physical iOS device -- APNs does not work on iOS Simulator
 - Phase 24 requires APNs .p8 Auth Key (not .p12) -- confirmed FlutterFire bug with .p12 (issue #10920)
 - Phase 24 requires active Apple Developer account and Firebase project (manual prerequisites before planning)
-- Phase 22 (fl_chart): scatter markers overlaid on line chart may need fallback to vertical dashed lines -- verify before planning
 
 ### Pending Todos
 
@@ -88,8 +95,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 21-02-PLAN.md (HomeScreen UI with portfolio stats, health badge, countdown, last buy card)
-Next step: Execute Phase 22 (Chart History Screen)
+Stopped at: Completed 22-02-PLAN.md (Purchase history screen with infinite scroll, cursor pagination, filter bottom sheet)
+Next step: Execute Phase 23
 
 ---
-*State updated: 2026-02-20 after 21-01 completion*
+*State updated: 2026-02-20 after 22-02 completion*

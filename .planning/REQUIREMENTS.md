@@ -30,8 +30,8 @@ Requirements for Flutter iOS mobile app milestone. Each maps to roadmap phases.
 - [ ] **CHART-02**: User can see purchase markers on price chart colored by multiplier tier
 - [ ] **CHART-03**: User can see average cost basis dashed line on price chart
 - [ ] **CHART-04**: User can touch chart to see price and date tooltip
-- [ ] **CHART-05**: User can scroll through purchase history with infinite scroll (cursor pagination)
-- [ ] **CHART-06**: User can filter purchase history by date range and multiplier tier via bottom sheet
+- [x] **CHART-05**: User can scroll through purchase history with infinite scroll (cursor pagination)
+- [x] **CHART-06**: User can filter purchase history by date range and multiplier tier via bottom sheet
 
 ### Configuration
 
@@ -104,8 +104,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHART-02 | Phase 22 | Pending |
 | CHART-03 | Phase 22 | Pending |
 | CHART-04 | Phase 22 | Pending |
-| CHART-05 | Phase 22 | Pending |
-| CHART-06 | Phase 22 | Pending |
+| CHART-05 | Phase 22 | Complete |
+| CHART-06 | Phase 22 | Complete |
 | CONF-01 | Phase 23 | Pending |
 | CONF-02 | Phase 23 | Pending |
 | CONF-03 | Phase 23 | Pending |
