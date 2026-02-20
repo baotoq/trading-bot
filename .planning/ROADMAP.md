@@ -97,7 +97,7 @@ Plans:
 
 Plans:
 - [x] 21-01-PLAN.md — Data layer: extend LiveStatusResponse, Dart DTO models, HomeRepository, Riverpod providers with 30s auto-refresh
-- [ ] 21-02-PLAN.md — UI layer: portfolio stats section, health badge, countdown text, last buy card, assemble HomeScreen
+- [x] 21-02-PLAN.md — UI layer: portfolio stats section, health badge, countdown text, last buy card, assemble HomeScreen
 
 ### Phase 22: Price Chart + Purchase History
 **Goal**: Users can visually explore their DCA performance on a price chart with purchase markers and scroll through the full purchase history
@@ -113,8 +113,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Chart data layer + fl_chart price chart with timeframe selector, purchase markers, avg cost line, touch tooltip
-- [ ] 22-02-PLAN.md — Purchase history data layer + infinite scroll list with cursor pagination, purchase list items, filter bottom sheet
+- [x] 22-01-PLAN.md — Chart data layer + fl_chart price chart with timeframe selector, purchase markers, avg cost line, touch tooltip
+- [x] 22-02-PLAN.md — Purchase history data layer + infinite scroll list with cursor pagination, purchase list items, filter bottom sheet
 
 ### Phase 23: Configuration Screen
 **Goal**: Users can view and edit their live DCA configuration parameters, including multiplier tiers, directly from the app
