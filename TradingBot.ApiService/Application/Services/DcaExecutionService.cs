@@ -144,15 +144,37 @@ public class DcaExecutionService(
             ma200Day: multiplierResult.Ma200Day,
             isDryRun: options.DryRun);
 
+        // Compute running totals from DB (exclude dry-run purchases) before raising domain events
+        var runningTotals = await dbContext.Purchases
+            .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
+            .Where(p => !p.IsDryRun)
+            .GroupBy(p => 1)
+            .Select(g => new
+            {
+                TotalBtc = g.Sum(p => p.Quantity),
+                TotalCost = g.Sum(p => p.Cost),
+                PurchaseCount = g.Count()
+            })
+            .FirstOrDefaultAsync(ct);
+
+        var dbTotalBtc = runningTotals?.TotalBtc ?? 0m;
+        var dbTotalCost = runningTotals?.TotalCost ?? 0m;
+        var dbPurchaseCount = runningTotals?.PurchaseCount ?? 0;
+
         try
         {
             if (options.DryRun)
             {
                 logger.LogInformation("[DRY RUN] Simulating order: {Quantity} BTC at {Price}", roundedQuantity, currentPriceDecimal);
+
+                // Dry-run purchases are excluded from running totals by convention
                 purchase.RecordDryRunFill(
                     Quantity.From(roundedQuantity),
                     currentPrice,
-                    UsdAmount.From(roundedQuantity * currentPriceDecimal));
+                    UsdAmount.From(roundedQuantity * currentPriceDecimal),
+                    dbTotalBtc,
+                    dbTotalCost,
+                    dbPurchaseCount);
             }
             else
             {
@@ -174,13 +196,18 @@ public class DcaExecutionService(
                     // Order filled (fully or partially)
                     var filledQty = decimal.Parse(filled.TotalSz, CultureInfo.InvariantCulture);
                     var avgPrice = decimal.Parse(filled.AvgPx, CultureInfo.InvariantCulture);
+                    var actualCost = filledQty * avgPrice;
 
+                    // Include the current purchase in running totals (not yet committed to DB)
                     purchase.RecordFill(
                         Quantity.From(filledQty),
                         Price.From(avgPrice),
-                        UsdAmount.From(filledQty * avgPrice),
+                        UsdAmount.From(actualCost),
                         filled.Oid.ToString(),
-                        roundedQuantity);
+                        roundedQuantity,
+                        dbTotalBtc + filledQty,
+                        dbTotalCost + actualCost,
+                        dbPurchaseCount + 1);
 
                     logger.LogInformation("Order filled: {Quantity} BTC at {Price}, status: {Status}",
                         filledQty, avgPrice, purchase.Status);

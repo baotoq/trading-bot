@@ -2,24 +2,21 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using TradingBot.ApiService.Application.Events;
 using TradingBot.ApiService.Infrastructure.Data;
-using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Firebase;
+using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ApiService.Models;
 
 namespace TradingBot.ApiService.Application.Handlers;
 
-public class PurchaseCompletedHandler(
+public class TelegramPurchaseCompletedEventHandler(
     TelegramNotificationService telegramService,
-    FcmNotificationService fcmService,
     TradingBotDbContext dbContext,
     HyperliquidClient hyperliquidClient,
-    ILogger<PurchaseCompletedHandler> logger) : INotificationHandler<PurchaseCompletedEvent>
+    ILogger<TelegramPurchaseCompletedEventHandler> logger) : INotificationHandler<PurchaseCompletedEvent>
 {
     public async Task Handle(PurchaseCompletedEvent notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling PurchaseCompletedEvent for purchase {PurchaseId}", notification.PurchaseId);
-
         try
         {
             var purchase = await dbContext.Purchases
@@ -27,31 +24,18 @@ public class PurchaseCompletedHandler(
 
             if (purchase is null)
             {
-                logger.LogWarning("Purchase {PurchaseId} not found when handling PurchaseCompletedEvent", notification.PurchaseId);
+                logger.LogWarning("Purchase {PurchaseId} not found when handling PurchaseCompletedEvent for Telegram", notification.PurchaseId);
                 return;
             }
 
-            // Query running totals from database (exclude dry-run purchases)
-            var totals = await dbContext.Purchases
-                .Where(p => p.Status == PurchaseStatus.Filled || p.Status == PurchaseStatus.PartiallyFilled)
-                .Where(p => !p.IsDryRun)
-                .GroupBy(p => 1)
-                .Select(g => new
-                {
-                    TotalBtc = g.Sum(p => p.Quantity),
-                    TotalUsd = g.Sum(p => p.Cost),
-                    PurchaseCount = g.Count()
-                })
-                .FirstOrDefaultAsync(cancellationToken);
-
-            var totalBtc = totals?.TotalBtc ?? 0m;
-            var totalUsd = totals?.TotalUsd ?? 0m;
+            // Read running totals from enriched event (no DB query needed)
+            var totalBtc = notification.TotalBtc;
+            var totalUsd = notification.TotalCost;
             var avgCost = totalBtc > 0 ? totalUsd / totalBtc : 0m;
 
             // Fetch remaining USDC balance
             var remainingUsdc = await hyperliquidClient.GetBalancesAsync(cancellationToken);
 
-            // TODO: Phase 4 will track actual BTC balance, for now use filled quantity
             var currentBtcBalance = purchase.Quantity;
 
             // Build multiplier reasoning
@@ -84,23 +68,6 @@ public class PurchaseCompletedHandler(
                 """;
 
             await telegramService.SendMessageAsync(message, cancellationToken);
-
-            // Send FCM push notification
-            try
-            {
-                var pushTitle = purchase.IsDryRun ? "[SIM] BTC Purchased" : "BTC Purchased";
-                var pushBody = $"{purchase.Quantity.Value:F5} BTC at ${purchase.Price.Value:N2} ({purchase.Multiplier.Value:F1}x)";
-                var data = new Dictionary<string, string>
-                {
-                    ["type"] = "purchase_completed",
-                    ["route"] = "/history"
-                };
-                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
-            }
-            catch (Exception fcmEx)
-            {
-                logger.LogError(fcmEx, "Error sending FCM notification for completed purchase");
-            }
         }
         catch (Exception ex)
         {
@@ -108,7 +75,7 @@ public class PurchaseCompletedHandler(
         }
     }
 
-    private string BuildMultiplierReasoning(Purchase p)
+    private static string BuildMultiplierReasoning(Purchase p)
     {
         // Standard buy (no multiplier applied)
         if (p.Multiplier.Value == 1.0m && (string.IsNullOrEmpty(p.MultiplierTier) || p.MultiplierTier == "None"))
@@ -145,5 +112,30 @@ public class PurchaseCompletedHandler(
 
         // Fallback if multiplier > 1 but no clear reason
         return $"Buying {p.Multiplier.Value:F1}x (tier: {p.MultiplierTier ?? "unknown"})";
+    }
+}
+
+public class FcmPurchaseCompletedEventHandler(
+    FcmNotificationService fcmService,
+    ILogger<FcmPurchaseCompletedEventHandler> logger) : INotificationHandler<PurchaseCompletedEvent>
+{
+    public async Task Handle(PurchaseCompletedEvent notification, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var pushTitle = notification.IsDryRun ? "[SIM] BTC Purchased" : "BTC Purchased";
+            var pushBody = $"{notification.Quantity:F5} BTC at ${notification.Price:N2} ({notification.Multiplier:F1}x)";
+            var data = new Dictionary<string, string>
+            {
+                ["type"] = "purchase_completed",
+                ["route"] = "/history"
+            };
+
+            await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending FCM notification for completed purchase");
+        }
     }
 }

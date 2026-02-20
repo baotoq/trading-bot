@@ -54,12 +54,12 @@ public class PurchaseSpecsTests : IClassFixture<PostgresFixture>
         // Seed purchases
         // A: Filled, not dry-run -> should be included
         var purchaseA = CreatePurchase("5% Drop");
-        purchaseA.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-a", 0.0002m);
+        purchaseA.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-a", 0.0002m, 0.0002m, 10m, 1);
         purchaseA.ClearDomainEvents();
 
         // B: Filled, not dry-run, no tier -> should be included
         var purchaseB = CreatePurchase(null);
-        purchaseB.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-b", 0.0002m);
+        purchaseB.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-b", 0.0002m, 0.0004m, 20m, 2);
         purchaseB.ClearDomainEvents();
 
         // C: Failed, not dry-run -> should be excluded (not Filled/PartiallyFilled)
@@ -78,12 +78,12 @@ public class PurchaseSpecsTests : IClassFixture<PostgresFixture>
             ma200Day: 0m,
             isDryRun: true);
         purchaseD.ClearDomainEvents();
-        purchaseD.RecordDryRunFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m));
+        purchaseD.RecordDryRunFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), 0m, 0m, 0);
         purchaseD.ClearDomainEvents();
 
         // E: PartiallyFilled, not dry-run -> should be included
         var purchaseE = CreatePurchase("10% Drop");
-        purchaseE.RecordFill(Quantity.From(0.00015m), Price.From(50_000m), UsdAmount.From(7.5m), "order-e", 0.0002m); // partial: < 95% of requested
+        purchaseE.RecordFill(Quantity.From(0.00015m), Price.From(50_000m), UsdAmount.From(7.5m), "order-e", 0.0002m, 0.00055m, 27.5m, 3); // partial: < 95% of requested
         purchaseE.ClearDomainEvents();
 
         db.Purchases.AddRange(purchaseA, purchaseB, purchaseC, purchaseD, purchaseE);
@@ -277,7 +277,7 @@ public class PurchaseSpecsTests : IClassFixture<PostgresFixture>
         // Seed: mix of status, dates, dry-run flags
         // Filled Jan, not dry-run -> INCLUDED (filled + in date range)
         var filledJan = CreatePurchase();
-        filledJan.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-1", 0.0002m);
+        filledJan.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-1", 0.0002m, 0.0002m, 10m, 1);
         filledJan.ClearDomainEvents();
 
         // Failed Jan, not dry-run -> EXCLUDED (not filled)
@@ -287,7 +287,7 @@ public class PurchaseSpecsTests : IClassFixture<PostgresFixture>
 
         // Filled Feb, not dry-run -> EXCLUDED (outside date range)
         var filledFeb = CreatePurchase();
-        filledFeb.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-3", 0.0002m);
+        filledFeb.RecordFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), "order-3", 0.0002m, 0.0004m, 20m, 2);
         filledFeb.ClearDomainEvents();
 
         // Filled Jan, dry-run -> EXCLUDED (dry run)
@@ -295,7 +295,7 @@ public class PurchaseSpecsTests : IClassFixture<PostgresFixture>
             Price.From(50_000m), UsdAmount.From(10m), Multiplier.From(1m),
             null, Percentage.From(0m), 0m, 0m, isDryRun: true);
         dryRunJan.ClearDomainEvents();
-        dryRunJan.RecordDryRunFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m));
+        dryRunJan.RecordDryRunFill(Quantity.From(0.0002m), Price.From(50_000m), UsdAmount.From(10m), 0m, 0m, 0);
         dryRunJan.ClearDomainEvents();
 
         db.Purchases.AddRange(filledJan, failedJan, filledFeb, dryRunJan);

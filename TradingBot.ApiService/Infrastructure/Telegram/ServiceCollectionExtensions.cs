@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
 
         // Register MediatR
         services.AddMediatR(cfg =>
-            cfg.RegisterServicesFromAssembly(typeof(PurchaseCompletedHandler).Assembly));
+            cfg.RegisterServicesFromAssembly(typeof(TelegramPurchaseCompletedEventHandler).Assembly));
 
         return services;
     }

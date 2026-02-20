@@ -7,16 +7,13 @@ using TradingBot.ApiService.Infrastructure.Telegram;
 
 namespace TradingBot.ApiService.Application.Handlers;
 
-public class PurchaseFailedHandler(
+public class TelegramPurchaseFailedEventHandler(
     TelegramNotificationService telegramService,
-    FcmNotificationService fcmService,
     TradingBotDbContext dbContext,
-    ILogger<PurchaseFailedHandler> logger) : INotificationHandler<PurchaseFailedEvent>
+    ILogger<TelegramPurchaseFailedEventHandler> logger) : INotificationHandler<PurchaseFailedEvent>
 {
     public async Task Handle(PurchaseFailedEvent notification, CancellationToken cancellationToken)
     {
-        logger.LogInformation("Handling PurchaseFailedEvent for purchase {PurchaseId}", notification.PurchaseId);
-
         try
         {
             var purchase = await dbContext.Purchases
@@ -24,7 +21,7 @@ public class PurchaseFailedHandler(
 
             if (purchase is null)
             {
-                logger.LogWarning("Purchase {PurchaseId} not found when handling PurchaseFailedEvent", notification.PurchaseId);
+                logger.LogWarning("Purchase {PurchaseId} not found when handling PurchaseFailedEvent for Telegram", notification.PurchaseId);
                 return;
             }
 
@@ -47,27 +44,35 @@ public class PurchaseFailedHandler(
                 """;
 
             await telegramService.SendMessageAsync(message, cancellationToken);
-
-            // Send FCM push notification
-            try
-            {
-                var pushTitle = "Purchase Failed";
-                var pushBody = $"Error: {errorMessage}";
-                var data = new Dictionary<string, string>
-                {
-                    ["type"] = "purchase_failed",
-                    ["route"] = "/home"
-                };
-                await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
-            }
-            catch (Exception fcmEx)
-            {
-                logger.LogError(fcmEx, "Error sending FCM notification for failed purchase");
-            }
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error sending Telegram notification for failed purchase");
+        }
+    }
+}
+
+public class FcmPurchaseFailedEventHandler(
+    FcmNotificationService fcmService,
+    ILogger<FcmPurchaseFailedEventHandler> logger) : INotificationHandler<PurchaseFailedEvent>
+{
+    public async Task Handle(PurchaseFailedEvent notification, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var pushTitle = "Purchase Failed";
+            var pushBody = $"Error: {notification.FailureReason ?? "Unknown error"}";
+            var data = new Dictionary<string, string>
+            {
+                ["type"] = "purchase_failed",
+                ["route"] = "/home"
+            };
+
+            await fcmService.SendToAllDevicesAsync(pushTitle, pushBody, data, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error sending FCM notification for failed purchase");
         }
     }
 }

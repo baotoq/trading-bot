@@ -83,7 +83,8 @@ public class Purchase : AggregateRoot<PurchaseId>
         return purchase;
     }
 
-    public void RecordDryRunFill(Quantity quantity, Price price, UsdAmount actualCost)
+    public void RecordDryRunFill(Quantity quantity, Price price, UsdAmount actualCost,
+        decimal totalBtc, decimal totalCost, int purchaseCount)
     {
         Quantity = quantity;
         Price = price;
@@ -98,10 +99,16 @@ public class Purchase : AggregateRoot<PurchaseId>
             price.Value,
             quantity.Value,
             actualCost.Value,
+            Multiplier.Value,
+            IsDryRun,
+            totalBtc,
+            totalCost,
+            purchaseCount,
             DateTimeOffset.UtcNow));
     }
 
-    public void RecordFill(Quantity quantity, Price avgPrice, UsdAmount actualCost, string orderId, decimal requestedQuantity)
+    public void RecordFill(Quantity quantity, Price avgPrice, UsdAmount actualCost, string orderId, decimal requestedQuantity,
+        decimal totalBtc, decimal totalCost, int purchaseCount)
     {
         Quantity = quantity;
         Price = avgPrice;
@@ -117,6 +124,11 @@ public class Purchase : AggregateRoot<PurchaseId>
             avgPrice.Value,
             quantity.Value,
             actualCost.Value,
+            Multiplier.Value,
+            IsDryRun,
+            totalBtc,
+            totalCost,
+            purchaseCount,
             DateTimeOffset.UtcNow));
     }
 

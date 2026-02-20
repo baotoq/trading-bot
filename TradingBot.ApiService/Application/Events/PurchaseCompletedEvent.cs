@@ -8,4 +8,9 @@ public record PurchaseCompletedEvent(
     decimal Price,
     decimal Quantity,
     decimal Cost,
+    decimal Multiplier,
+    bool IsDryRun,
+    decimal TotalBtc,
+    decimal TotalCost,
+    int PurchaseCount,
     DateTimeOffset OccurredAt) : IDomainEvent;
