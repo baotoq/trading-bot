@@ -184,7 +184,7 @@ Plans:
 | 18. Specification Pattern | v2.0 | 3/3 | Complete | 2026-02-19 |
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
 | 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
-| 21. Portfolio + Status Screens | 2/2 | Complete   | 2026-02-20 | - |
+| 21. Portfolio + Status Screens | 2/2 | Complete    | 2026-02-20 | - |
 | 22. Price Chart + Purchase History | v3.0 | 0/2 | Not started | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
 | 24. Push Notifications | v3.0 | 0/3 | Not started | - |
