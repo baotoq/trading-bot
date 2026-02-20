@@ -9,27 +9,27 @@
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA
-**Current focus:** Phase 28 — Portfolio API Endpoints
+**Current focus:** Phase 29 — Flutter Portfolio UI
 
 ## Current Position
 
-Phase: 27 of 29 (Price Feeds & Market Data) — COMPLETE
+Phase: 28 of 29 (Portfolio Backend API) — COMPLETE
 Plan: 2 of 2 (all executed)
-Status: Phase 27 complete
-Last activity: 2026-02-20 — Phase 27 complete (2 plans, 3 providers, 11 new files)
+Status: Phase 28 complete
+Last activity: 2026-02-20 — Phase 28 complete (2 plans, domain model extensions + auto-import + 9 API endpoints)
 
-Progress: [#####░░░░░] 50% (v4.0)
+Progress: [#######░░░] 75% (v4.0)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 61 (across v1.0-v4.0)
+- Total plans completed: 63 (across v1.0-v4.0)
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (11 plans)
-- v4.0: in progress (5 plans so far)
+- v4.0: in progress (7 plans so far)
 
 **By Milestone:**
 
@@ -40,7 +40,7 @@ Progress: [#####░░░░░] 50% (v4.0)
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
 | v3.0 | 20-25 | 11 | Complete |
-| v4.0 | 26-29 | 5/TBD | Phase 27 complete |
+| v4.0 | 26-29 | 7/TBD | Phase 28 complete |
 
 ## Accumulated Context
 
@@ -72,6 +72,14 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Shared resilience config: 2 retries, 1s exponential backoff, 15s total/8s attempt timeout
 - VNDirect close prices multiplied by 1000 to convert from thousands-of-VND to actual VND
 
+**Phase 28 decisions:**
+- SourcePurchaseId uses optional parameter (default null) rather than separate overload to keep API surface minimal
+- CoinGecko ID mapping via static dictionary (BTC=bitcoin, ETH=ethereum) — extensible for future coins
+- P&L uses weighted average cost from buy transactions only (sells reduce position but don't change avg cost basis)
+- Fixed deposit accrued/projected values computed per request (no caching — computation is cheap)
+- Price feed failures use 0 for that asset, don't fail portfolio summary endpoint
+- Historical migration triggers automatically when BTC asset has no bot-imported transactions on first summary call
+
 **v3.0 Flutter conventions carried forward:**
 - Dark-only theme, NavigationBar (Material 3) + CupertinoIcons, StatefulShellRoute
 - Manual fromJson for DTO models (no json_serializable), intl as explicit dependency
@@ -93,8 +101,8 @@ v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 27 complete — all 2 plans executed (shared types + CoinGecko provider, VNDirect + exchange rate + DI wiring)
-Next step: `/gsd:plan-phase 28` (Portfolio API Endpoints)
+Stopped at: Phase 28 complete — all 2 plans executed (domain model extensions + auto-import handler + migration service, portfolio + fixed deposit API endpoints)
+Next step: `/gsd:plan-phase 29` (Flutter Portfolio UI)
 
 ---
-*State updated: 2026-02-20 after Phase 27 completion*
+*State updated: 2026-02-20 after Phase 28 completion*
