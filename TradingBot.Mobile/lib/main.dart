@@ -8,10 +8,11 @@ import 'app/theme.dart';
 import 'core/api/api_client.dart';
 import 'core/services/fcm_service.dart';
 import 'features/portfolio/data/currency_provider.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   final prefs = await SharedPreferences.getInstance();
 
   runApp(
