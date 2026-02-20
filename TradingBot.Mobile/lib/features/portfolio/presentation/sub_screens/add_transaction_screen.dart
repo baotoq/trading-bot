@@ -40,7 +40,7 @@ class AddTransactionScreen extends HookConsumerWidget {
     final fdStartDateController = useTextEditingController(
         text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
     final fdMaturityDateController = useTextEditingController();
-    final compoundingFreq = useState('None');
+    final compoundingFreq = useState('Simple');
 
     final portfolioData = ref.watch(portfolioPageDataProvider);
     final assets = portfolioData.value?.assets ?? [];
@@ -342,7 +342,7 @@ class AddTransactionScreen extends HookConsumerWidget {
                 decoration: const InputDecoration(
                     labelText: 'Compounding frequency'),
                 items: const [
-                  DropdownMenuItem(value: 'None', child: Text('None')),
+                  DropdownMenuItem(value: 'Simple', child: Text('Simple (No Compounding)')),
                   DropdownMenuItem(
                       value: 'Monthly', child: Text('Monthly')),
                   DropdownMenuItem(

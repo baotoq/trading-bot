@@ -87,6 +87,7 @@ public static class PortfolioEndpoints
         var totalCostUsd = 0m;
         var totalCostVnd = 0m;
         var allocationsByType = new Dictionary<string, decimal>();
+        var allocationsByTypeVnd = new Dictionary<string, decimal>();
 
         // Compute per-asset values
         foreach (var asset in assets)
@@ -123,6 +124,7 @@ public static class PortfolioEndpoints
 
             var typeKey = asset.AssetType.ToString();
             allocationsByType[typeKey] = allocationsByType.GetValueOrDefault(typeKey) + assetValueUsd;
+            allocationsByTypeVnd[typeKey] = allocationsByTypeVnd.GetValueOrDefault(typeKey) + assetValueVnd;
         }
 
         // Add fixed deposits (always VND)
@@ -141,6 +143,7 @@ public static class PortfolioEndpoints
             var fdValueUsd = rate > 0 ? fdTotalVnd / rate : 0m;
             totalValueUsd += fdValueUsd;
             allocationsByType["FixedDeposit"] = allocationsByType.GetValueOrDefault("FixedDeposit") + fdValueUsd;
+            allocationsByTypeVnd["FixedDeposit"] = allocationsByTypeVnd.GetValueOrDefault("FixedDeposit") + fdTotalVnd;
         }
 
         // Compute allocations
@@ -148,6 +151,7 @@ public static class PortfolioEndpoints
             .Select(kvp => new AllocationDto(
                 kvp.Key,
                 Math.Round(kvp.Value, 2),
+                Math.Round(allocationsByTypeVnd.GetValueOrDefault(kvp.Key), 0),
                 totalValueUsd > 0 ? Math.Round(kvp.Value / totalValueUsd * 100, 2) : 0))
             .OrderByDescending(a => a.Percentage)
             .ToList();

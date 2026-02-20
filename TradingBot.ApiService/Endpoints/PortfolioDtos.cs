@@ -13,7 +13,7 @@ public record PortfolioSummaryResponse(
     DateTimeOffset? ExchangeRateUpdatedAt
 );
 
-public record AllocationDto(string AssetType, decimal ValueUsd, decimal Percentage);
+public record AllocationDto(string AssetType, decimal ValueUsd, decimal ValueVnd, decimal Percentage);
 
 // Per-asset breakdown
 public record PortfolioAssetResponse(

@@ -2,17 +2,20 @@ class AllocationDto {
   AllocationDto({
     required this.assetType,
     required this.valueUsd,
+    required this.valueVnd,
     required this.percentage,
   });
 
   factory AllocationDto.fromJson(Map<String, dynamic> json) => AllocationDto(
         assetType: json['assetType'] as String,
         valueUsd: (json['valueUsd'] as num).toDouble(),
+        valueVnd: (json['valueVnd'] as num).toDouble(),
         percentage: (json['percentage'] as num).toDouble(),
       );
 
   final String assetType;
   final double valueUsd;
+  final double valueVnd;
   final double percentage;
 }
 

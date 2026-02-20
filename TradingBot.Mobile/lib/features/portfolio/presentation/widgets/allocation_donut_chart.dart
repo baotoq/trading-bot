@@ -160,7 +160,7 @@ class _AllocationDonutChartState extends State<AllocationDonutChart> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        '${_labelForType(allocation.assetType)}: ${allocation.percentage.toStringAsFixed(1)}% - ${_formatValue(allocation.valueUsd)}',
+        '${_labelForType(allocation.assetType)}: ${allocation.percentage.toStringAsFixed(1)}% - ${_formatValue(widget.isVnd ? allocation.valueVnd : allocation.valueUsd)}',
         style: const TextStyle(fontSize: 13),
       ),
     );
