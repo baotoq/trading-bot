@@ -45,6 +45,11 @@ class ScaffoldWithNavigation extends StatelessWidget {
             selectedIcon: Icon(CupertinoIcons.settings_solid),
             label: 'Config',
           ),
+          NavigationDestination(
+            icon: Icon(CupertinoIcons.briefcase),
+            selectedIcon: Icon(CupertinoIcons.briefcase_fill),
+            label: 'Portfolio',
+          ),
         ],
       ),
     );

@@ -25,6 +25,7 @@ public static class PortfolioEndpoints
 
         group.MapGet("/summary", GetSummaryAsync);
         group.MapGet("/assets", GetAssetsAsync);
+        group.MapGet("/assets/{id}/transactions", GetTransactionsAsync);
         group.MapPost("/assets/{id}/transactions", CreateTransactionAsync);
 
         return app;
@@ -241,6 +242,47 @@ public static class PortfolioEndpoints
         }
 
         return Results.Ok(result);
+    }
+
+    private static async Task<IResult> GetTransactionsAsync(
+        TradingBotDbContext db,
+        Guid id,
+        string? type,
+        DateOnly? startDate,
+        DateOnly? endDate,
+        CancellationToken ct)
+    {
+        var assetId = PortfolioAssetId.From(id);
+        var assetExists = await db.PortfolioAssets.AnyAsync(a => a.Id == assetId, ct);
+        if (!assetExists)
+            return Results.NotFound();
+
+        var query = db.AssetTransactions.Where(t => t.PortfolioAssetId == assetId);
+
+        if (!string.IsNullOrEmpty(type) && Enum.TryParse<TransactionType>(type, ignoreCase: true, out var txType))
+            query = query.Where(t => t.Type == txType);
+
+        if (startDate.HasValue)
+            query = query.Where(t => t.Date >= startDate.Value);
+
+        if (endDate.HasValue)
+            query = query.Where(t => t.Date <= endDate.Value);
+
+        var transactions = await query
+            .OrderByDescending(t => t.Date)
+            .ThenByDescending(t => t.CreatedAt)
+            .Select(t => new TransactionResponse(
+                t.Id.Value,
+                t.Date,
+                t.Quantity,
+                t.PricePerUnit,
+                t.Currency.ToString(),
+                t.Type.ToString(),
+                t.Fee,
+                t.Source.ToString()))
+            .ToListAsync(ct);
+
+        return Results.Ok(transactions);
     }
 
     private static async Task<IResult> CreateTransactionAsync(

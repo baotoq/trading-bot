@@ -5,6 +5,10 @@ import '../features/chart/presentation/chart_screen.dart';
 import '../features/config/presentation/config_screen.dart';
 import '../features/history/presentation/history_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/portfolio/presentation/portfolio_screen.dart';
+import '../features/portfolio/presentation/sub_screens/add_transaction_screen.dart';
+import '../features/portfolio/presentation/sub_screens/fixed_deposit_detail_screen.dart';
+import '../features/portfolio/presentation/sub_screens/transaction_history_screen.dart';
 import '../shared/navigation_shell.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -17,6 +21,8 @@ final GlobalKey<NavigatorState> _historyNavKey =
     GlobalKey<NavigatorState>(debugLabel: 'history');
 final GlobalKey<NavigatorState> _configNavKey =
     GlobalKey<NavigatorState>(debugLabel: 'config');
+final GlobalKey<NavigatorState> _portfolioNavKey =
+    GlobalKey<NavigatorState>(debugLabel: 'portfolio');
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
@@ -59,6 +65,34 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/config',
               builder: (context, state) => const ConfigScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          navigatorKey: _portfolioNavKey,
+          routes: [
+            GoRoute(
+              path: '/portfolio',
+              builder: (context, state) => const PortfolioScreen(),
+              routes: [
+                GoRoute(
+                  path: 'add-transaction',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const AddTransactionScreen(),
+                ),
+                GoRoute(
+                  path: 'transaction-history',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const TransactionHistoryScreen(),
+                ),
+                GoRoute(
+                  path: 'fixed-deposit/:id',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (context, state) => FixedDepositDetailScreen(
+                    id: state.pathParameters['id']!,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
