@@ -185,7 +185,7 @@ Plans:
 | 19. Dashboard Nullable Price Fix | v2.0 | 1/1 | Complete | 2026-02-19 |
 | 20. Flutter Project Setup + Core Infrastructure | v3.0 | Complete    | 2026-02-19 | 2026-02-19 |
 | 21. Portfolio + Status Screens | 2/2 | Complete    | 2026-02-20 | - |
-| 22. Price Chart + Purchase History | 2/2 | Complete   | 2026-02-20 | - |
+| 22. Price Chart + Purchase History | 2/2 | Complete    | 2026-02-20 | - |
 | 23. Configuration Screen | v3.0 | 0/1 | Not started | - |
 | 24. Push Notifications | v3.0 | 0/3 | Not started | - |
 | 25. Nuxt Deprecation | v3.0 | 0/1 | Not started | - |
