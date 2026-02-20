@@ -154,10 +154,10 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. Running `dotnet run` in TradingBot.AppHost does not start the Nuxt dashboard container
   2. The TradingBot.Dashboard directory and all its code remain intact and undeleted
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 25-01: Remove Nuxt resource from AppHost.cs orchestration
+- [ ] 25-01-PLAN.md — Remove Nuxt dashboard NodeApp resource from AppHost.cs orchestration
 
 ## Progress
 
