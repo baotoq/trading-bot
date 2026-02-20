@@ -1,20 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/error_snackbar.dart';
 import '../../../core/widgets/retry_widget.dart';
-
-part 'home_screen.g.dart';
-
-@riverpod
-Future<String> homeData(Ref ref) async {
-  // Placeholder — Phase 21 replaces with real portfolio data.
-  // This demonstrates the Riverpod async pattern for error handling.
-  await Future<void>.delayed(const Duration(milliseconds: 500));
-  return 'Home';
-}
+import '../data/home_providers.dart';
 
 class HomeScreen extends HookConsumerWidget {
   const HomeScreen({super.key});
@@ -43,13 +33,15 @@ class HomeScreen extends HookConsumerWidget {
             child: switch (homeData) {
               AsyncData(:final value) => Center(
                   child: Text(
-                    value,
+                    // Placeholder: displays total BTC to prove data wiring works.
+                    // Plan 02 will replace with the full portfolio UI.
+                    '${value.portfolio.totalBtc} BTC',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
               AsyncError() when cachedValue != null => Center(
                   child: Text(
-                    cachedValue,
+                    '${cachedValue.portfolio.totalBtc} BTC',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 ),
