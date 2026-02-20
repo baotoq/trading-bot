@@ -109,6 +109,19 @@ None - no external service configuration required.
 - Donut chart shows correct currency-denominated values in tooltip
 - Users can create new portfolio assets directly from the mobile app without needing manual DB inserts
 
+## Self-Check: PASSED
+
+- SUMMARY.md: FOUND
+- PortfolioDtos.cs: FOUND
+- PortfolioEndpoints.cs: FOUND
+- portfolio_summary_response.dart: FOUND
+- allocation_donut_chart.dart: FOUND
+- add_transaction_screen.dart: FOUND
+- portfolio_repository.dart: FOUND
+- Commit 80b0611 (Task 1): FOUND
+- Commit b31ff94 (Task 2): FOUND
+- Commit 4072b96 (docs): FOUND
+
 ---
 *Phase: 30-critical-bug-fixes*
 *Completed: 2026-02-20*
