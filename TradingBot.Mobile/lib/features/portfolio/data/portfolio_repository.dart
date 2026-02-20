@@ -74,4 +74,9 @@ class PortfolioRepository {
     return FixedDepositResponse.fromJson(
         response.data as Map<String, dynamic>);
   }
+
+  Future<Map<String, dynamic>> createAsset(Map<String, dynamic> body) async {
+    final response = await _dio.post('/api/portfolio/assets', data: body);
+    return response.data as Map<String, dynamic>;
+  }
 }

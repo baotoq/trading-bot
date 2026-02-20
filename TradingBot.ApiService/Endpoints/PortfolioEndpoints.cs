@@ -25,6 +25,7 @@ public static class PortfolioEndpoints
 
         group.MapGet("/summary", GetSummaryAsync);
         group.MapGet("/assets", GetAssetsAsync);
+        group.MapPost("/assets", CreateAssetAsync);
         group.MapGet("/assets/{id}/transactions", GetTransactionsAsync);
         group.MapPost("/assets/{id}/transactions", CreateTransactionAsync);
 
@@ -345,6 +346,45 @@ public static class PortfolioEndpoints
         {
             return Results.BadRequest(ex.Message);
         }
+    }
+
+    private static async Task<IResult> CreateAssetAsync(
+        TradingBotDbContext db,
+        CreateAssetRequest request,
+        ILogger<Program> logger,
+        CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(request.Name))
+            return Results.BadRequest("Name is required");
+
+        if (string.IsNullOrWhiteSpace(request.Ticker))
+            return Results.BadRequest("Ticker is required");
+
+        if (!Enum.TryParse<AssetType>(request.AssetType, ignoreCase: true, out var assetType))
+            return Results.BadRequest("Invalid asset type. Valid values: Crypto, ETF");
+
+        if (!Enum.TryParse<Currency>(request.NativeCurrency, ignoreCase: true, out var currency))
+            return Results.BadRequest("Invalid currency. Valid values: USD, VND");
+
+        var normalizedTicker = request.Ticker.Trim().ToUpper();
+        var exists = await db.PortfolioAssets.AnyAsync(a => a.Ticker == normalizedTicker, ct);
+        if (exists)
+            return Results.Conflict($"Asset with ticker '{normalizedTicker}' already exists");
+
+        var asset = PortfolioAsset.Create(
+            request.Name.Trim(),
+            normalizedTicker,
+            assetType,
+            currency);
+
+        db.PortfolioAssets.Add(asset);
+        await db.SaveChangesAsync(ct);
+
+        logger.LogInformation("Created portfolio asset {Ticker} ({AssetType})", asset.Ticker, asset.AssetType);
+
+        return Results.Created(
+            $"/api/portfolio/assets/{asset.Id.Value}",
+            new CreateAssetResponse(asset.Id.Value, asset.Name, asset.Ticker, asset.AssetType.ToString(), asset.NativeCurrency.ToString()));
     }
 
     private static async Task<(decimal Price, PriceFeedResult? Feed)> GetCurrentPriceAsync(

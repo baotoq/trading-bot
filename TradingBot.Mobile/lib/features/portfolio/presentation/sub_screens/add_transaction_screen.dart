@@ -10,7 +10,7 @@ import '../../../../app/theme.dart';
 import '../../data/models/portfolio_asset_response.dart';
 import '../../data/portfolio_providers.dart';
 
-enum FormMode { transaction, fixedDeposit }
+enum FormMode { transaction, fixedDeposit, asset }
 
 class AddTransactionScreen extends HookConsumerWidget {
   const AddTransactionScreen({super.key});
@@ -41,6 +41,12 @@ class AddTransactionScreen extends HookConsumerWidget {
         text: DateFormat('yyyy-MM-dd').format(DateTime.now()));
     final fdMaturityDateController = useTextEditingController();
     final compoundingFreq = useState('Simple');
+
+    // Asset creation fields
+    final assetNameController = useTextEditingController();
+    final assetTickerController = useTextEditingController();
+    final assetType = useState('Crypto');
+    final assetCurrency = useState('USD');
 
     final portfolioData = ref.watch(portfolioPageDataProvider);
     final assets = portfolioData.value?.assets ?? [];
@@ -147,6 +153,41 @@ class AddTransactionScreen extends HookConsumerWidget {
       }
     }
 
+    Future<void> submitAsset() async {
+      if (assetNameController.text.isEmpty || assetTickerController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill in all required fields')),
+        );
+        return;
+      }
+      isSaving.value = true;
+      try {
+        final body = {
+          'name': assetNameController.text,
+          'ticker': assetTickerController.text,
+          'assetType': assetType.value,
+          'nativeCurrency': assetCurrency.value,
+        };
+        await ref.read(portfolioRepositoryProvider).createAsset(body);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Asset created')),
+          );
+          context.pop();
+          ref.invalidate(portfolioPageDataProvider);
+        }
+      } on DioException catch (e) {
+        if (context.mounted) {
+          final msg = e.response?.data?.toString() ?? 'Failed to create asset';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(msg)),
+          );
+        }
+      } finally {
+        isSaving.value = false;
+      }
+    }
+
     final filteredAssets = assets
         .where((a) =>
             a.name.toLowerCase().contains(assetQuery.value.toLowerCase()) ||
@@ -169,6 +210,10 @@ class AddTransactionScreen extends HookConsumerWidget {
                 ButtonSegment(
                   value: FormMode.fixedDeposit,
                   label: Text('Fixed Deposit'),
+                ),
+                ButtonSegment(
+                  value: FormMode.asset,
+                  label: Text('New Asset'),
                 ),
               ],
               selected: {mode.value},
@@ -290,7 +335,7 @@ class AddTransactionScreen extends HookConsumerWidget {
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
               ),
-            ] else ...[
+            ] else if (mode.value == FormMode.fixedDeposit) ...[
               // Fixed deposit fields
               TextField(
                 controller: bankNameController,
@@ -354,6 +399,38 @@ class AddTransactionScreen extends HookConsumerWidget {
                 ],
                 onChanged: (v) => compoundingFreq.value = v!,
               ),
+            ] else ...[
+              // New asset fields
+              TextField(
+                controller: assetNameController,
+                decoration: const InputDecoration(labelText: 'Asset name'),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: assetTickerController,
+                decoration: const InputDecoration(labelText: 'Ticker symbol'),
+                textCapitalization: TextCapitalization.characters,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: assetType.value,
+                decoration: const InputDecoration(labelText: 'Asset type'),
+                items: const [
+                  DropdownMenuItem(value: 'Crypto', child: Text('Crypto')),
+                  DropdownMenuItem(value: 'ETF', child: Text('ETF')),
+                ],
+                onChanged: (v) => assetType.value = v!,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: assetCurrency.value,
+                decoration: const InputDecoration(labelText: 'Native currency'),
+                items: const [
+                  DropdownMenuItem(value: 'USD', child: Text('USD')),
+                  DropdownMenuItem(value: 'VND', child: Text('VND')),
+                ],
+                onChanged: (v) => assetCurrency.value = v!,
+              ),
             ],
             const SizedBox(height: 32),
             FilledButton.icon(
@@ -362,8 +439,10 @@ class AddTransactionScreen extends HookConsumerWidget {
                   : () {
                       if (mode.value == FormMode.transaction) {
                         submitTransaction();
-                      } else {
+                      } else if (mode.value == FormMode.fixedDeposit) {
                         submitFixedDeposit();
+                      } else {
+                        submitAsset();
                       }
                     },
               icon: isSaving.value

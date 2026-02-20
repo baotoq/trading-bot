@@ -54,3 +54,8 @@ public record TransactionResponse(
     decimal? Fee,
     string Source
 );
+
+// Asset creation
+public record CreateAssetRequest(string Name, string Ticker, string AssetType, string NativeCurrency);
+
+public record CreateAssetResponse(Guid Id, string Name, string Ticker, string AssetType, string NativeCurrency);
