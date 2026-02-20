@@ -89,10 +89,12 @@
   3. Fixed deposit accrued value computes correctly for both simple interest and compound (monthly/quarterly/semi-annual/annual) scenarios
   4. Vogen typed IDs (PortfolioAssetId, AssetTransactionId, FixedDepositId) are registered in ConfigureConventions() and pass round-trip EF tests
   5. VndAmount and integer ETF share quantities use correct precision (VND: no decimals, ETF: whole numbers only)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 26-01: TBD
+- [ ] 26-01-PLAN.md — Domain models: typed IDs, VndAmount, enums, PortfolioAsset/AssetTransaction/FixedDeposit entities
+- [ ] 26-02-PLAN.md — InterestCalculator TDD: accrued value calculation for all compounding frequencies
+- [ ] 26-03-PLAN.md — EF Core configuration, migration, and integration tests
 
 ### Phase 27: Price Feed Infrastructure
 **Goal**: Live prices are available for all asset types — crypto from CoinGecko, VN ETFs from VNDirect finfo, and USD/VND rate from open.er-api.com — with Redis caching and graceful degradation
