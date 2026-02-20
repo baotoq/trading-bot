@@ -122,10 +122,11 @@ Plans:
   3. All historical DCA bot purchases from the existing Purchases table are migrated into AssetTransactions on first setup
   4. POST /api/portfolio/assets/{id}/transactions accepts manual buy/sell with date, quantity, price, and currency; rejects fractional ETF quantities and future dates
   5. POST/GET/PUT/DELETE /api/portfolio/fixed-deposits endpoints handle the full fixed deposit lifecycle including accrued value calculation
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 28-01: TBD
+- [ ] 28-01-PLAN.md — Domain changes (SourcePurchaseId, FixedDeposit.Update), DCA auto-import handler, historical migration service
+- [ ] 28-02-PLAN.md — Portfolio API endpoints (summary, assets, transactions) + fixed deposit CRUD endpoints
 
 ### Phase 29: Flutter Portfolio UI
 **Goal**: Users can see and manage their full multi-asset portfolio in the Flutter app, with VND/USD toggle, per-asset P&L, allocation chart, and all transaction entry forms
