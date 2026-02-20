@@ -7,5 +7,5 @@ const String kApiBaseUrl = String.fromEnvironment(
 
 const String kApiKey = String.fromEnvironment(
   'API_KEY',
-  defaultValue: '',
+  defaultValue: 'dev-dashboard-key-change-in-production',
 );

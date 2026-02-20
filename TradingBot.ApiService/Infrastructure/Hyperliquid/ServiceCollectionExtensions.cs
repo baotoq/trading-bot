@@ -30,7 +30,6 @@ public static class ServiceCollectionExtensions
         {
             client.BaseAddress = new Uri(hyperliquidOptions.ApiUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
-            client.DefaultRequestHeaders.Add("Content-Type", "application/json");
         })
         .AddStandardResilienceHandler(options =>
         {
