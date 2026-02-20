@@ -26,10 +26,10 @@ Requirements for Flutter iOS mobile app milestone. Each maps to roadmap phases.
 
 ### Charts & History
 
-- [ ] **CHART-01**: User can view BTC price chart with 6 timeframe options (7D/1M/3M/6M/1Y/All)
-- [ ] **CHART-02**: User can see purchase markers on price chart colored by multiplier tier
-- [ ] **CHART-03**: User can see average cost basis dashed line on price chart
-- [ ] **CHART-04**: User can touch chart to see price and date tooltip
+- [x] **CHART-01**: User can view BTC price chart with 6 timeframe options (7D/1M/3M/6M/1Y/All)
+- [x] **CHART-02**: User can see purchase markers on price chart colored by multiplier tier
+- [x] **CHART-03**: User can see average cost basis dashed line on price chart
+- [x] **CHART-04**: User can touch chart to see price and date tooltip
 - [x] **CHART-05**: User can scroll through purchase history with infinite scroll (cursor pagination)
 - [x] **CHART-06**: User can filter purchase history by date range and multiplier tier via bottom sheet
 
@@ -100,10 +100,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-03 | Phase 21 | Complete |
 | PORT-04 | Phase 21 | Complete |
 | PORT-05 | Phase 21 | Complete |
-| CHART-01 | Phase 22 | Pending |
-| CHART-02 | Phase 22 | Pending |
-| CHART-03 | Phase 22 | Pending |
-| CHART-04 | Phase 22 | Pending |
+| CHART-01 | Phase 22 | Complete |
+| CHART-02 | Phase 22 | Complete |
+| CHART-03 | Phase 22 | Complete |
+| CHART-04 | Phase 22 | Complete |
 | CHART-05 | Phase 22 | Complete |
 | CHART-06 | Phase 22 | Complete |
 | CONF-01 | Phase 23 | Pending |
