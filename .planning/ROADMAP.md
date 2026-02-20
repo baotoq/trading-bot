@@ -189,11 +189,12 @@ Plans:
   3. Exchange rate failure returns last cached value (not 0) for VND conversions
   4. PortfolioRepository has updateFixedDeposit/deleteFixedDeposit methods; Flutter UI has edit/delete for fixed deposits
   5. CoinGecko ID mapping supports dynamic lookup (not hardcoded BTC/ETH only)
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — Backend tests (price feed unit tests, portfolio endpoint integration tests) + exchange rate graceful degradation
+- [ ] 32-01-PLAN.md — Price feed unit tests + exchange rate graceful degradation
 - [ ] 32-02-PLAN.md — Flutter fixed deposit CRUD completion + CoinGecko dynamic ID lookup
+- [ ] 32-03-PLAN.md — Integration tests for portfolio and fixed deposit endpoints
 
 ## Progress
 
