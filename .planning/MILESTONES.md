@@ -115,3 +115,34 @@
 
 ---
 
+## v3.0 Flutter Mobile (Shipped: 2026-02-20)
+
+**Delivered:** Native Flutter iOS app replacing the Nuxt web dashboard with full feature parity -- portfolio monitoring, interactive price chart, purchase history, DCA configuration management, and FCM push notifications for buy events and health alerts.
+
+**Phases completed:** 20-25 (6 phases, 11 plans total)
+
+**Key accomplishments:**
+
+- Flutter project scaffold with dark-only Bitcoin theme, go_router 4-tab navigation, and Dio HTTP client with build-time API key injection
+- Portfolio home screen with live BTC price (30s auto-refresh), health badge, countdown timer, and last buy card using Riverpod state management
+- Interactive fl_chart price chart with 6 timeframe presets, purchase markers colored by multiplier tier, average cost line, and touch tooltips
+- Purchase history with infinite scroll cursor pagination, date/tier filter bottom sheet, and AsyncNotifier-based loading state
+- Configuration view/edit screen with numeric fields, time picker, multiplier tier list CRUD, and inline server validation errors
+- FCM push notifications for purchase executed, purchase failed, and missed purchase events with deep-link tap navigation
+- Backend device token management with auto-cleanup of stale FCM tokens
+- Nuxt dashboard removed from Aspire orchestration (code preserved for reference)
+
+**Stats:**
+
+- 63 files created/modified
+- 4,533 insertions / 341 deletions (Dart, C#, YAML, JSON)
+- 6 phases, 11 plans, 44 commits (14 feature/fix/refactor)
+- 1 day from start to ship (2026-02-20)
+- 62 tests passing (unchanged from v2.0)
+
+**Git range:** `5a9a55d` → `HEAD`
+
+**What's next:** Runtime testing on physical device, potential multi-asset support, advanced analytics
+
+---
+

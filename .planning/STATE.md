@@ -1,24 +1,24 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** v3.0 Flutter Mobile
-**Updated:** 2026-02-20 (23-01 complete)
+**Milestone:** v3.0 Flutter Mobile (SHIPPED)
+**Updated:** 2026-02-20 (25-01 complete -- v3.0 shipped)
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-20)
 
 **Core value:** Reliably execute daily BTC spot purchases with smart dip-buying, validated by backtesting, monitored via mobile app
-**Current focus:** Phase 23 -- Configuration Screen (complete)
+**Current focus:** v3.0 complete -- all phases shipped
 
 ## Current Position
 
-Phase: 23 of 25 (Configuration Screen)
-Plan: 01 of 01 complete (Phase 23 complete)
-Status: In progress (Phase 24 next)
-Last activity: 2026-02-20 -- 23-01 complete: Config data layer + view/edit screen with numeric fields, time picker, tier list CRUD, inline server validation errors
+Phase: 25 of 25 (Nuxt Deprecation)
+Plan: 01 of 01 complete (Phase 25 complete)
+Status: Complete -- v3.0 Flutter Mobile shipped
+Last activity: 2026-02-20 -- 25-01 complete: Removed Nuxt dashboard NodeApp resource from Aspire orchestration
 
-Progress: [████░░░░░░] 64% (7/11 plans complete)
+Progress: [██████████] 100% (11/11 plans complete)
 
 ## Milestones Shipped
 
@@ -26,6 +26,7 @@ Progress: [████░░░░░░] 64% (7/11 plans complete)
 - v1.1 Backtesting Engine (2026-02-13) -- 4 phases, 7 plans, 53 tests
 - v1.2 Web Dashboard (2026-02-14) -- 5 phases, 12 plans
 - v2.0 DDD Foundation (2026-02-20) -- 7 phases, 15 plans, 62 tests
+- v3.0 Flutter Mobile (2026-02-20) -- 6 phases, 11 plans
 
 ## Performance Metrics
 
@@ -35,7 +36,7 @@ Progress: [████░░░░░░] 64% (7/11 plans complete)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
-- v3.0: in progress (7 plans)
+- v3.0: 1 day (11 plans)
 
 **By Milestone:**
 
@@ -45,7 +46,7 @@ Progress: [████░░░░░░] 64% (7/11 plans complete)
 | v1.1 | 5-8 | 7 | Complete |
 | v1.2 | 9-12 | 12 | Complete |
 | v2.0 | 13-19 | 15 | Complete |
-| v3.0 | 20-25 | 11 est. | In progress |
+| v3.0 | 20-25 | 11 | Complete |
 
 ## Accumulated Context
 
@@ -86,9 +87,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Known Risks
 
-- Phase 24 (Push Notifications) requires a real physical iOS device -- APNs does not work on iOS Simulator
-- Phase 24 requires APNs .p8 Auth Key (not .p12) -- confirmed FlutterFire bug with .p12 (issue #10920)
-- Phase 24 requires active Apple Developer account and Firebase project (manual prerequisites before planning)
+None.
 
 ### Pending Todos
 
@@ -101,8 +100,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Completed 23-01-PLAN.md (Config data layer + view/edit screen with tier CRUD and inline server validation)
-Next step: Execute Phase 24 (Push Notifications)
+Stopped at: Completed 25-01-PLAN.md (Nuxt dashboard removed from Aspire orchestration) -- v3.0 Flutter Mobile milestone shipped
+Next step: Plan next milestone (if any)
 
 ---
-*State updated: 2026-02-20 after 23-01 completion*
+*State updated: 2026-02-20 after 25-01 completion -- v3.0 shipped*

@@ -6,7 +6,7 @@
 - ✅ **v1.1 Backtesting Engine** -- Phases 5-8 (shipped 2026-02-13) -- [archive](milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Web Dashboard** -- Phases 9-12 (shipped 2026-02-14) -- [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v2.0 DDD Foundation** -- Phases 13-19 (shipped 2026-02-20) -- [archive](milestones/v2.0-ROADMAP.md)
-- 🚧 **v3.0 Flutter Mobile** -- Phases 20-25 (in progress)
+- ✅ **v3.0 Flutter Mobile** -- Phases 20-25 (shipped 2026-02-20)
 
 ## Phases
 
@@ -54,7 +54,7 @@
 
 </details>
 
-### 🚧 v3.0 Flutter Mobile (In Progress)
+### v3.0 Flutter Mobile (Shipped 2026-02-20)
 
 **Milestone Goal:** Replace Nuxt web dashboard with a native Flutter iOS app with full dashboard feature parity, add push notifications for buy events and health alerts, and remove the Nuxt dashboard from Aspire orchestration.
 
@@ -63,7 +63,7 @@
 - [x] **Phase 22: Price Chart + Purchase History** - Interactive price chart with purchase markers and scrollable purchase history (completed 2026-02-20)
 - [x] **Phase 23: Configuration Screen** - View and edit DCA configuration with server validation (completed 2026-02-20)
 - [x] **Phase 24: Push Notifications** - FCM push delivery for buy events and health alerts, with backend token management (completed 2026-02-20)
-- [ ] **Phase 25: Nuxt Deprecation** - Remove Nuxt dashboard from Aspire orchestration
+- [x] **Phase 25: Nuxt Deprecation** - Remove Nuxt dashboard from Aspire orchestration (completed 2026-02-20)
 
 ## Phase Details
 
@@ -157,7 +157,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 25-01-PLAN.md — Remove Nuxt dashboard NodeApp resource from AppHost.cs orchestration
+- [x] 25-01-PLAN.md — Remove Nuxt dashboard NodeApp resource from AppHost.cs orchestration
 
 ## Progress
 
@@ -188,7 +188,7 @@ Plans:
 | 22. Price Chart + Purchase History | 2/2 | Complete    | 2026-02-20 | - |
 | 23. Configuration Screen | v3.0 | 1/1 | Complete | 2026-02-20 |
 | 24. Push Notifications | v3.0 | 3/3 | Complete | 2026-02-20 |
-| 25. Nuxt Deprecation | v3.0 | 0/1 | Not started | - |
+| 25. Nuxt Deprecation | v3.0 | 1/1 | Complete | 2026-02-20 |
 
 ---
-*Roadmap updated: 2026-02-20 after Phase 24 completion*
+*Roadmap updated: 2026-02-20 after Phase 25 completion -- v3.0 Flutter Mobile shipped*
