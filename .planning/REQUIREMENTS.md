@@ -72,9 +72,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PORT-01 | Phase 26 | Pending |
+| PORT-01 | Phase 30 | Pending |
 | PORT-02 | Phase 26 | Pending |
-| PORT-03 | Phase 26 | Pending |
+| PORT-03 | Phase 30 | Pending |
 | PORT-04 | Phase 28 | Pending |
 | PORT-05 | Phase 28 | Pending |
 | PORT-06 | Phase 26 | Pending |
@@ -84,9 +84,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRICE-04 | Phase 27 | Pending |
 | DISP-01 | Phase 29 | Pending |
 | DISP-02 | Phase 29 | Pending |
-| DISP-03 | Phase 29 | Pending |
+| DISP-03 | Phase 30 | Pending |
 | DISP-04 | Phase 29 | Pending |
-| DISP-05 | Phase 29 | Pending |
+| DISP-05 | Phase 30 | Pending |
 | DISP-06 | Phase 29 | Pending |
 | DISP-07 | Phase 29 | Pending |
 | DISP-08 | Phase 29 | Pending |

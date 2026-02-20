@@ -7,7 +7,7 @@
 - ✅ **v1.2 Web Dashboard** -- Phases 9-12 (shipped 2026-02-14) -- [archive](milestones/v1.2-ROADMAP.md)
 - ✅ **v2.0 DDD Foundation** -- Phases 13-19 (shipped 2026-02-20) -- [archive](milestones/v2.0-ROADMAP.md)
 - ✅ **v3.0 Flutter Mobile** -- Phases 20-25.1 (shipped 2026-02-20) -- [archive](milestones/v3.0-ROADMAP.md)
-- 📋 **v4.0 Portfolio Tracker** -- Phases 26-29 (planned)
+- 📋 **v4.0 Portfolio Tracker** -- Phases 26-32 (planned)
 
 ## Phases
 
@@ -72,10 +72,13 @@
 
 **Milestone Goal:** Multi-asset portfolio tracking (crypto, VN30 ETF, fixed deposits) with live prices, P&L, and multi-currency support (VND/USD) in the Flutter app.
 
-- [ ] **Phase 26: Portfolio Domain Foundation** - Domain model, aggregates, EF migration for multi-asset portfolio
-- [ ] **Phase 27: Price Feed Infrastructure** - Crypto, VN ETF, and USD/VND exchange rate providers with Redis caching
-- [ ] **Phase 28: Portfolio Backend API** - Read endpoints, write endpoints, DCA auto-import, and historical migration
-- [ ] **Phase 29: Flutter Portfolio UI** - Complete portfolio feature module in Flutter with currency toggle and staleness indicators
+- [x] **Phase 26: Portfolio Domain Foundation** - Domain model, aggregates, EF migration for multi-asset portfolio
+- [x] **Phase 27: Price Feed Infrastructure** - Crypto, VN ETF, and USD/VND exchange rate providers with Redis caching
+- [x] **Phase 28: Portfolio Backend API** - Read endpoints, write endpoints, DCA auto-import, and historical migration
+- [x] **Phase 29: Flutter Portfolio UI** - Complete portfolio feature module in Flutter with currency toggle and staleness indicators
+- [ ] **Phase 30: Critical Bug Fixes** - Enum mismatch, tooltip formatting, missing asset creation endpoint
+- [ ] **Phase 31: Milestone Verification** - VERIFICATION.md for all phases, traceability closure
+- [ ] **Phase 32: Tech Debt Cleanup** - Tests, edge case handling, missing Flutter CRUD methods
 
 ## Phase Details
 
@@ -147,6 +150,51 @@ Plans:
 - [ ] 29-02-PLAN.md — Portfolio main screen (navigation tab, summary card, donut chart, expandable asset sections, staleness indicators)
 - [ ] 29-03-PLAN.md — Sub-screens (add transaction/deposit form, transaction history with filters, fixed deposit detail)
 
+### Phase 30: Critical Bug Fixes
+**Goal**: All 3 code bugs identified in the milestone audit are fixed — simple-interest fixed deposits create successfully, donut chart tooltip displays correct currency, and users can create portfolio assets from Flutter
+**Depends on**: Phase 29
+**Requirements**: PORT-01, PORT-03, DISP-03, DISP-05
+**Gap Closure**: Closes 3 integration gaps and 2 broken E2E flows from audit
+**Success Criteria** (what must be TRUE):
+  1. Flutter sends `'Simple'` (not `'None'`) for CompoundingFrequency — POST /api/portfolio/fixed-deposits succeeds for simple-interest deposits
+  2. AllocationDonutChart tooltip displays values in the correct currency format (VND when in VND mode, USD when in USD mode)
+  3. POST /api/portfolio/assets endpoint exists and accepts name, ticker, asset type, and native currency; Flutter has a UI to create new portfolio assets
+**Plans**: 1 plan
+
+Plans:
+- [ ] 30-01-PLAN.md — Fix CompoundingFrequency enum mismatch, donut chart tooltip currency bug, add asset creation endpoint + Flutter UI
+
+### Phase 31: Milestone Verification
+**Goal**: All 20 v4.0 requirements are formally verified with VERIFICATION.md files for phases 26-30, SUMMARY frontmatter updated, and REQUIREMENTS.md traceability checkboxes marked complete
+**Depends on**: Phase 30
+**Requirements**: All 20 (verification closure)
+**Gap Closure**: Closes all verification gaps from audit
+**Success Criteria** (what must be TRUE):
+  1. VERIFICATION.md exists for phases 26, 27, 28, 29, and 30 with per-requirement pass/fail status
+  2. All SUMMARY.md files have `requirements-completed` frontmatter listing their satisfied requirements
+  3. REQUIREMENTS.md traceability shows all 20 requirements as `[x]` with correct phase assignments
+**Plans**: 1 plan
+
+Plans:
+- [ ] 31-01-PLAN.md — Create VERIFICATION.md for all phases, update SUMMARY frontmatter, close REQUIREMENTS.md traceability
+
+### Phase 32: Tech Debt Cleanup
+**Goal**: Key tech debt items from the audit are resolved — price feed and portfolio endpoint tests exist, exchange rate failure is handled gracefully, and Flutter CRUD is complete for fixed deposits
+**Depends on**: Phase 30
+**Requirements**: None (quality improvement)
+**Gap Closure**: Addresses 15 tech debt items from audit
+**Success Criteria** (what must be TRUE):
+  1. Unit tests exist for CoinGeckoPriceProvider, VNDirectPriceProvider, and OpenErApiProvider
+  2. Integration tests exist for portfolio summary, transaction, and fixed deposit endpoints
+  3. Exchange rate failure returns last cached value (not 0) for VND conversions
+  4. PortfolioRepository has updateFixedDeposit/deleteFixedDeposit methods; Flutter UI has edit/delete for fixed deposits
+  5. CoinGecko ID mapping supports dynamic lookup (not hardcoded BTC/ETH only)
+**Plans**: 2 plans
+
+Plans:
+- [ ] 32-01-PLAN.md — Backend tests (price feed unit tests, portfolio endpoint integration tests) + exchange rate graceful degradation
+- [ ] 32-02-PLAN.md — Flutter fixed deposit CRUD completion + CoinGecko dynamic ID lookup
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -178,10 +226,13 @@ Plans:
 | 24. Push Notifications | v3.0 | 3/3 | Complete | 2026-02-20 |
 | 25. Nuxt Deprecation | v3.0 | 1/1 | Complete | 2026-02-20 |
 | 25.1 Cross-Cutting Notification Handler Split | v3.0 | 1/1 | Complete | 2026-02-20 |
-| 26. Portfolio Domain Foundation | v4.0 | 0/TBD | Not started | - |
-| 27. Price Feed Infrastructure | v4.0 | 0/TBD | Not started | - |
-| 28. Portfolio Backend API | v4.0 | 0/TBD | Not started | - |
-| 29. Flutter Portfolio UI | v4.0 | 0/TBD | Not started | - |
+| 26. Portfolio Domain Foundation | v4.0 | 3/3 | Complete | 2026-02-20 |
+| 27. Price Feed Infrastructure | v4.0 | 2/2 | Complete | 2026-02-20 |
+| 28. Portfolio Backend API | v4.0 | 2/2 | Complete | 2026-02-20 |
+| 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
+| 30. Critical Bug Fixes | v4.0 | 0/1 | Not started | - |
+| 31. Milestone Verification | v4.0 | 0/1 | Not started | - |
+| 32. Tech Debt Cleanup | v4.0 | 0/2 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-20 after v4.0 milestone roadmap creation*
+*Roadmap updated: 2026-02-20 after gap closure phases 30-32 added*
