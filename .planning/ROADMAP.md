@@ -125,10 +125,10 @@ Plans:
   2. User can tap Edit and modify any numeric parameter using a numeric keyboard, and change the daily buy time via a time picker
   3. User can add, remove, and reorder multiplier tier entries within the edit form before saving
   4. When the server rejects a config change (e.g., invalid tier order, out-of-range value), the validation error appears inline next to the relevant field
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [ ] 23-01: Config view + edit form (numeric fields, time picker, tier list add/remove, PUT /api/config, inline server validation errors)
+- [ ] 23-01-PLAN.md — Config data layer + view/edit screen with numeric fields, time picker, tier list CRUD, inline server validation errors
 
 ### Phase 24: Push Notifications
 **Goal**: Users receive push notifications on their iPhone when a BTC purchase executes, when a purchase fails, and when the bot has not bought in over 36 hours
