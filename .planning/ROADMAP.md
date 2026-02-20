@@ -76,7 +76,7 @@
 - [x] **Phase 27: Price Feed Infrastructure** - Crypto, VN ETF, and USD/VND exchange rate providers with Redis caching
 - [x] **Phase 28: Portfolio Backend API** - Read endpoints, write endpoints, DCA auto-import, and historical migration
 - [x] **Phase 29: Flutter Portfolio UI** - Complete portfolio feature module in Flutter with currency toggle and staleness indicators
-- [ ] **Phase 30: Critical Bug Fixes** - Enum mismatch, tooltip formatting, missing asset creation endpoint
+- [x] **Phase 30: Critical Bug Fixes** - Enum mismatch, tooltip formatting, missing asset creation endpoint (completed 2026-02-20)
 - [ ] **Phase 31: Milestone Verification** - VERIFICATION.md for all phases, traceability closure
 - [ ] **Phase 32: Tech Debt Cleanup** - Tests, edge case handling, missing Flutter CRUD methods
 
@@ -230,7 +230,7 @@ Plans:
 | 27. Price Feed Infrastructure | v4.0 | 2/2 | Complete | 2026-02-20 |
 | 28. Portfolio Backend API | v4.0 | 2/2 | Complete | 2026-02-20 |
 | 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
-| 30. Critical Bug Fixes | v4.0 | 0/1 | Not started | - |
+| 30. Critical Bug Fixes | 1/1 | Complete   | 2026-02-20 | - |
 | 31. Milestone Verification | v4.0 | 0/1 | Not started | - |
 | 32. Tech Debt Cleanup | v4.0 | 0/2 | Not started | - |
 

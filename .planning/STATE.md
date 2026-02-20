@@ -1,7 +1,7 @@
 # Project State
 
 **Project:** BTC Smart DCA Bot
-**Milestone:** v4.0 Portfolio Tracker
+**Milestone:** Phase 30 Critical Bug Fixes
 **Updated:** 2026-02-20
 
 ## Project Reference
@@ -13,12 +13,12 @@ See: .planning/PROJECT.md (updated 2026-02-20)
 
 ## Current Position
 
-Phase: 29 of 29 (Flutter Portfolio UI) — COMPLETE
-Plan: 3 of 3 (all executed)
-Status: v4.0 milestone complete
-Last activity: 2026-02-20 — Phase 29 complete (3 plans, data layer + main screen + sub-screens)
+Phase: 30 of 30 (Critical Bug Fixes) — COMPLETE
+Plan: 1 of 1 (all executed)
+Status: Phase 30 complete — all 3 v4.0 audit bugs fixed
+Last activity: 2026-02-20 — Phase 30 complete (1 plan, 3 bugs fixed, 6 files modified)
 
-Progress: [##########] 100% (v4.0)
+Progress: [##########] 100% (Phase 30)
 
 ## Performance Metrics
 
@@ -41,6 +41,7 @@ Progress: [##########] 100% (v4.0)
 | v2.0 | 13-19 | 15 | Complete |
 | v3.0 | 20-25 | 11 | Complete |
 | v4.0 | 26-29 | 10 | Complete |
+| Phase 30 (critical-bug-fixes) | 30 | 1 | Complete |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ All decisions logged in PROJECT.md Key Decisions table.
 - Manual fromJson for DTO models (no json_serializable), intl as explicit dependency
 - SliverAppBar with floating+snap, fl_chart with two-LineChartBarData approach
 - Explicit isLoadingMore boolean (not copyWithPrevious) for pagination state
+- [Phase 30-critical-bug-fixes]: allocationsByTypeVnd tracked as parallel dictionary alongside allocationsByType in GetSummaryAsync — no schema change, same loop
+- [Phase 30-critical-bug-fixes]: Donut chart tooltip currency-aware: uses allocation.valueVnd when isVnd=true, allocation.valueUsd otherwise
+- [Phase 30-critical-bug-fixes]: POST /api/portfolio/assets endpoint validates assetType and nativeCurrency enums, checks duplicate ticker, returns 201 with created asset
 
 ### Known Risks
 
@@ -110,8 +114,8 @@ v4.0 roadmap: 4 phases (26-29), 20 requirements, all mapped and completed.
 ## Session Continuity
 
 Last session: 2026-02-20
-Stopped at: Phase 29 complete — all 3 plans executed (data layer + main screen + sub-screens). v4.0 milestone complete.
-Next step: All milestones complete. Define next milestone if needed.
+Stopped at: Phase 30 complete — 30-01 plan executed (CompoundingFrequency fix, donut chart currency fix, POST /api/portfolio/assets endpoint + Flutter UI).
+Next step: All v4.0 audit gaps closed. Define next milestone if needed.
 
 ---
-*State updated: 2026-02-20 after Phase 29 completion (v4.0 complete)*
+*State updated: 2026-02-20 after Phase 30 completion (critical bug fixes)*

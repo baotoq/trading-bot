@@ -9,9 +9,9 @@ Requirements for multi-asset portfolio tracker. Each maps to roadmap phases.
 
 ### Portfolio Data Model
 
-- [ ] **PORT-01**: User can create portfolio assets with name, ticker, asset type (Crypto/ETF/FixedDeposit), and native currency (USD/VND)
+- [x] **PORT-01**: User can create portfolio assets with name, ticker, asset type (Crypto/ETF/FixedDeposit), and native currency (USD/VND)
 - [ ] **PORT-02**: User can record buy/sell transactions on tradeable assets with date, quantity, price per unit, and currency
-- [ ] **PORT-03**: User can create fixed deposits with principal (VND), annual interest rate, start date, maturity date, and compounding frequency
+- [x] **PORT-03**: User can create fixed deposits with principal (VND), annual interest rate, start date, maturity date, and compounding frequency
 - [ ] **PORT-04**: DCA bot purchases auto-import into BTC portfolio position idempotently (no duplicates, read-only in UI)
 - [ ] **PORT-05**: Historical DCA bot purchases are migrated into portfolio on first setup
 - [ ] **PORT-06**: Fixed deposit accrued value is calculated correctly for both simple interest (non-cumulative) and compound interest (cumulative)
@@ -27,9 +27,9 @@ Requirements for multi-asset portfolio tracker. Each maps to roadmap phases.
 
 - [ ] **DISP-01**: User can see total portfolio value with VND/USD currency toggle that persists across sessions
 - [ ] **DISP-02**: User can see per-asset holdings with current value, unrealized P&L (absolute + percentage), grouped by asset type
-- [ ] **DISP-03**: User can see asset allocation pie chart by asset type (Crypto / ETF / Fixed Deposit)
+- [x] **DISP-03**: User can see asset allocation pie chart by asset type (Crypto / ETF / Fixed Deposit)
 - [ ] **DISP-04**: User can add manual buy/sell transactions via a form in the Flutter app
-- [ ] **DISP-05**: User can add fixed deposits via a dedicated form with principal, rate, dates, and compounding frequency
+- [x] **DISP-05**: User can add fixed deposits via a dedicated form with principal, rate, dates, and compounding frequency
 - [ ] **DISP-06**: User can see transaction history across all assets with filtering by asset, type, and date range
 - [ ] **DISP-07**: User can see fixed deposit details including accrued value, days to maturity, and projected maturity amount
 - [ ] **DISP-08**: Auto-imported DCA bot transactions show a "Bot" badge and are not editable/deletable
@@ -72,9 +72,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PORT-01 | Phase 30 | Pending |
+| PORT-01 | Phase 30 | Complete |
 | PORT-02 | Phase 26 | Pending |
-| PORT-03 | Phase 30 | Pending |
+| PORT-03 | Phase 30 | Complete |
 | PORT-04 | Phase 28 | Pending |
 | PORT-05 | Phase 28 | Pending |
 | PORT-06 | Phase 26 | Pending |
@@ -84,9 +84,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PRICE-04 | Phase 27 | Pending |
 | DISP-01 | Phase 29 | Pending |
 | DISP-02 | Phase 29 | Pending |
-| DISP-03 | Phase 30 | Pending |
+| DISP-03 | Phase 30 | Complete |
 | DISP-04 | Phase 29 | Pending |
-| DISP-05 | Phase 30 | Pending |
+| DISP-05 | Phase 30 | Complete |
 | DISP-06 | Phase 29 | Pending |
 | DISP-07 | Phase 29 | Pending |
 | DISP-08 | Phase 29 | Pending |
