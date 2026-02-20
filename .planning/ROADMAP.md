@@ -140,10 +140,12 @@ Plans:
   5. User can see fixed deposit details including accrued value, days to maturity, and projected maturity amount
   6. User can browse full transaction history across all assets and filter by asset, transaction type, and date range; auto-imported DCA bot transactions show a "Bot" badge and cannot be edited or deleted
   7. VN asset prices show a "price as of [date]" staleness indicator when using cached data; cross-currency values show "converted at today's rate"
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 29-01: TBD
+- [ ] 29-01-PLAN.md — Backend transaction list endpoint + Flutter data layer (models, repository, providers, currency toggle)
+- [ ] 29-02-PLAN.md — Portfolio main screen (navigation tab, summary card, donut chart, expandable asset sections, staleness indicators)
+- [ ] 29-03-PLAN.md — Sub-screens (add transaction/deposit form, transaction history with filters, fixed deposit detail)
 
 ## Progress
 
