@@ -77,7 +77,7 @@
 - [x] **Phase 28: Portfolio Backend API** - Read endpoints, write endpoints, DCA auto-import, and historical migration
 - [x] **Phase 29: Flutter Portfolio UI** - Complete portfolio feature module in Flutter with currency toggle and staleness indicators
 - [x] **Phase 30: Critical Bug Fixes** - Enum mismatch, tooltip formatting, missing asset creation endpoint (completed 2026-02-20)
-- [ ] **Phase 31: Milestone Verification** - VERIFICATION.md for all phases, traceability closure
+- [x] **Phase 31: Milestone Verification** - VERIFICATION.md for all phases, traceability closure (completed 2026-02-21)
 - [ ] **Phase 32: Tech Debt Cleanup** - Tests, edge case handling, missing Flutter CRUD methods
 
 ## Phase Details
@@ -176,7 +176,7 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 31-01-PLAN.md — Create VERIFICATION.md for all phases, update SUMMARY frontmatter, close REQUIREMENTS.md traceability
+- [x] 31-01-PLAN.md — Create VERIFICATION.md for all phases, update SUMMARY frontmatter, close REQUIREMENTS.md traceability
 
 ### Phase 32: Tech Debt Cleanup
 **Goal**: Key tech debt items from the audit are resolved — price feed and portfolio endpoint tests exist, exchange rate failure is handled gracefully, and Flutter CRUD is complete for fixed deposits
@@ -231,8 +231,8 @@ Plans:
 | 28. Portfolio Backend API | v4.0 | 2/2 | Complete | 2026-02-20 |
 | 29. Flutter Portfolio UI | v4.0 | 3/3 | Complete | 2026-02-20 |
 | 30. Critical Bug Fixes | 1/1 | Complete    | 2026-02-20 | - |
-| 31. Milestone Verification | v4.0 | 0/1 | Not started | - |
+| 31. Milestone Verification | v4.0 | 1/1 | Complete | 2026-02-21 |
 | 32. Tech Debt Cleanup | v4.0 | 0/2 | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-20 after gap closure phases 30-32 added*
+*Roadmap updated: 2026-02-21 after Phase 31 completion (milestone verification — all 20 v4.0 requirements closed)*
