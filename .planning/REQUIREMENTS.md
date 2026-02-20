@@ -10,31 +10,31 @@ Requirements for multi-asset portfolio tracker. Each maps to roadmap phases.
 ### Portfolio Data Model
 
 - [x] **PORT-01**: User can create portfolio assets with name, ticker, asset type (Crypto/ETF/FixedDeposit), and native currency (USD/VND)
-- [ ] **PORT-02**: User can record buy/sell transactions on tradeable assets with date, quantity, price per unit, and currency
+- [x] **PORT-02**: User can record buy/sell transactions on tradeable assets with date, quantity, price per unit, and currency
 - [x] **PORT-03**: User can create fixed deposits with principal (VND), annual interest rate, start date, maturity date, and compounding frequency
-- [ ] **PORT-04**: DCA bot purchases auto-import into BTC portfolio position idempotently (no duplicates, read-only in UI)
-- [ ] **PORT-05**: Historical DCA bot purchases are migrated into portfolio on first setup
-- [ ] **PORT-06**: Fixed deposit accrued value is calculated correctly for both simple interest (non-cumulative) and compound interest (cumulative)
+- [x] **PORT-04**: DCA bot purchases auto-import into BTC portfolio position idempotently (no duplicates, read-only in UI)
+- [x] **PORT-05**: Historical DCA bot purchases are migrated into portfolio on first setup
+- [x] **PORT-06**: Fixed deposit accrued value is calculated correctly for both simple interest (non-cumulative) and compound interest (cumulative)
 
 ### Price Feeds
 
-- [ ] **PRICE-01**: Crypto asset prices auto-fetch from CoinGecko with Redis caching (5-min TTL)
-- [ ] **PRICE-02**: VN30 ETF prices auto-fetch from VNDirect finfo API with graceful degradation to cached values (48h TTL)
-- [ ] **PRICE-03**: USD/VND exchange rate auto-fetches daily from open.er-api.com with Redis caching (12h TTL)
-- [ ] **PRICE-04**: Price staleness is tracked and surfaced (last updated timestamp available for all price types)
+- [x] **PRICE-01**: Crypto asset prices auto-fetch from CoinGecko with Redis caching (5-min TTL)
+- [x] **PRICE-02**: VN30 ETF prices auto-fetch from VNDirect finfo API with graceful degradation to cached values (48h TTL)
+- [x] **PRICE-03**: USD/VND exchange rate auto-fetches daily from open.er-api.com with Redis caching (12h TTL)
+- [x] **PRICE-04**: Price staleness is tracked and surfaced (last updated timestamp available for all price types)
 
 ### Portfolio Display
 
-- [ ] **DISP-01**: User can see total portfolio value with VND/USD currency toggle that persists across sessions
-- [ ] **DISP-02**: User can see per-asset holdings with current value, unrealized P&L (absolute + percentage), grouped by asset type
+- [x] **DISP-01**: User can see total portfolio value with VND/USD currency toggle that persists across sessions
+- [x] **DISP-02**: User can see per-asset holdings with current value, unrealized P&L (absolute + percentage), grouped by asset type
 - [x] **DISP-03**: User can see asset allocation pie chart by asset type (Crypto / ETF / Fixed Deposit)
-- [ ] **DISP-04**: User can add manual buy/sell transactions via a form in the Flutter app
+- [x] **DISP-04**: User can add manual buy/sell transactions via a form in the Flutter app
 - [x] **DISP-05**: User can add fixed deposits via a dedicated form with principal, rate, dates, and compounding frequency
-- [ ] **DISP-06**: User can see transaction history across all assets with filtering by asset, type, and date range
-- [ ] **DISP-07**: User can see fixed deposit details including accrued value, days to maturity, and projected maturity amount
-- [ ] **DISP-08**: Auto-imported DCA bot transactions show a "Bot" badge and are not editable/deletable
-- [ ] **DISP-09**: VN asset prices show staleness indicator ("price as of [date]") when using cached data
-- [ ] **DISP-10**: Cross-currency values show "converted at today's rate" label
+- [x] **DISP-06**: User can see transaction history across all assets with filtering by asset, type, and date range
+- [x] **DISP-07**: User can see fixed deposit details including accrued value, days to maturity, and projected maturity amount
+- [x] **DISP-08**: Auto-imported DCA bot transactions show a "Bot" badge and are not editable/deletable
+- [x] **DISP-09**: VN asset prices show staleness indicator ("price as of [date]") when using cached data
+- [x] **DISP-10**: Cross-currency values show "converted at today's rate" label
 
 ## v4.x Requirements
 
@@ -68,36 +68,37 @@ Deferred to future iteration. Tracked but not in current roadmap.
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
+All 20 v4.0 requirements implemented and verified. Closed 2026-02-21 during milestone verification (Phase 31).
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PORT-01 | Phase 30 | Complete |
-| PORT-02 | Phase 26 | Pending |
-| PORT-03 | Phase 30 | Complete |
-| PORT-04 | Phase 28 | Pending |
-| PORT-05 | Phase 28 | Pending |
-| PORT-06 | Phase 26 | Pending |
-| PRICE-01 | Phase 27 | Pending |
-| PRICE-02 | Phase 27 | Pending |
-| PRICE-03 | Phase 27 | Pending |
-| PRICE-04 | Phase 27 | Pending |
-| DISP-01 | Phase 29 | Pending |
-| DISP-02 | Phase 29 | Pending |
-| DISP-03 | Phase 30 | Complete |
-| DISP-04 | Phase 29 | Pending |
-| DISP-05 | Phase 30 | Complete |
-| DISP-06 | Phase 29 | Pending |
-| DISP-07 | Phase 29 | Pending |
-| DISP-08 | Phase 29 | Pending |
-| DISP-09 | Phase 29 | Pending |
-| DISP-10 | Phase 29 | Pending |
+| PORT-01 | Phase 26, 30 | Complete |
+| PORT-02 | Phase 26, 28 | Complete |
+| PORT-03 | Phase 26, 30 | Complete |
+| PORT-04 | Phase 28 | Complete |
+| PORT-05 | Phase 28 | Complete |
+| PORT-06 | Phase 26 | Complete |
+| PRICE-01 | Phase 27 | Complete |
+| PRICE-02 | Phase 27 | Complete |
+| PRICE-03 | Phase 27 | Complete |
+| PRICE-04 | Phase 27 | Complete |
+| DISP-01 | Phase 29 | Complete |
+| DISP-02 | Phase 29 | Complete |
+| DISP-03 | Phase 29, 30 | Complete |
+| DISP-04 | Phase 29 | Complete |
+| DISP-05 | Phase 29, 30 | Complete |
+| DISP-06 | Phase 29 | Complete |
+| DISP-07 | Phase 29 | Complete |
+| DISP-08 | Phase 29 | Complete |
+| DISP-09 | Phase 29 | Complete |
+| DISP-10 | Phase 29 | Complete |
 
 **Coverage:**
 - v4.0 requirements: 20 total
 - Mapped to phases: 20
 - Unmapped: 0 ✓
+- Complete: 20/20 ✓
 
 ---
 *Requirements defined: 2026-02-20*
-*Last updated: 2026-02-20 after roadmap creation (all 20 requirements mapped)*
+*Last updated: 2026-02-21 — milestone verification closure (all 20 v4.0 requirements marked complete)*
