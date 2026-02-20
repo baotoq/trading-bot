@@ -19,6 +19,7 @@ using TradingBot.ApiService.Infrastructure.Data;
 using TradingBot.ApiService.Infrastructure.Hyperliquid;
 using TradingBot.ApiService.Infrastructure.Locking;
 using TradingBot.ApiService.Infrastructure.Firebase;
+using TradingBot.ApiService.Infrastructure.PriceFeeds;
 using TradingBot.ApiService.Infrastructure.Telegram;
 using TradingBot.ServiceDefaults;
 
@@ -117,6 +118,9 @@ try
 
     // CoinGecko API client for historical price data
     builder.Services.AddCoinGecko(builder.Configuration);
+
+    // Price feed providers (CoinGecko live prices, VNDirect ETF, exchange rate)
+    builder.Services.AddPriceFeeds(builder.Configuration);
 
     // Historical data pipeline
     builder.Services.AddSingleton<IngestionJobQueue>();
