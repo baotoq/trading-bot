@@ -41,7 +41,9 @@ public record LiveStatusResponse(
     DateTimeOffset? LastPurchaseTime,
     Price? LastPurchasePrice,
     Quantity? LastPurchaseBtc,
-    string? LastPurchaseTier
+    string? LastPurchaseTier,
+    Multiplier? LastPurchaseMultiplier,    // null when no purchases
+    Percentage? LastPurchaseDropPercentage // null when no purchases
 );
 
 // Price chart data

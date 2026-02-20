@@ -183,7 +183,9 @@ public static class DashboardEndpoints
             LastPurchaseTime: lastPurchase?.ExecutedAt,
             LastPurchasePrice: lastPurchase?.Price,
             LastPurchaseBtc: lastPurchase?.Quantity,
-            LastPurchaseTier: lastPurchase?.MultiplierTier ?? "Base"
+            LastPurchaseTier: lastPurchase?.MultiplierTier ?? "Base",
+            LastPurchaseMultiplier: lastPurchase?.Multiplier,
+            LastPurchaseDropPercentage: lastPurchase?.DropPercentage
         );
 
         return Results.Ok(response);
