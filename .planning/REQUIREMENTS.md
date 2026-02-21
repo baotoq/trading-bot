@@ -10,9 +10,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 ### Design System
 
 - [ ] **DESIGN-01**: App uses a frosted glass card component (BackdropFilter + tint + border) as the primary surface across all screens
-- [ ] **DESIGN-02**: App displays an ambient gradient background with static colored orbs behind glass cards
-- [ ] **DESIGN-03**: App uses a consistent typography scale with system fonts, proper weights, and tabular figures for all monetary values
-- [ ] **DESIGN-04**: All design tokens (blur sigma, glass opacity, border, glow) live in a single GlassTheme ThemeExtension
+- [x] **DESIGN-02**: App displays an ambient gradient background with static colored orbs behind glass cards
+- [x] **DESIGN-03**: App uses a consistent typography scale with system fonts, proper weights, and tabular figures for all monetary values
+- [x] **DESIGN-04**: All design tokens (blur sigma, glass opacity, border, glow) live in a single GlassTheme ThemeExtension
 - [ ] **DESIGN-05**: App honors iOS Reduce Transparency by degrading glass to opaque surfaces
 - [ ] **DESIGN-06**: App honors iOS Reduce Motion by skipping all animations
 
@@ -67,9 +67,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | DESIGN-01 | Phase 33 | Pending |
-| DESIGN-02 | Phase 33 | Pending |
-| DESIGN-03 | Phase 33 | Pending |
-| DESIGN-04 | Phase 33 | Pending |
+| DESIGN-02 | Phase 33 | Complete |
+| DESIGN-03 | Phase 33 | Complete |
+| DESIGN-04 | Phase 33 | Complete |
 | DESIGN-05 | Phase 33 | Pending |
 | DESIGN-06 | Phase 33 | Pending |
 | CHART-01 | Phase 35 | Pending |

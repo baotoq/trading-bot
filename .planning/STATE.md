@@ -14,22 +14,23 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 33 of 38 (Design System Foundation)
-Plan: — of — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-21 -- v5.0 roadmap created (6 phases, 21 requirements mapped)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-21 -- 33-01 complete (GlassTheme ThemeExtension + AmbientBackground)
 
-Progress: [░░░░░░░░░░] 0% (v5.0)
+Progress: [█░░░░░░░░░] 5% (v5.0)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (across v1.0-v4.0)
+- Total plans completed: 72 (across v1.0-v5.0)
 - v1.0: 1 day (11 plans)
 - v1.1: 1 day (7 plans)
 - v1.2: 2 days (12 plans)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (12 plans)
 - v4.0: 2 days (15 plans)
+- v5.0: In progress (1 plan so far)
 
 **By Milestone:**
 
@@ -42,6 +43,12 @@ Progress: [░░░░░░░░░░] 0% (v5.0)
 | v3.0 | 20-25.1 | 12 | Complete |
 | v4.0 | 26-32 | 15 | Complete |
 | v5.0 | 33-38 | TBD | In progress |
+
+**Recent Plan Metrics:**
+
+| Phase | Plan | Duration | Tasks | Files |
+|-------|------|----------|-------|-------|
+| 33 | 01 | 2min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -56,6 +63,10 @@ Recent decisions affecting v5.0:
 - All AnimationControllers in HookConsumerWidget via useAnimationController -- prevents lifecycle leaks across 5 tabs
 - _hasAnimated guard pattern -- counters and chart draw-in animate only on initial load, not on every tab revisit
 - BackdropFilter on nav bar (GlassBottomNav) deferred to v5.x -- requires physical device performance gate before committing
+- Color.withAlpha(int) over withOpacity(float) -- consistent with existing project pattern, avoids float-rounding issues
+- moneyStyle as partial TextStyle (fontFeatures only) -- consumers merge via copyWith to preserve their font size/weight/color
+- AmbientBackground wraps body not entire Scaffold -- keeps orbs behind content only, nav bar retains its own background
+- scaffoldBackgroundColor: Colors.transparent globally -- individual screens must not set solid backgroundColor unless they are modals/dialogs above AmbientBackground
 
 ### Known Risks
 
@@ -63,6 +74,7 @@ Recent decisions affecting v5.0:
 - GlassBottomNav BackdropFilter: full-width blur affects every tab transition; fallback is opacity-tint-only nav (safe)
 - GlowLineChart data-slice: ChartResponse data model compatibility not yet validated against prices.length * progress approach
 - Blur sigma calibration (card: 12, appBar: 16) must be verified on physical iPhone -- iOS Simulator does not accurately represent BackdropFilter GPU cost
+- Screen Scaffolds with solid backgroundColor will paint over AmbientBackground orbs -- audit all screen Scaffolds in phases 34-38
 
 ### Pending Todos
 
@@ -71,8 +83,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: v5.0 roadmap created. Ready to plan Phase 33.
-Next step: `/gsd:plan-phase 33`
+Stopped at: 33-01-PLAN.md complete. GlassTheme + AmbientBackground foundation delivered.
+Next step: `/gsd:execute-phase 33` for plan 02
 
 ---
-*State updated: 2026-02-21 after v5.0 roadmap created*
+*State updated: 2026-02-21 after 33-01 complete*
