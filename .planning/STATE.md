@@ -9,14 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 33 -- Design System Foundation
+**Current focus:** Phase 34 -- Home Screen Redesign (next)
 
 ## Current Position
 
 Phase: 33 of 38 (Design System Foundation)
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-02-21 -- 33-01 complete (GlassTheme ThemeExtension + AmbientBackground)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-02-21 -- 33-02 complete (GlassCard widget with frosted glass + accessibility fallbacks)
 
 Progress: [█░░░░░░░░░] 5% (v5.0)
 
@@ -30,7 +30,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (12 plans)
 - v4.0: 2 days (15 plans)
-- v5.0: In progress (1 plan so far)
+- v5.0: In progress (2 plans so far)
 
 **By Milestone:**
 
@@ -49,6 +49,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 | Phase | Plan | Duration | Tasks | Files |
 |-------|------|----------|-------|-------|
 | 33 | 01 | 2min | 2 | 3 |
+| 33 | 02 | 23min | 2 | 1 |
 
 ## Accumulated Context
 
@@ -67,6 +68,9 @@ Recent decisions affecting v5.0:
 - moneyStyle as partial TextStyle (fontFeatures only) -- consumers merge via copyWith to preserve their font size/weight/color
 - AmbientBackground wraps body not entire Scaffold -- keeps orbs behind content only, nav bar retains its own background
 - scaffoldBackgroundColor: Colors.transparent globally -- individual screens must not set solid backgroundColor unless they are modals/dialogs above AmbientBackground
+- [Phase 33]: MediaQuery.highContrast used as Reduce Transparency proxy — no direct Flutter reduceTransparency API exists
+- [Phase 33]: GlassCard.shouldReduceMotion uses MediaQuery.disableAnimations only — AccessibilityFeatures.reduceMotion does not exist in Flutter API
+- [Phase 33]: ClipRRect always wraps BackdropFilter in GlassCard — enforced by code structure to prevent blur bleed
 
 ### Known Risks
 
@@ -83,8 +87,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: 33-01-PLAN.md complete. GlassTheme + AmbientBackground foundation delivered.
-Next step: `/gsd:execute-phase 33` for plan 02
+Stopped at: 33-02-PLAN.md complete. Phase 33 Design System Foundation fully delivered (GlassTheme + AmbientBackground + GlassCard).
+Next step: `/gsd:execute-phase 34` to begin Home Screen redesign
 
 ---
-*State updated: 2026-02-21 after 33-01 complete*
+*State updated: 2026-02-21 after 33-02 complete*
