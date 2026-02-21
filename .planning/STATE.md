@@ -9,14 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 34 -- Home Screen Redesign (next)
+**Current focus:** Phase 35 -- next phase (phase 34 Shared Glass Primitives complete)
 
 ## Current Position
 
 Phase: 34 of 38 (Shared Glass Primitives)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-02-21 -- 34-01 complete (GlassVariant enum + PressableScale micro-interaction widget)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-02-21 -- 34-02 complete (shimmer skeleton loading states on all 5 tab screens via skeletonizer + AppShimmer)
 
 Progress: [█░░░░░░░░░] 5% (v5.0)
 
@@ -30,7 +30,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (12 plans)
 - v4.0: 2 days (15 plans)
-- v5.0: In progress (2 plans so far)
+- v5.0: In progress (4 plans so far)
 
 **By Milestone:**
 
@@ -51,6 +51,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 | 33 | 01 | 2min | 2 | 3 |
 | 33 | 02 | 23min | 2 | 1 |
 | 34 | 01 | 4min | 2 | 2 |
+| 34 | 02 | 6min | 2 | 7 |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 34]: GlassVariant.scrollItem renders Container without BackdropFilter — same GlassTheme tokens, no blur pass — prevents Impeller frame drops on scroll
 - [Phase 34]: didChangeDependencies used for shouldReduceMotion check in PressableScale — context not available in initState
 - [Phase 34]: AnimationController uses single 100ms duration for both forward and reverse in PressableScale — adequate for subtle 0.97 scale effect
+- [Phase 34]: skeletonizer 1.4.3 integrated with AppShimmer wrapper using GlassTheme opaqueSurface/opaqueBorder as shimmer colors for visual continuity
+- [Phase 34]: PulseEffect chosen as reduce-motion fallback over SoldColorEffect — still communicates loading state via gentle alpha fade
 
 ### Known Risks
 
@@ -91,8 +94,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: 34-01-PLAN.md complete. GlassVariant enum + PressableScale micro-interaction widget delivered.
-Next step: Execute 34-02 (shimmer skeletons) to complete phase 34 shared glass primitives
+Stopped at: 34-02-PLAN.md complete. Phase 34 Shared Glass Primitives fully delivered (GlassVariant + PressableScale + AppShimmer + shimmer loading states on all 5 screens).
+Next step: `/gsd:execute-phase 35` to begin next phase
 
 ---
-*State updated: 2026-02-21 after 33-02 complete*
+*State updated: 2026-02-21 after 34-02 complete*

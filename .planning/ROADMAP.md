@@ -87,7 +87,7 @@
 **Milestone Goal:** Transform the Flutter app from generic Material 3 into a premium glassmorphism design with rich animations, gradient glow charts, and polished data visualization across all 5 tabs.
 
 - [x] **Phase 33: Design System Foundation** - GlassTheme tokens, ambient background, and typography scale as the prerequisite foundation (completed 2026-02-21)
-- [ ] **Phase 34: Shared Glass Primitives** - GlassCard widget, shimmer skeletons, and press micro-interactions as the shared building blocks
+- [x] **Phase 34: Shared Glass Primitives** - GlassCard widget, shimmer skeletons, and press micro-interactions as the shared building blocks (completed 2026-02-21)
 - [ ] **Phase 35: Chart Redesign** - Gradient glow chart, animated draw-in, glow markers, and glass tooltip on ChartScreen
 - [ ] **Phase 36: Home Screen Redesign** - Dashboard overview layout with hero balance, mini allocation chart, staggered entrance, and animated counters
 - [ ] **Phase 37: Portfolio Screen Restyle** - Glass cards, animated donut, per-asset glass rows, and currency toggle slot-flip
@@ -118,7 +118,7 @@ Plans:
   1. Loading states on any screen display shimmer skeleton placeholders shaped to match the real content layout, not a spinner
   2. Tapping any card produces a visible press-scale shrink (to ~0.97) with a haptic pulse, then springs back on release
   3. A GlassCard widget renders a frosted glass surface (blur variant) for stationary cards and a non-blur tint-plus-border surface for scrollable list items without any code changes at the call site
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 34-01-PLAN.md -- GlassCard scroll-safe variant (GlassVariant enum) and PressableScale micro-interaction wrapper widget
 - [ ] 34-02-PLAN.md -- Skeletonizer shimmer skeletons replacing CircularProgressIndicator on all 5 tab screens
@@ -205,7 +205,7 @@ Plans:
 | 31. Milestone Verification | v4.0 | 1/1 | Complete | 2026-02-21 |
 | 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
-| 34. Shared Glass Primitives | 1/2 | In Progress|  | - |
+| 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | v5.0 | 0/? | Not started | - |
 | 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
