@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trading_bot_app/core/widgets/ambient_background.dart';
 
 class ScaffoldWithNavigation extends StatelessWidget {
   const ScaffoldWithNavigation({
@@ -20,7 +21,11 @@ class ScaffoldWithNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      // Transparent so AmbientBackground renders through all tab screens.
+      // The global theme sets scaffoldBackgroundColor: Colors.transparent,
+      // but being explicit here ensures correctness if theme is overridden.
+      backgroundColor: Colors.transparent,
+      body: AmbientBackground(child: navigationShell),
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: _goBranch,
