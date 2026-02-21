@@ -71,7 +71,17 @@ The bot reliably executes daily BTC spot purchases with smart dip-buying, and th
 
 ### Active
 
-(None -- define next milestone requirements via `/gsd:new-milestone`)
+## Current Milestone: v5.0 Stunning Mobile UI
+
+**Goal:** Transform the Flutter app from generic Material 3 into a premium glassmorphism design with rich animations, gradient glow charts, and polished data visualization across all 5 tabs.
+
+**Target features:**
+- Premium glassmorphism design system (frosted glass cards, blur layers, depth)
+- Dashboard overview home screen (hero balance, mini allocation chart, recent activity, quick actions)
+- Gradient glow line charts with animated draw-in and premium tooltips
+- Essential animations and micro-interactions (page transitions, animated counters, shimmer loading, parallax)
+- Typography hierarchy overhaul (system fonts, proper sizing, weights, spacing)
+- Full visual redesign of all 5 tabs (Home, Chart, History, Config, Portfolio)
 
 ### Out of Scope
 
@@ -101,7 +111,7 @@ The bot reliably executes daily BTC spot purchases with smart dip-buying, and th
 
 ## Current State
 
-Shipped v4.0 Portfolio Tracker (2026-02-21). All milestones complete through v4.0.
+Shipped v4.0 Portfolio Tracker (2026-02-21). Starting v5.0 Stunning Mobile UI.
 
 **Codebase:**
 - ~12,000+ lines of C# (backend, 32 phases, 71 plans)
@@ -194,4 +204,4 @@ Shipped v4.0 Portfolio Tracker (2026-02-21). All milestones complete through v4.
 | Dynamic CoinGecko ID lookup with not-found caching | Well-known dict for 10 common tickers; API search fallback with 1-day negative cache | ✓ Good |
 
 ---
-*Last updated: 2026-02-21 after v4.0 milestone*
+*Last updated: 2026-02-21 after v5.0 milestone started*
