@@ -105,7 +105,10 @@
   3. All monetary values across the app display with tabular figures so digits align vertically in lists
   4. On a device with Reduce Transparency enabled, glass surfaces render as fully opaque dark cards with no BackdropFilter applied
   5. On a device with Reduce Motion enabled, no animations play anywhere in the app
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 33-01-PLAN.md -- GlassTheme ThemeExtension tokens, AmbientBackground widget with orbs, typography scale with tabular figures
+- [ ] 33-02-PLAN.md -- GlassCard widget with glass/opaque rendering, accessibility fallbacks (Reduce Transparency + Reduce Motion)
 
 ### Phase 34: Shared Glass Primitives
 **Goal**: The shared GlassCard widget, shimmer loading skeletons, and press micro-interactions exist as stable, reusable components that all five feature screens can adopt
@@ -198,7 +201,7 @@
 | 30. Critical Bug Fixes | v4.0 | 1/1 | Complete | 2026-02-20 |
 | 31. Milestone Verification | v4.0 | 1/1 | Complete | 2026-02-21 |
 | 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
-| 33. Design System Foundation | v5.0 | 0/? | Not started | - |
+| 33. Design System Foundation | v5.0 | 0/2 | Planned | - |
 | 34. Shared Glass Primitives | v5.0 | 0/? | Not started | - |
 | 35. Chart Redesign | v5.0 | 0/? | Not started | - |
 | 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
