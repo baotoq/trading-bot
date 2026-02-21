@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/widgets/error_snackbar.dart';
 import '../../../core/widgets/retry_widget.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../data/history_providers.dart';
 import '../data/models/purchase_history_response.dart';
 import 'widgets/filter_bottom_sheet.dart';
@@ -102,12 +104,67 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
         },
         child: asyncPurchases.when(
           data: (items) => _buildList(items, notifier.hasMore),
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => _buildLoadingSkeleton(),
           error: (_, __) => RetryWidget(
             onRetry: () => ref.invalidate(purchaseHistoryProvider),
           ),
           skipLoadingOnReload: true,
           skipLoadingOnRefresh: true,
+        ),
+      ),
+    );
+  }
+
+  /// Skeleton loading state — 7 fake purchase rows shaped like real list items.
+  Widget _buildLoadingSkeleton() {
+    return AppShimmer(
+      enabled: true,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 8, bottom: 80),
+        itemCount: 7,
+        itemBuilder: (context, _) => Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E1E1E),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.white12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Bone.text(words: 3, fontSize: 13),
+                  Bone.text(words: 2, fontSize: 12),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Bone.text(words: 1, fontSize: 17),
+                  Bone.text(words: 2, fontSize: 14),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Bone.text(words: 1, fontSize: 13),
+                  Row(
+                    children: [
+                      Bone(width: 36, height: 18, borderRadius: BorderRadius.circular(4)),
+                      const SizedBox(width: 8),
+                      Bone.text(words: 1, fontSize: 13),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

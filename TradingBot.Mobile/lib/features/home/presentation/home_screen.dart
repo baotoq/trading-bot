@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/error_snackbar.dart';
 import '../../../core/widgets/retry_widget.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../data/home_providers.dart';
 import 'widgets/countdown_text.dart';
 import 'widgets/health_badge.dart';
@@ -73,9 +75,7 @@ class HomeScreen extends HookConsumerWidget {
                     onRetry: () => ref.invalidate(homeDataProvider),
                   ),
                 ),
-              _ => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+              _ => SliverToBoxAdapter(child: _buildLoadingSkeleton()),
             },
           ],
         ),
@@ -92,5 +92,88 @@ class HomeScreen extends HookConsumerWidget {
       LastBuyCard(status: homeData.status),
       const SizedBox(height: 16),
     ];
+  }
+
+  /// Skeleton loading state — mirrors the real content layout so Skeletonizer
+  /// can generate bone shapes that match the actual widget sizes and positions.
+  Widget _buildLoadingSkeleton() {
+    return AppShimmer(
+      enabled: true,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Portfolio value hero
+            const SizedBox(height: 8),
+            Bone.text(words: 2, fontSize: 14),
+            const SizedBox(height: 6),
+            Bone.text(words: 1, fontSize: 32),
+            const SizedBox(height: 6),
+            Bone.text(words: 2, fontSize: 14),
+            const SizedBox(height: 20),
+            // 2x2 stat grid
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 8,
+              childAspectRatio: 2.2,
+              children: List.generate(
+                4,
+                (_) => Card(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Bone.text(words: 2, fontSize: 12),
+                        const SizedBox(height: 4),
+                        Bone.text(words: 1, fontSize: 16),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Countdown text
+            Bone.text(words: 4, fontSize: 14),
+            const SizedBox(height: 16),
+            // Last buy card
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Bone.text(words: 2, fontSize: 16),
+                        Bone.text(words: 1, fontSize: 12),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Bone.text(words: 1, fontSize: 24),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Bone.text(words: 2, fontSize: 14),
+                        const SizedBox(width: 10),
+                        Bone(width: 40, height: 20, borderRadius: BorderRadius.circular(12)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
   }
 }

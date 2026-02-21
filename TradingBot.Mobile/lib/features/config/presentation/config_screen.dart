@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/error_snackbar.dart';
 import '../../../core/widgets/retry_widget.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../data/config_providers.dart';
 import 'widgets/config_edit_form.dart';
 import 'widgets/config_view_section.dart';
@@ -76,8 +78,47 @@ class ConfigScreen extends HookConsumerWidget {
           AsyncError() => RetryWidget(
               onRetry: () => ref.invalidate(configDataProvider),
             ),
-          _ => const Center(child: CircularProgressIndicator()),
+          _ => _buildLoadingSkeleton(context),
         },
+      ),
+    );
+  }
+
+  /// Skeleton loading state — 3 card groups matching the ConfigViewSection layout.
+  Widget _buildLoadingSkeleton(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    Widget skeletonCard(int rowCount) => Card(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Bone.text(words: 2, fontSize: textTheme.titleMedium?.fontSize ?? 16),
+          ),
+          ...List.generate(
+            rowCount,
+            (_) => ListTile(
+              leading: const Bone.icon(),
+              title: Bone.text(words: 3, fontSize: 14),
+              trailing: Bone.text(words: 1, fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    return AppShimmer(
+      enabled: true,
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          skeletonCard(3), // DCA Settings — 3 rows
+          const SizedBox(height: 12),
+          skeletonCard(4), // Market Analysis — 4 rows
+          const SizedBox(height: 12),
+          skeletonCard(3), // Multiplier Tiers — 3 rows
+        ],
       ),
     );
   }

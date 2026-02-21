@@ -2,11 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../app/theme.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/error_snackbar.dart';
 import '../../../core/widgets/retry_widget.dart';
+import '../../../core/widgets/shimmer_loading.dart';
 import '../data/currency_provider.dart';
 import '../data/models/portfolio_asset_response.dart';
 import '../data/portfolio_providers.dart';
@@ -58,9 +60,7 @@ class PortfolioScreen extends HookConsumerWidget {
                     onRetry: () => ref.invalidate(portfolioPageDataProvider),
                   ),
                 ),
-              _ => const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+              _ => SliverToBoxAdapter(child: _buildLoadingSkeleton()),
             },
           ],
         ),
@@ -141,6 +141,87 @@ class PortfolioScreen extends HookConsumerWidget {
         ),
         const SizedBox(height: 80), // Space for FAB
       ],
+    );
+  }
+
+  /// Skeleton loading state — summary card + donut chart placeholder + asset rows.
+  Widget _buildLoadingSkeleton() {
+    return AppShimmer(
+      enabled: true,
+      child: Column(
+        children: [
+          // Summary card placeholder
+          Card(
+            margin: const EdgeInsets.all(16),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Bone.text(words: 2, fontSize: 14),
+                  const SizedBox(height: 8),
+                  Bone.text(words: 1, fontSize: 28),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Bone.text(words: 2, fontSize: 14),
+                      Bone.text(words: 2, fontSize: 14),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Donut chart placeholder
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Bone(
+              width: double.infinity,
+              height: 200,
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Asset section header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Bone.text(words: 1, fontSize: 16),
+          ),
+          // Asset rows
+          ...List.generate(
+            3,
+            (_) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  const Bone.icon(size: 40),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Bone.text(words: 1, fontSize: 14),
+                        const SizedBox(height: 4),
+                        Bone.text(words: 2, fontSize: 12),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Bone.text(words: 1, fontSize: 14),
+                      const SizedBox(height: 4),
+                      Bone.text(words: 1, fontSize: 12),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 80), // Space for FAB
+        ],
+      ),
     );
   }
 
