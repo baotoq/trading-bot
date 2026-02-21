@@ -13,10 +13,10 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 33 of 38 (Design System Foundation)
-Plan: 2 of 2 complete
-Status: Complete
-Last activity: 2026-02-21 -- 33-02 complete (GlassCard widget with frosted glass + accessibility fallbacks)
+Phase: 34 of 38 (Shared Glass Primitives)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-21 -- 34-01 complete (GlassVariant enum + PressableScale micro-interaction widget)
 
 Progress: [█░░░░░░░░░] 5% (v5.0)
 
@@ -50,6 +50,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 |-------|------|----------|-------|-------|
 | 33 | 01 | 2min | 2 | 3 |
 | 33 | 02 | 23min | 2 | 1 |
+| 34 | 01 | 4min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -57,7 +58,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Recent decisions affecting v5.0:
+Recent decisions affecting v5.0 (phase 34 additions):
 - No BackdropFilter in scrollable lists (History, Portfolio) -- Impeller frame drops confirmed; use opacity-tint + border non-blur GlassCard variant
 - GlassTheme as single ThemeExtension -- consolidated before any screen is touched to prevent two-source-of-truth color drift
 - profitGreen and lossRed are non-negotiable semantic constants -- must survive token consolidation
@@ -71,6 +72,9 @@ Recent decisions affecting v5.0:
 - [Phase 33]: MediaQuery.highContrast used as Reduce Transparency proxy — no direct Flutter reduceTransparency API exists
 - [Phase 33]: GlassCard.shouldReduceMotion uses MediaQuery.disableAnimations only — AccessibilityFeatures.reduceMotion does not exist in Flutter API
 - [Phase 33]: ClipRRect always wraps BackdropFilter in GlassCard — enforced by code structure to prevent blur bleed
+- [Phase 34]: GlassVariant.scrollItem renders Container without BackdropFilter — same GlassTheme tokens, no blur pass — prevents Impeller frame drops on scroll
+- [Phase 34]: didChangeDependencies used for shouldReduceMotion check in PressableScale — context not available in initState
+- [Phase 34]: AnimationController uses single 100ms duration for both forward and reverse in PressableScale — adequate for subtle 0.97 scale effect
 
 ### Known Risks
 
@@ -87,8 +91,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-21
-Stopped at: 33-02-PLAN.md complete. Phase 33 Design System Foundation fully delivered (GlassTheme + AmbientBackground + GlassCard).
-Next step: `/gsd:execute-phase 34` to begin Home Screen redesign
+Stopped at: 34-01-PLAN.md complete. GlassVariant enum + PressableScale micro-interaction widget delivered.
+Next step: Execute 34-02 (shimmer skeletons) to complete phase 34 shared glass primitives
 
 ---
 *State updated: 2026-02-21 after 33-02 complete*

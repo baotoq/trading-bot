@@ -28,7 +28,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [ ] **ANIM-01**: All loading states display shimmer skeleton placeholders matching real content shapes
 - [ ] **ANIM-02**: Portfolio balance and key stat values animate with a count-up effect on first load
 - [ ] **ANIM-03**: Dashboard cards cascade in with staggered entrance animation (40-60ms offset)
-- [ ] **ANIM-04**: All tappable cards respond with a press-scale micro-interaction and haptic feedback
+- [x] **ANIM-04**: All tappable cards respond with a press-scale micro-interaction and haptic feedback
 - [ ] **ANIM-05**: Tab and modal routes use smooth fade+scale page transitions
 - [ ] **ANIM-06**: Currency toggle animates value labels with a slot-flip effect
 
@@ -79,7 +79,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | ANIM-01 | Phase 34 | Pending |
 | ANIM-02 | Phase 36 | Pending |
 | ANIM-03 | Phase 36 | Pending |
-| ANIM-04 | Phase 34 | Pending |
+| ANIM-04 | Phase 34 | Complete |
 | ANIM-05 | Phase 36 | Pending |
 | ANIM-06 | Phase 37 | Pending |
 | SCRN-01 | Phase 36 | Pending |
