@@ -4,16 +4,69 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme.dart';
 
+/// Controls which rendering mode [GlassCard] uses for its glass surface.
+///
+/// Choose the variant based on how the card is used in the widget tree:
+///
+/// - **[stationary]** (default) — Full BackdropFilter frosted glass with blur.
+///   Use for cards that sit over a static or slowly changing background
+///   (dashboard hero sections, bottom sheets, dialog overlays, summary panels).
+///
+/// - **[scrollItem]** — Non-blur tint+border surface with no [BackdropFilter].
+///   Use for cards inside scrollable lists (History, Portfolio list tiles).
+///   Avoids the Impeller frame drops confirmed when BackdropFilter repaints
+///   on every scroll offset change. The surface still uses GlassTheme tokens
+///   for color, opacity, and border — it simply skips the blur pass.
+///
+/// ## Decision: No BackdropFilter in scrollable lists
+///
+/// Impeller frame drop testing confirmed that BackdropFilter inside a
+/// CustomScrollView causes consistent jank on mid-range devices because every
+/// scroll pixel triggers a full-texture blur repaint. The scrollItem variant
+/// was introduced to give list items a glass-adjacent appearance while keeping
+/// scroll performance at 60 fps.
+enum GlassVariant {
+  /// Full BackdropFilter frosted glass (default). Recommended for stationary
+  /// cards where the background does not scroll underneath.
+  stationary,
+
+  /// Non-blur tint+border surface. Recommended for items inside scrollable
+  /// lists where BackdropFilter would cause Impeller frame drops.
+  scrollItem,
+}
+
 /// A frosted glass surface widget — the primary card/panel across all app screens.
 ///
 /// Reads all design tokens from [GlassTheme] (registered in [ThemeData.extensions]).
 /// No blur sigma, opacity, or border values are hardcoded.
+///
+/// ## Variants
+///
+/// Use the [variant] parameter to control rendering mode:
+///
+/// - [GlassVariant.stationary] (default) — Full [BackdropFilter] frosted glass.
+///   Suitable for dashboard cards, hero sections, and overlays.
+///
+/// - [GlassVariant.scrollItem] — Non-blur tint+border surface with no
+///   [BackdropFilter]. Suitable for items in scrollable lists (History,
+///   Portfolio). Prevents Impeller frame drops on scroll.
+///
+/// Switching variants requires only a parameter change at the call site:
+///
+/// ```dart
+/// // Stationary (default — frosted blur):
+/// GlassCard(child: Text('Hello'))
+///
+/// // Scroll-safe (no blur):
+/// GlassCard(variant: GlassVariant.scrollItem, child: ListTile(...))
+/// ```
 ///
 /// ## Accessibility
 ///
 /// **Reduce Transparency:** When [MediaQuery.of(context).highContrast] is true,
 /// BackdropFilter is skipped entirely and an opaque dark card is rendered instead.
 /// This prevents performance and legibility issues for users who prefer reduced blur.
+/// This fallback applies to both variants.
 ///
 /// **Reduce Motion:** Use [GlassCard.shouldReduceMotion(context)] before starting
 /// any animation in a child widget to respect the platform's motion preference.
@@ -43,6 +96,7 @@ class GlassCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(16),
     this.borderRadius,
     this.margin,
+    this.variant = GlassVariant.stationary,
   });
 
   /// The widget rendered inside the card surface.
@@ -56,6 +110,13 @@ class GlassCard extends StatelessWidget {
 
   /// Optional outer margin around the card. Defaults to null (no margin).
   final EdgeInsets? margin;
+
+  /// Controls whether to render frosted glass (blur) or a non-blur tint+border
+  /// surface. Defaults to [GlassVariant.stationary].
+  ///
+  /// Use [GlassVariant.scrollItem] for cards inside scrollable lists to prevent
+  /// Impeller frame drops caused by BackdropFilter repainting on scroll.
+  final GlassVariant variant;
 
   /// Whether the platform requests reduced motion.
   ///
@@ -97,12 +158,33 @@ class GlassCard extends StatelessWidget {
     if (reduceTransparency) {
       // Opaque fallback path — no BackdropFilter applied.
       // Renders a plain dark container using the opaque surface tokens.
+      // Applies to all variants when high contrast is active.
       return Container(
         margin: margin,
         decoration: BoxDecoration(
           color: glass.opaqueSurface,
           borderRadius: BorderRadius.circular(radius),
           border: Border.all(color: glass.opaqueBorder, width: glass.borderWidth),
+        ),
+        padding: padding,
+        child: child,
+      );
+    }
+
+    if (variant == GlassVariant.scrollItem) {
+      // Scroll-safe path — no BackdropFilter, no ClipRRect.
+      //
+      // Uses the same GlassTheme tokens (tintColor, tintOpacity, borderColor,
+      // borderWidth, cardRadius) as the stationary glass path, but skips the
+      // blur pass entirely. This keeps visual consistency while avoiding the
+      // Impeller frame drops that occur when BackdropFilter repaints on every
+      // scroll offset change in a CustomScrollView/ListView.
+      return Container(
+        margin: margin,
+        decoration: BoxDecoration(
+          color: glass.tintColor.withAlpha((glass.tintOpacity * 255).round()),
+          borderRadius: BorderRadius.circular(radius),
+          border: Border.all(color: glass.borderColor, width: glass.borderWidth),
         ),
         padding: padding,
         child: child,
