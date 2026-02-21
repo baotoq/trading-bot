@@ -66,33 +66,33 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DESIGN-01 | — | Pending |
-| DESIGN-02 | — | Pending |
-| DESIGN-03 | — | Pending |
-| DESIGN-04 | — | Pending |
-| DESIGN-05 | — | Pending |
-| DESIGN-06 | — | Pending |
-| CHART-01 | — | Pending |
-| CHART-02 | — | Pending |
-| CHART-03 | — | Pending |
-| CHART-04 | — | Pending |
-| ANIM-01 | — | Pending |
-| ANIM-02 | — | Pending |
-| ANIM-03 | — | Pending |
-| ANIM-04 | — | Pending |
-| ANIM-05 | — | Pending |
-| ANIM-06 | — | Pending |
-| SCRN-01 | — | Pending |
-| SCRN-02 | — | Pending |
-| SCRN-03 | — | Pending |
-| SCRN-04 | — | Pending |
-| SCRN-05 | — | Pending |
+| DESIGN-01 | Phase 33 | Pending |
+| DESIGN-02 | Phase 33 | Pending |
+| DESIGN-03 | Phase 33 | Pending |
+| DESIGN-04 | Phase 33 | Pending |
+| DESIGN-05 | Phase 33 | Pending |
+| DESIGN-06 | Phase 33 | Pending |
+| CHART-01 | Phase 35 | Pending |
+| CHART-02 | Phase 35 | Pending |
+| CHART-03 | Phase 35 | Pending |
+| CHART-04 | Phase 35 | Pending |
+| ANIM-01 | Phase 34 | Pending |
+| ANIM-02 | Phase 36 | Pending |
+| ANIM-03 | Phase 36 | Pending |
+| ANIM-04 | Phase 34 | Pending |
+| ANIM-05 | Phase 36 | Pending |
+| ANIM-06 | Phase 37 | Pending |
+| SCRN-01 | Phase 36 | Pending |
+| SCRN-02 | Phase 35 | Pending |
+| SCRN-03 | Phase 38 | Pending |
+| SCRN-04 | Phase 38 | Pending |
+| SCRN-05 | Phase 37 | Pending |
 
 **Coverage:**
 - v5.0 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 after v5.0 roadmap created (traceability complete)*
