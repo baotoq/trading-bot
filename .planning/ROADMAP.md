@@ -118,7 +118,10 @@ Plans:
   1. Loading states on any screen display shimmer skeleton placeholders shaped to match the real content layout, not a spinner
   2. Tapping any card produces a visible press-scale shrink (to ~0.97) with a haptic pulse, then springs back on release
   3. A GlassCard widget renders a frosted glass surface (blur variant) for stationary cards and a non-blur tint-plus-border surface for scrollable list items without any code changes at the call site
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 34-01-PLAN.md -- GlassCard scroll-safe variant (GlassVariant enum) and PressableScale micro-interaction wrapper widget
+- [ ] 34-02-PLAN.md -- Skeletonizer shimmer skeletons replacing CircularProgressIndicator on all 5 tab screens
 
 ### Phase 35: Chart Redesign
 **Goal**: The price chart is a premium gradient glow visualization with animated left-to-right draw-in, glowing purchase markers, and a frosted glass tooltip
