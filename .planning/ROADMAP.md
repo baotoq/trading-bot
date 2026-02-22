@@ -89,7 +89,7 @@
 - [x] **Phase 33: Design System Foundation** - GlassTheme tokens, ambient background, and typography scale as the prerequisite foundation (completed 2026-02-21)
 - [x] **Phase 34: Shared Glass Primitives** - GlassCard widget, shimmer skeletons, and press micro-interactions as the shared building blocks (completed 2026-02-21)
 - [x] **Phase 35: Chart Redesign** - Gradient glow chart, animated draw-in, glow markers, and glass tooltip on ChartScreen (completed 2026-02-22)
-- [ ] **Phase 36: Home Screen Redesign** - Dashboard overview layout with hero balance, mini allocation chart, staggered entrance, and animated counters
+- [x] **Phase 36: Home Screen Redesign** - Dashboard overview layout with hero balance, mini allocation chart, staggered entrance, and animated counters (completed 2026-02-22)
 - [ ] **Phase 37: Portfolio Screen Restyle** - Glass cards, animated donut, per-asset glass rows, and currency toggle slot-flip
 - [ ] **Phase 38: History, Config, and Navigation Shell** - Glass restyles for remaining tabs and smooth page transitions
 
@@ -182,7 +182,7 @@ Plans:
   2. On first opening the Home tab after app launch, glass cards cascade in with staggered entrance (each card slightly delayed after the previous)
   3. The hero balance value animates from zero to the actual value on first load rather than appearing instantly
   4. Navigating between tabs and opening modals uses a smooth fade-and-scale transition instead of a hard cut
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 36-01-PLAN.md -- Home dashboard layout with 4 glass cards, staggered entrance animation, and count-up balance
 - [ ] 36-02-PLAN.md -- Fade+scale page transitions on all GoRouter routes
@@ -249,7 +249,7 @@ Plans:
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
-| 36. Home Screen Redesign | 1/2 | In Progress|  | - |
+| 36. Home Screen Redesign | 2/2 | Complete   | 2026-02-22 | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
 

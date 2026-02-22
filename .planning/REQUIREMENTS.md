@@ -26,8 +26,8 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 ### Animations
 
 - [x] **ANIM-01**: All loading states display shimmer skeleton placeholders matching real content shapes
-- [ ] **ANIM-02**: Portfolio balance and key stat values animate with a count-up effect on first load
-- [ ] **ANIM-03**: Dashboard cards cascade in with staggered entrance animation (40-60ms offset)
+- [x] **ANIM-02**: Portfolio balance and key stat values animate with a count-up effect on first load
+- [x] **ANIM-03**: Dashboard cards cascade in with staggered entrance animation (40-60ms offset)
 - [x] **ANIM-04**: All tappable cards respond with a press-scale micro-interaction and haptic feedback
 - [x] **ANIM-05**: Tab and modal routes use smooth fade+scale page transitions
 - [ ] **ANIM-06**: Currency toggle animates value labels with a slot-flip effect
@@ -50,7 +50,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 
 ### Screen Redesign
 
-- [ ] **SCRN-01**: Home screen uses dashboard overview layout with hero balance, mini allocation chart, recent activity, and quick actions
+- [x] **SCRN-01**: Home screen uses dashboard overview layout with hero balance, mini allocation chart, recent activity, and quick actions
 - [x] **SCRN-02**: Chart screen displays gradient glow chart with premium glass tooltip and animated draw-in
 - [ ] **SCRN-03**: History screen uses glass-styled list items (non-blur) with glass filter bottom sheet
 - [ ] **SCRN-04**: Config screen uses glass cards for settings groups with polished edit form
@@ -93,12 +93,12 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | CHART-03 | Phase 35 | Complete |
 | CHART-04 | Phase 35 | Complete |
 | ANIM-01 | Phase 34 | Complete |
-| ANIM-02 | Phase 36 | Pending |
-| ANIM-03 | Phase 36 | Pending |
+| ANIM-02 | Phase 36 | Complete |
+| ANIM-03 | Phase 36 | Complete |
 | ANIM-04 | Phase 34 | Complete |
 | ANIM-05 | Phase 36 | Complete |
 | ANIM-06 | Phase 37 | Pending |
-| SCRN-01 | Phase 36 | Pending |
+| SCRN-01 | Phase 36 | Complete |
 | SCRN-02 | Phase 35 | Complete |
 | SCRN-03 | Phase 38 | Pending |
 | SCRN-04 | Phase 38 | Pending |
