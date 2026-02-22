@@ -137,6 +137,32 @@ Plans:
 - [ ] 35-01-PLAN.md -- GlowDotPainter, draw-in animation, enhanced gradient glow fill on PriceLineChart
 - [ ] 35-02-PLAN.md -- Frosted glass tooltip overlay, ChartScreen layout update for premium chart
 
+### Phase 35.2: DCA Bot Detail Screen (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Depends on:** Phase 35
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 35.2 to break down)
+
+### Phase 35.1: Portfolio Overview Screen (INSERTED)
+
+**Goal:** The Portfolio tab is rebuilt as a CMC-style overview with a glass hero header, sticky tab bar, filter chips, and flat glass-styled asset list replacing the old Card/ExpansionTile layout
+**Depends on:** Phase 34
+**Requirements:** PORT-UI-01, PORT-UI-02, PORT-UI-03
+**Success Criteria** (what must be TRUE):
+  1. Portfolio screen shows a glass hero header with total value and all-time P&L (absolute + percentage)
+  2. A sticky tab bar (Overview/Transactions) pins at the top during scroll; switching tabs shows different content
+  3. Filter chips (Holding amount, Cumulative profit, Analysis) sort the flat asset list
+  4. Asset rows render in GlassCard scrollItem variant with colored ticker badge, price + P&L%, holding value + quantity
+  5. AmbientBackground orbs are visible behind all portfolio content
+**Plans:** 2 plans
+
+Plans:
+- [ ] 35.1-01-PLAN.md -- Glass hero header, sticky tab bar, filter chips, and PortfolioScreen CustomScrollView rebuild
+- [ ] 35.1-02-PLAN.md -- PortfolioAssetListItem with glass scrollItem variant and updated loading skeleton
+
 ### Phase 36: Home Screen Redesign
 **Goal**: The Home tab is a dashboard overview with a hero balance section, a mini allocation chart, recent activity, and quick actions -- using glass cards with staggered entrance animation and animated counters on first load
 **Depends on**: Phase 34

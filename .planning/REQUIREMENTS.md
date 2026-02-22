@@ -32,6 +32,12 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [ ] **ANIM-05**: Tab and modal routes use smooth fade+scale page transitions
 - [ ] **ANIM-06**: Currency toggle animates value labels with a slot-flip effect
 
+### Portfolio UI Redesign (Phase 35.1 — Inserted)
+
+- [ ] **PORT-UI-01**: Portfolio screen displays a glass hero header with total value, all-time P&L absolute and percentage
+- [ ] **PORT-UI-02**: Portfolio screen has Overview/Transactions tab switcher with sticky tab bar and horizontal filter chips that sort the asset list
+- [ ] **PORT-UI-03**: Portfolio asset rows render in GlassCard scrollItem variant with colored ticker badge, price + P&L%, and holding value + quantity
+
 ### Screen Redesign
 
 - [ ] **SCRN-01**: Home screen uses dashboard overview layout with hero balance, mini allocation chart, recent activity, and quick actions
@@ -87,12 +93,15 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | SCRN-03 | Phase 38 | Pending |
 | SCRN-04 | Phase 38 | Pending |
 | SCRN-05 | Phase 37 | Pending |
+| PORT-UI-01 | Phase 35.1 | Pending |
+| PORT-UI-02 | Phase 35.1 | Pending |
+| PORT-UI-03 | Phase 35.1 | Pending |
 
 **Coverage:**
-- v5.0 requirements: 21 total
-- Mapped to phases: 21
+- v5.0 requirements: 24 total
+- Mapped to phases: 24
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after v5.0 roadmap created (traceability complete)*
+*Last updated: 2026-02-22 after Phase 35.1 requirements added*
