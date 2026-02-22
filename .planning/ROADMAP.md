@@ -132,7 +132,7 @@ Plans:
   2. On first entry to the Chart tab each session, the chart line draws in from left to right over approximately 1 second
   3. Purchase marker dots on the chart display an orange radial glow halo distinct from the dot itself
   4. Touching the chart displays a frosted glass tooltip with rounded corners and locale-formatted numbers
-**Plans:** 2 plans
+**Plans:** 0/2 plans executed
 Plans:
 - [ ] 35-01-PLAN.md -- GlowDotPainter, draw-in animation, enhanced gradient glow fill on PriceLineChart
 - [ ] 35-02-PLAN.md -- Frosted glass tooltip overlay, ChartScreen layout update for premium chart
@@ -157,7 +157,7 @@ Plans:
   3. Filter chips (Holding amount, Cumulative profit, Analysis) sort the flat asset list
   4. Asset rows render in GlassCard scrollItem variant with colored ticker badge, price + P&L%, holding value + quantity
   5. AmbientBackground orbs are visible behind all portfolio content
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 35.1-01-PLAN.md -- Glass hero header, sticky tab bar, filter chips, and PortfolioScreen CustomScrollView rebuild
@@ -235,7 +235,7 @@ Plans:
 | 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
-| 35. Chart Redesign | v5.0 | 0/? | Not started | - |
+| 35. Chart Redesign | 0/2 | Planned    |  | - |
 | 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |

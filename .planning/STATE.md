@@ -2,7 +2,7 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v5.0 Stunning Mobile UI
-**Updated:** 2026-02-21
+**Updated:** 2026-02-22
 
 ## Project Reference
 
@@ -13,10 +13,10 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 34 of 38 (Shared Glass Primitives)
-Plan: 2 of 2 complete
-Status: Complete
-Last activity: 2026-02-21 -- 34-02 complete (shimmer skeleton loading states on all 5 tab screens via skeletonizer + AppShimmer)
+Phase: 35.1 of 38 (Portfolio Overview Screen)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-22 -- 35.1-01 complete (PortfolioScreen rebuilt with glass hero header, pinned tab bar, filter chips, flat asset list)
 
 Progress: [█░░░░░░░░░] 5% (v5.0)
 
@@ -52,6 +52,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 | 33 | 02 | 23min | 2 | 1 |
 | 34 | 01 | 4min | 2 | 2 |
 | 34 | 02 | 6min | 2 | 7 |
+| 35.1 | 01 | 3min | 2 | 4 |
 
 ## Accumulated Context
 
@@ -78,6 +79,15 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 34]: AnimationController uses single 100ms duration for both forward and reverse in PressableScale — adequate for subtle 0.97 scale effect
 - [Phase 34]: skeletonizer 1.4.3 integrated with AppShimmer wrapper using GlassTheme opaqueSurface/opaqueBorder as shimmer colors for visual continuity
 - [Phase 34]: PulseEffect chosen as reduce-motion fallback over SoldColorEffect — still communicates loading state via gentle alpha fade
+- [Phase 35.1-01]: _buildContent returns List<Widget> slivers spread at call site — switch expression with spread not valid in Dart list literals
+- [Phase 35.1-01]: StickyTabBarDelegate uses Material(transparent) wrapper so AmbientBackground orbs show through the pinned tab bar region
+- [Phase 35.1-01]: PortfolioTabBar uses ValueListenableBuilder internally — parent passes ValueNotifier<int> so only tab buttons rebuild on tap
+- [Phase 35.1-01]: CurrencyToggle moved from SliverAppBar actions into PortfolioHeroHeader — co-located with the value it controls
+
+### Roadmap Evolution
+
+- Phase 35.1 inserted after Phase 35: Portfolio Overview Screen (URGENT)
+- Phase 35.2 inserted after Phase 35: DCA Bot Detail Screen (URGENT)
 
 ### Known Risks
 
@@ -93,9 +103,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21
-Stopped at: 34-02-PLAN.md complete. Phase 34 Shared Glass Primitives fully delivered (GlassVariant + PressableScale + AppShimmer + shimmer loading states on all 5 screens).
-Next step: `/gsd:execute-phase 35` to begin next phase
+Last session: 2026-02-22
+Stopped at: 35.1-01-PLAN.md complete. PortfolioScreen structural shell delivered (glass hero header, pinned tab bar, filter chips, flat asset list).
+Next step: Execute 35.1-02 to replace AssetRow with glass asset list items
 
 ---
 *State updated: 2026-02-21 after 34-02 complete*
