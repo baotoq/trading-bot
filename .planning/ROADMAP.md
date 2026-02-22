@@ -245,7 +245,7 @@ Plans:
 | 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
-| 35. Chart Redesign | 2/2 | Complete   | 2026-02-22 | - |
+| 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
 | 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
