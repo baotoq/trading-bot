@@ -149,7 +149,7 @@ Plans:
   4. Parameters tab shows DCA config in 3 GlassCard sections (Schedule, Strategy, Tiers) read-only
   5. PnL chart gradient fill is colored green for profit, red for loss, derived from existing price + average cost data
   6. Bot ID is copyable to clipboard with SnackBar confirmation
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 35.2-01-PLAN.md -- Screen shell, route, Overview tab with identity header, stats grid, action buttons

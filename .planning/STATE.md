@@ -9,14 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 35.2 -- DCA Bot Detail Screen (Phase 35.1 Portfolio Overview Screen complete)
+**Current focus:** Phase 35.2 complete -- DCA Bot Detail Screen fully implemented (next: Phase 36)
 
 ## Current Position
 
 Phase: 35.2 of 38 (DCA Bot Detail Screen)
-Plan: 1 of TBD complete
-Status: In Progress
-Last activity: 2026-02-22 -- 35.2-01 complete (DcaBotDetailScreen structural shell: 3-tab layout, bot identity header, stats grid, action buttons, /home/bot-detail route)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-02-22 -- 35.2-02 complete (PnlChartCard, BotInfoCard, History tab, Parameters tab, loading skeleton)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -30,7 +30,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (12 plans)
 - v4.0: 2 days (15 plans)
-- v5.0: In progress (5 plans so far)
+- v5.0: In progress (6 plans so far)
 
 **By Milestone:**
 
@@ -55,6 +55,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | 35.1 | 01 | 3min | 2 | 4 |
 | 35.1 | 02 | 3min | 2 | 2 |
 | 35.2 | 01 | 3min | 2 | 5 |
+| 35.2 | 02 | 3min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -91,6 +92,9 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35.2]: DcaBotDetailScreen uses no Scaffold backgroundColor — global transparent allows AmbientBackground orbs through
 - [Phase 35.2]: parentNavigatorKey: rootNavigatorKey on /home/bot-detail — full-screen push above tab shell
 - [Phase 35.2]: Frequency label 'Daily at HH:MM / N' — correct for once-daily DCA, reference screenshot was from different product
+- [Phase 35.2]: _PnlChartSection and _EventHistoryPreviewSection isolated as private HookConsumerWidgets to scope provider subscriptions
+- [Phase 35.2]: BotInfoCard derives Bot ID as firstPurchaseDate.millisecondsSinceEpoch.toString() — stable unique ID without server-side bot ID endpoint
+- [Phase 35.2]: History tab uses useEffect + useScrollController hook; pagination triggers at maxScrollExtent - 200px threshold
 
 ### Roadmap Evolution
 
@@ -112,8 +116,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: 35.2-01-PLAN.md complete. DCA Bot Detail Screen structural shell delivered (DcaBotDetailScreen 3-tab layout, BotIdentityHeader, BotStatsGrid, BotActionButtons, /home/bot-detail route).
-Next step: Execute Phase 35.2 Plan 02 (PnL chart card, bot info card, event history, History tab, Parameters tab)
+Stopped at: 35.2-02-PLAN.md complete. DCA Bot Detail Screen feature-complete (PnlChartCard, BotInfoCard, History tab, Parameters tab, loading skeleton).
+Next step: Execute Phase 36
 
 ---
-*State updated: 2026-02-22 after 35.2-01 complete*
+*State updated: 2026-02-22 after 35.2-02 complete*
