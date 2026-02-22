@@ -21,7 +21,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [x] **CHART-01**: Price chart displays a gradient glow fill area beneath the line with orange-to-transparent gradient
 - [x] **CHART-02**: Price chart animates left-to-right draw-in on initial tab entry
 - [x] **CHART-03**: Purchase marker dots display an orange radial glow effect
-- [ ] **CHART-04**: Chart tooltip uses a frosted glass style with rounded corners and formatted numbers
+- [x] **CHART-04**: Chart tooltip uses a frosted glass style with rounded corners and formatted numbers
 
 ### Animations
 
@@ -51,7 +51,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 ### Screen Redesign
 
 - [ ] **SCRN-01**: Home screen uses dashboard overview layout with hero balance, mini allocation chart, recent activity, and quick actions
-- [ ] **SCRN-02**: Chart screen displays gradient glow chart with premium glass tooltip and animated draw-in
+- [x] **SCRN-02**: Chart screen displays gradient glow chart with premium glass tooltip and animated draw-in
 - [ ] **SCRN-03**: History screen uses glass-styled list items (non-blur) with glass filter bottom sheet
 - [ ] **SCRN-04**: Config screen uses glass cards for settings groups with polished edit form
 - [ ] **SCRN-05**: Portfolio screen uses glass cards with animated allocation donut and per-asset glass rows
@@ -91,7 +91,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | CHART-01 | Phase 35 | Complete |
 | CHART-02 | Phase 35 | Complete |
 | CHART-03 | Phase 35 | Complete |
-| CHART-04 | Phase 35 | Pending |
+| CHART-04 | Phase 35 | Complete |
 | ANIM-01 | Phase 34 | Complete |
 | ANIM-02 | Phase 36 | Pending |
 | ANIM-03 | Phase 36 | Pending |
@@ -99,7 +99,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | ANIM-05 | Phase 36 | Pending |
 | ANIM-06 | Phase 37 | Pending |
 | SCRN-01 | Phase 36 | Pending |
-| SCRN-02 | Phase 35 | Pending |
+| SCRN-02 | Phase 35 | Complete |
 | SCRN-03 | Phase 38 | Pending |
 | SCRN-04 | Phase 38 | Pending |
 | SCRN-05 | Phase 37 | Pending |

@@ -9,14 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 35.2 complete -- DCA Bot Detail Screen fully implemented with navigation entry point wired (next: Phase 36)
+**Current focus:** Phase 35 complete -- Chart Redesign fully implemented with GlowDotPainter, draw-in animation, glass tooltip overlay, premium ChartScreen layout (next: Phase 36)
 
 ## Current Position
 
 Phase: 35 of 38 (Chart Redesign)
-Plan: 1 of 2 complete
-Status: In Progress
-Last activity: 2026-02-22 -- 35-01 complete (GlowDotPainter + PriceLineChart draw-in animation + enhanced gradient)
+Plan: 2 of 2 complete
+Status: Complete
+Last activity: 2026-02-22 -- 35-02 complete (GlassChartTooltip + PriceLineChart custom touch handling + ChartScreen premium layout)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -58,6 +58,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | 35.2 | 02 | 3min | 2 | 3 |
 | Phase 35.2 P03 | 1 | 1 tasks | 1 files |
 | 35 | 01 | 3min | 2 | 2 |
+| Phase 35 P02 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,10 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35-01]: GlowDotPainter implements lerp + props (EquatableMixin) -- required abstract members of FlDotPainter not noted in plan; auto-fixed
 - [Phase 35-01]: useRef(false) as hasAnimated guard -- fires draw-in animation only on first mount, not on tab revisit
 - [Phase 35-01]: controller.isCompleted used for purchase dot show guard -- dots only appear when full line is drawn
+- [Phase 35-02]: handleBuiltInTouches:true with null getTooltipItems -- preserves vertical indicator line while suppressing built-in tooltip (Pitfall 4 solution)
+- [Phase 35-02]: Tooltip anchored at top:0 centered horizontally -- avoids complex pixel-coordinate calculation for LineBarSpot.x canvas position
+- [Phase 35-02]: SingleChildScrollView(AlwaysScrollable) at top level replaces Expanded+inner-scroll nesting -- PriceLineChart AspectRatio has intrinsic height, no Expanded needed
+- [Phase 35-02]: Transparent AppBar backgroundColor in ChartScreen -- allows AmbientBackground orbs to show through app bar area
 
 ### Roadmap Evolution
 
@@ -123,8 +128,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 35-01-PLAN.md. GlowDotPainter + PriceLineChart draw-in animation + enhanced gradient (CHART-01, CHART-02, CHART-03 partially done).
-Next step: Execute Phase 35 Plan 02 (glass tooltip overlay)
+Stopped at: Completed 35-02-PLAN.md. GlassChartTooltip + PriceLineChart custom touch handling + ChartScreen premium layout (CHART-04, SCRN-02). Phase 35 Chart Redesign complete.
+Next step: Execute Phase 36
 
 ---
 *State updated: 2026-02-22 after 35.2-03 complete*

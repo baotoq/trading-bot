@@ -88,7 +88,7 @@
 
 - [x] **Phase 33: Design System Foundation** - GlassTheme tokens, ambient background, and typography scale as the prerequisite foundation (completed 2026-02-21)
 - [x] **Phase 34: Shared Glass Primitives** - GlassCard widget, shimmer skeletons, and press micro-interactions as the shared building blocks (completed 2026-02-21)
-- [ ] **Phase 35: Chart Redesign** - Gradient glow chart, animated draw-in, glow markers, and glass tooltip on ChartScreen
+- [x] **Phase 35: Chart Redesign** - Gradient glow chart, animated draw-in, glow markers, and glass tooltip on ChartScreen (completed 2026-02-22)
 - [ ] **Phase 36: Home Screen Redesign** - Dashboard overview layout with hero balance, mini allocation chart, staggered entrance, and animated counters
 - [ ] **Phase 37: Portfolio Screen Restyle** - Glass cards, animated donut, per-asset glass rows, and currency toggle slot-flip
 - [ ] **Phase 38: History, Config, and Navigation Shell** - Glass restyles for remaining tabs and smooth page transitions
@@ -132,7 +132,7 @@ Plans:
   2. On first entry to the Chart tab each session, the chart line draws in from left to right over approximately 1 second
   3. Purchase marker dots on the chart display an orange radial glow halo distinct from the dot itself
   4. Touching the chart displays a frosted glass tooltip with rounded corners and locale-formatted numbers
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 35-01-PLAN.md -- GlowDotPainter, draw-in animation, enhanced gradient glow fill on PriceLineChart
 - [ ] 35-02-PLAN.md -- Frosted glass tooltip overlay, ChartScreen layout update for premium chart
@@ -245,7 +245,7 @@ Plans:
 | 32. Tech Debt Cleanup | v4.0 | 3/3 | Complete | 2026-02-21 |
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
-| 35. Chart Redesign | 1/2 | In Progress|  | - |
+| 35. Chart Redesign | 2/2 | Complete   | 2026-02-22 | - |
 | 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
