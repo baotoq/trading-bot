@@ -182,7 +182,10 @@ Plans:
   2. On first opening the Home tab after app launch, glass cards cascade in with staggered entrance (each card slightly delayed after the previous)
   3. The hero balance value animates from zero to the actual value on first load rather than appearing instantly
   4. Navigating between tabs and opening modals uses a smooth fade-and-scale transition instead of a hard cut
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 36-01-PLAN.md -- Home dashboard layout with 4 glass cards, staggered entrance animation, and count-up balance
+- [ ] 36-02-PLAN.md -- Fade+scale page transitions on all GoRouter routes
 
 ### Phase 37: Portfolio Screen Restyle
 **Goal**: The Portfolio tab displays all assets and totals in glass cards with a visually prominent animated allocation donut and a slot-flip animation when the user toggles currency
@@ -246,7 +249,7 @@ Plans:
 | 33. Design System Foundation | 2/2 | Complete    | 2026-02-21 | - |
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
-| 36. Home Screen Redesign | v5.0 | 0/? | Not started | - |
+| 36. Home Screen Redesign | v5.0 | 0/2 | Planned | - |
 | 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
 
