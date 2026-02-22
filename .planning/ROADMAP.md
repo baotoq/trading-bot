@@ -157,7 +157,7 @@ Plans:
   3. Filter chips (Holding amount, Cumulative profit, Analysis) sort the flat asset list
   4. Asset rows render in GlassCard scrollItem variant with colored ticker badge, price + P&L%, holding value + quantity
   5. AmbientBackground orbs are visible behind all portfolio content
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 35.1-01-PLAN.md -- Glass hero header, sticky tab bar, filter chips, and PortfolioScreen CustomScrollView rebuild

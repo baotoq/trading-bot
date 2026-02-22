@@ -9,16 +9,16 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 35 -- next phase (phase 34 Shared Glass Primitives complete)
+**Current focus:** Phase 35.2 -- DCA Bot Detail Screen (Phase 35.1 Portfolio Overview Screen complete)
 
 ## Current Position
 
-Phase: 35.1 of 38 (Portfolio Overview Screen)
-Plan: 1 of 2 complete
+Phase: 35.2 of 38 (DCA Bot Detail Screen)
+Plan: 0 of TBD complete
 Status: In Progress
-Last activity: 2026-02-22 -- 35.1-01 complete (PortfolioScreen rebuilt with glass hero header, pinned tab bar, filter chips, flat asset list)
+Last activity: 2026-02-22 -- 35.1-02 complete (PortfolioAssetListItem glass rows, updated loading skeleton)
 
-Progress: [█░░░░░░░░░] 5% (v5.0)
+Progress: [██░░░░░░░░] 10% (v5.0)
 
 ## Performance Metrics
 
@@ -30,7 +30,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 - v2.0: 2 days (15 plans)
 - v3.0: 1 day (12 plans)
 - v4.0: 2 days (15 plans)
-- v5.0: In progress (4 plans so far)
+- v5.0: In progress (5 plans so far)
 
 **By Milestone:**
 
@@ -53,6 +53,7 @@ Progress: [█░░░░░░░░░] 5% (v5.0)
 | 34 | 01 | 4min | 2 | 2 |
 | 34 | 02 | 6min | 2 | 7 |
 | 35.1 | 01 | 3min | 2 | 4 |
+| 35.1 | 02 | 3min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -83,6 +84,9 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35.1-01]: StickyTabBarDelegate uses Material(transparent) wrapper so AmbientBackground orbs show through the pinned tab bar region
 - [Phase 35.1-01]: PortfolioTabBar uses ValueListenableBuilder internally — parent passes ValueNotifier<int> so only tab buttons rebuild on tap
 - [Phase 35.1-01]: CurrencyToggle moved from SliverAppBar actions into PortfolioHeroHeader — co-located with the value it controls
+- [Phase 35.1-02]: PortfolioAssetListItem uses GlassVariant.scrollItem — no BackdropFilter in list items, preserving 60fps scroll per Impeller constraint from Phase 34
+- [Phase 35.1-02]: ticker.hashCode.abs() % 6 for badge palette color — .abs() guards against negative hashCode on some Dart runtimes
+- [Phase 35.1-02]: Skeleton rebuilt with actual GlassCard(scrollItem) for asset row bones — surface color matches loaded state without separate color values
 
 ### Roadmap Evolution
 
@@ -104,8 +108,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: 35.1-01-PLAN.md complete. PortfolioScreen structural shell delivered (glass hero header, pinned tab bar, filter chips, flat asset list).
-Next step: Execute 35.1-02 to replace AssetRow with glass asset list items
+Stopped at: 35.1-02-PLAN.md complete. Phase 35.1 Portfolio Overview Screen fully delivered (glass hero header, pinned tab bar, filter chips, glass asset rows, updated skeleton).
+Next step: Execute Phase 35.2 DCA Bot Detail Screen
 
 ---
-*State updated: 2026-02-21 after 34-02 complete*
+*State updated: 2026-02-22 after 35.1-02 complete*
