@@ -26,6 +26,30 @@ final GlobalKey<NavigatorState> _configNavKey =
 final GlobalKey<NavigatorState> _portfolioNavKey =
     GlobalKey<NavigatorState>(debugLabel: 'portfolio');
 
+/// Reusable fade+scale page transition for all routes (ANIM-05).
+CustomTransitionPage<void> fadeScalePage({
+  required LocalKey key,
+  required Widget child,
+}) {
+  return CustomTransitionPage<void>(
+    key: key,
+    child: child,
+    transitionDuration: const Duration(milliseconds: 200),
+    reverseTransitionDuration: const Duration(milliseconds: 200),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 0.95, end: 1.0).animate(
+            CurvedAnimation(parent: animation, curve: Curves.easeOut),
+          ),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 final GoRouter appRouter = GoRouter(
   navigatorKey: rootNavigatorKey,
   initialLocation: '/home',
@@ -39,12 +63,18 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/home',
-              builder: (context, state) => const HomeScreen(),
+              pageBuilder: (context, state) => fadeScalePage(
+                key: state.pageKey,
+                child: const HomeScreen(),
+              ),
               routes: [
                 GoRoute(
                   path: 'bot-detail',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (_, __) => const DcaBotDetailScreen(),
+                  pageBuilder: (context, state) => fadeScalePage(
+                    key: state.pageKey,
+                    child: const DcaBotDetailScreen(),
+                  ),
                 ),
               ],
             ),
@@ -55,7 +85,10 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/chart',
-              builder: (context, state) => const ChartScreen(),
+              pageBuilder: (context, state) => fadeScalePage(
+                key: state.pageKey,
+                child: const ChartScreen(),
+              ),
             ),
           ],
         ),
@@ -64,7 +97,10 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/history',
-              builder: (context, state) => const HistoryScreen(),
+              pageBuilder: (context, state) => fadeScalePage(
+                key: state.pageKey,
+                child: const HistoryScreen(),
+              ),
             ),
           ],
         ),
@@ -73,7 +109,10 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/config',
-              builder: (context, state) => const ConfigScreen(),
+              pageBuilder: (context, state) => fadeScalePage(
+                key: state.pageKey,
+                child: const ConfigScreen(),
+              ),
             ),
           ],
         ),
@@ -82,30 +121,45 @@ final GoRouter appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/portfolio',
-              builder: (context, state) => const PortfolioScreen(),
+              pageBuilder: (context, state) => fadeScalePage(
+                key: state.pageKey,
+                child: const PortfolioScreen(),
+              ),
               routes: [
                 GoRoute(
                   path: 'add-transaction',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (_, __) => const AddTransactionScreen(),
+                  pageBuilder: (context, state) => fadeScalePage(
+                    key: state.pageKey,
+                    child: const AddTransactionScreen(),
+                  ),
                 ),
                 GoRoute(
                   path: 'transaction-history',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (_, __) => const TransactionHistoryScreen(),
+                  pageBuilder: (context, state) => fadeScalePage(
+                    key: state.pageKey,
+                    child: const TransactionHistoryScreen(),
+                  ),
                 ),
                 GoRoute(
                   path: 'fixed-deposit/:id',
                   parentNavigatorKey: rootNavigatorKey,
-                  builder: (context, state) => FixedDepositDetailScreen(
-                    id: state.pathParameters['id']!,
+                  pageBuilder: (context, state) => fadeScalePage(
+                    key: state.pageKey,
+                    child: FixedDepositDetailScreen(
+                      id: state.pathParameters['id']!,
+                    ),
                   ),
                   routes: [
                     GoRoute(
                       path: 'edit',
                       parentNavigatorKey: rootNavigatorKey,
-                      builder: (context, state) => EditFixedDepositScreen(
-                        id: state.pathParameters['id']!,
+                      pageBuilder: (context, state) => fadeScalePage(
+                        key: state.pageKey,
+                        child: EditFixedDepositScreen(
+                          id: state.pathParameters['id']!,
+                        ),
                       ),
                     ),
                   ],
