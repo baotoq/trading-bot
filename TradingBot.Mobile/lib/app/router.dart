@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/chart/presentation/chart_screen.dart';
 import '../features/config/presentation/config_screen.dart';
 import '../features/history/presentation/history_screen.dart';
+import '../features/home/presentation/dca_bot_detail_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/portfolio/presentation/portfolio_screen.dart';
 import '../features/portfolio/presentation/sub_screens/add_transaction_screen.dart';
@@ -39,6 +40,13 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/home',
               builder: (context, state) => const HomeScreen(),
+              routes: [
+                GoRoute(
+                  path: 'bot-detail',
+                  parentNavigatorKey: rootNavigatorKey,
+                  builder: (_, __) => const DcaBotDetailScreen(),
+                ),
+              ],
             ),
           ],
         ),
