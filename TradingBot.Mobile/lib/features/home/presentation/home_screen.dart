@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -61,13 +62,13 @@ class HomeScreen extends HookConsumerWidget {
               AsyncData(:final value) => SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   sliver: SliverList.list(
-                    children: _buildContent(value),
+                    children: _buildContent(context, value),
                   ),
                 ),
               AsyncError() when cachedValue != null => SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   sliver: SliverList.list(
-                    children: _buildContent(cachedValue),
+                    children: _buildContent(context, cachedValue),
                   ),
                 ),
               AsyncError() => SliverFillRemaining(
@@ -83,9 +84,18 @@ class HomeScreen extends HookConsumerWidget {
     );
   }
 
-  List<Widget> _buildContent(homeData) {
+  List<Widget> _buildContent(BuildContext context, homeData) {
     return [
-      PortfolioStatsSection(portfolio: homeData.portfolio),
+      GestureDetector(
+        onTap: () => context.push('/home/bot-detail'),
+        behavior: HitTestBehavior.opaque,
+        child: Row(
+          children: [
+            Expanded(child: PortfolioStatsSection(portfolio: homeData.portfolio)),
+            Icon(Icons.chevron_right, color: Colors.white54, size: 20),
+          ],
+        ),
+      ),
       const SizedBox(height: 12),
       CountdownText(nextBuyTimeIso: homeData.status.nextBuyTime),
       const SizedBox(height: 16),
