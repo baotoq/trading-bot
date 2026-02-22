@@ -1,16 +1,23 @@
+import 'dart:math' show max;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../../app/theme.dart';
+import '../../../../core/widgets/glass_card.dart';
 import '../../data/models/chart_response.dart';
+import 'glow_dot_painter.dart';
 
 /// fl_chart LineChart displaying BTC price history with:
-/// - Orange curved price line with gradient fill
-/// - Tier-colored purchase marker dots at actual purchase prices
+/// - Orange curved price line with enhanced gradient fill (CHART-01)
+/// - Left-to-right draw-in animation on first tab entry (CHART-02)
+/// - Tier-colored purchase marker dots with radial glow halo (CHART-03)
 /// - Dashed horizontal average cost basis line
 /// - Touch tooltip showing date and price
-class PriceLineChart extends StatelessWidget {
+class PriceLineChart extends HookConsumerWidget {
   const PriceLineChart({
     required this.data,
     required this.timeframe,
@@ -44,7 +51,7 @@ class PriceLineChart extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateLabels = data.prices.map((p) => p.date).toList();
 
     // Build x-axis index → price spots
@@ -73,34 +80,77 @@ class PriceLineChart extends StatelessWidget {
     // Price formatter for y-axis labels
     final priceFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 0);
 
+    // --- Draw-in animation (CHART-02) ---
+    // useRef(false) guards against re-triggering the animation on tab revisit.
+    // The draw-in fires ONLY once per session (first time this widget is mounted).
+    final hasAnimated = useRef(false);
+    final controller = useAnimationController(
+      duration: const Duration(milliseconds: 1000),
+    );
+    final animation = useAnimation(
+      CurvedAnimation(parent: controller, curve: Curves.easeInOut),
+    );
+
+    useEffect(() {
+      if (!hasAnimated.value && !GlassCard.shouldReduceMotion(context)) {
+        // First entry, motion allowed: run draw-in animation
+        hasAnimated.value = true;
+        controller.forward();
+      } else if (!hasAnimated.value) {
+        // First entry, Reduce Motion enabled: skip animation, show full chart
+        hasAnimated.value = true;
+        controller.value = 1.0;
+      } else {
+        // Already animated on a previous build (tab revisit): show full chart
+        controller.value = 1.0;
+      }
+      return null;
+    }, [data]);
+
+    // Slice priceSpots to animate the line drawing left-to-right
+    final totalSpots = priceSpots.length;
+    final visibleCount =
+        controller.isCompleted || GlassCard.shouldReduceMotion(context)
+            ? totalSpots
+            : max(1, (animation * totalSpots).round());
+    final visiblePriceSpots = priceSpots.sublist(0, visibleCount);
+
     return AspectRatio(
       aspectRatio: 1.6,
       child: Padding(
         padding: const EdgeInsets.only(right: 8, top: 8),
         child: LineChart(
           LineChartData(
+            clipData: const FlClipData.all(),
+            maxX: visiblePriceSpots.last.x,
             lineBarsData: [
-              // 1. Main BTC price line
+              // 1. Main BTC price line (animated draw-in)
               LineChartBarData(
-                spots: priceSpots,
+                spots: visiblePriceSpots,
                 isCurved: true,
                 color: AppTheme.bitcoinOrange,
                 barWidth: 2,
                 dotData: const FlDotData(show: false),
                 belowBarData: BarAreaData(
                   show: true,
+                  // Enhanced multi-stop gradient for vivid "glow" appearance (CHART-01)
+                  // Top alpha increased from 51 (~0.20) to 77 (~0.30)
+                  // Middle stop at 0.5 with alpha 26 (~0.10) sustains gradient glow
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.bitcoinOrange.withAlpha(51),
-                      Colors.transparent,
+                      AppTheme.bitcoinOrange.withAlpha(77), // ~0.30 at top
+                      AppTheme.bitcoinOrange.withAlpha(26), // ~0.10 in middle
+                      AppTheme.bitcoinOrange.withAlpha(0),  // transparent at bottom
                     ],
+                    stops: const [0.0, 0.5, 1.0],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
                 ),
               ),
               // 2. Invisible line for purchase marker dots
-              // Uses purchaseSpots so dots appear at actual purchase prices
+              // Uses purchaseSpots so dots appear at actual purchase prices.
+              // Dots are hidden during draw-in animation (controller not completed).
               LineChartBarData(
                 spots: purchaseSpots.isEmpty
                     ? [const FlSpot(0, 0)]
@@ -108,15 +158,16 @@ class PriceLineChart extends StatelessWidget {
                 barWidth: 0,
                 color: Colors.transparent,
                 dotData: FlDotData(
-                  show: purchaseSpots.isNotEmpty,
+                  // Hide dots during draw-in; show only when animation completes (CHART-03)
+                  show: purchaseSpots.isNotEmpty && controller.isCompleted,
                   checkToShowDot: (spot, _) =>
                       purchaseDayIndexSet.contains(spot.x.toInt()),
-                  getDotPainter: (spot, _, __, ___) => FlDotCirclePainter(
+                  getDotPainter: (spot, _, __, ___) => GlowDotPainter(
                     radius: 5,
                     color: _tierColor(
                       purchasesByIndex[spot.x.toInt()]?.tier ?? 'Base',
                     ),
-                    strokeWidth: 1.5,
+                    glowColor: AppTheme.bitcoinOrange,
                     strokeColor: Colors.white,
                   ),
                 ),
