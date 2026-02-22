@@ -2,21 +2,21 @@
 
 **Project:** BTC Smart DCA Bot
 **Milestone:** v5.0 Stunning Mobile UI
-**Updated:** 2026-02-22
+**Updated:** 2026-02-23
 
 ## Project Reference
 
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 35 complete -- Chart Redesign fully implemented with GlowDotPainter, draw-in animation, glass tooltip overlay, premium ChartScreen layout (next: Phase 36)
+**Current focus:** Phase 36 in progress -- Home Screen Redesign, 36-02 complete (fade+scale CustomTransitionPage on all GoRouter routes, ANIM-05)
 
 ## Current Position
 
-Phase: 35 of 38 (Chart Redesign)
+Phase: 36 of 38 (Home Screen Redesign)
 Plan: 2 of 2 complete
-Status: Complete
-Last activity: 2026-02-22 -- 35-02 complete (GlassChartTooltip + PriceLineChart custom touch handling + ChartScreen premium layout)
+Status: In Progress
+Last activity: 2026-02-23 -- 36-02 complete (unified fade+scale CustomTransitionPage on all 10 GoRoute entries via fadeScalePage() factory)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -59,6 +59,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | Phase 35.2 P03 | 1 | 1 tasks | 1 files |
 | 35 | 01 | 3min | 2 | 2 |
 | Phase 35 P02 | 2min | 2 tasks | 3 files |
+| Phase 36 P02 | 1min | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -107,6 +108,7 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35-02]: Tooltip anchored at top:0 centered horizontally -- avoids complex pixel-coordinate calculation for LineBarSpot.x canvas position
 - [Phase 35-02]: SingleChildScrollView(AlwaysScrollable) at top level replaces Expanded+inner-scroll nesting -- PriceLineChart AspectRatio has intrinsic height, no Expanded needed
 - [Phase 35-02]: Transparent AppBar backgroundColor in ChartScreen -- allows AmbientBackground orbs to show through app bar area
+- [Phase 36]: fadeScalePage factory function defined at file level for reuse clarity; StatefulShellRoute.indexedStack builder: left unchanged (navigation shell, not page route); all parentNavigatorKey assignments preserved for full-screen push routes
 
 ### Roadmap Evolution
 
@@ -127,9 +129,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22
-Stopped at: Completed 35-02-PLAN.md. GlassChartTooltip + PriceLineChart custom touch handling + ChartScreen premium layout (CHART-04, SCRN-02). Phase 35 Chart Redesign complete.
-Next step: Execute Phase 36
+Last session: 2026-02-23
+Stopped at: Completed 36-02-PLAN.md. Unified fade+scale CustomTransitionPage applied to all 10 GoRoute entries via fadeScalePage() factory (ANIM-05). Phase 36 plan 02 complete.
+Next step: Continue Phase 36 (if more plans exist) or execute Phase 37
 
 ---
-*State updated: 2026-02-22 after 35.2-03 complete*
+*State updated: 2026-02-23 after 36-02 complete*
