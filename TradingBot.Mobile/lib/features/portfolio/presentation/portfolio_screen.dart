@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -13,9 +14,11 @@ import '../data/currency_provider.dart';
 import '../data/models/portfolio_asset_response.dart';
 import '../data/portfolio_providers.dart';
 import 'widgets/allocation_donut_chart.dart';
-import 'widgets/asset_type_section.dart';
-import 'widgets/currency_toggle.dart';
-import 'widgets/portfolio_summary_card.dart';
+import 'widgets/asset_row.dart';
+import 'widgets/fixed_deposit_row.dart';
+import 'widgets/portfolio_filter_chips.dart';
+import 'widgets/portfolio_hero_header.dart';
+import 'widgets/portfolio_tab_bar.dart';
 
 class PortfolioScreen extends HookConsumerWidget {
   const PortfolioScreen({super.key});
@@ -25,6 +28,11 @@ class PortfolioScreen extends HookConsumerWidget {
     final portfolioData = ref.watch(portfolioPageDataProvider);
     final cachedValue = portfolioData.value;
     final isVnd = ref.watch(currencyPreferenceProvider);
+
+    // Tab and filter state — survive widget rebuilds via useState hooks.
+    // Pattern: STATE.md "all AnimationControllers in HookConsumerWidget via hooks"
+    final selectedTab = useState(0); // 0 = Overview, 1 = Transactions
+    final activeFilter = useState('Holding amount');
 
     // Show snackbar on errors — stale cached data remains visible
     ref.listen(portfolioPageDataProvider, (previous, next) {
@@ -37,31 +45,50 @@ class PortfolioScreen extends HookConsumerWidget {
       }
     });
 
+    // Determine data to render — either fresh or cached on error.
+    final dataToShow = portfolioData.value ?? cachedValue;
+
+    // Build the sliver list based on async state.
+    final List<Widget> contentSlivers;
+    if (dataToShow != null) {
+      contentSlivers = _buildContent(
+        dataToShow,
+        isVnd,
+        context,
+        selectedTab,
+        activeFilter,
+      );
+    } else if (portfolioData.hasError) {
+      contentSlivers = [
+        SliverFillRemaining(
+          child: RetryWidget(
+            onRetry: () => ref.invalidate(portfolioPageDataProvider),
+          ),
+        ),
+      ];
+    } else {
+      contentSlivers = [
+        SliverToBoxAdapter(child: _buildLoadingSkeleton()),
+      ];
+    }
+
     return Scaffold(
+      // No backgroundColor — global transparent from AppTheme.dark applies so
+      // AmbientBackground orbs show through. Do NOT set a solid color here.
+      // See STATE.md: "scaffoldBackgroundColor: Colors.transparent globally"
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(portfolioPageDataProvider.future),
         child: CustomScrollView(
           slivers: [
             SliverAppBar(
               title: const Text('Portfolio'),
-              floating: true,
-              snap: true,
-              actions: const [
-                CurrencyToggle(),
-                SizedBox(width: 8),
-              ],
+              floating: false,
+              pinned: false,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              // CurrencyToggle moved into PortfolioHeroHeader — removed from actions.
             ),
-            switch (portfolioData) {
-              AsyncData(:final value) => _buildContent(value, isVnd, context),
-              AsyncError() when cachedValue != null =>
-                _buildContent(cachedValue, isVnd, context),
-              AsyncError() => SliverFillRemaining(
-                  child: RetryWidget(
-                    onRetry: () => ref.invalidate(portfolioPageDataProvider),
-                  ),
-                ),
-              _ => SliverToBoxAdapter(child: _buildLoadingSkeleton()),
-            },
+            ...contentSlivers,
           ],
         ),
       ),
@@ -74,101 +101,182 @@ class PortfolioScreen extends HookConsumerWidget {
     );
   }
 
-  SliverList _buildContent(
+  /// Builds the list of slivers for the loaded content state.
+  ///
+  /// Returns [List<Widget>] of slivers spread into the outer [CustomScrollView].
+  List<Widget> _buildContent(
     PortfolioPageData data,
     bool isVnd,
     BuildContext context,
+    ValueNotifier<int> selectedTab,
+    ValueNotifier<String> activeFilter,
   ) {
-    final cryptoAssets = data.assets
-        .where((a) => a.assetType == 'Crypto')
-        .toList();
-    final etfAssets = data.assets
-        .where((a) => a.assetType == 'ETF')
-        .toList();
+    final totalValue =
+        isVnd ? data.summary.totalValueVnd : data.summary.totalValueUsd;
 
-    final cryptoSubtotalUsd =
-        _sumField(cryptoAssets, (a) => a.currentValueUsd);
-    final cryptoSubtotalVnd =
-        _sumField(cryptoAssets, (a) => a.currentValueVnd);
-    final etfSubtotalUsd = _sumField(etfAssets, (a) => a.currentValueUsd);
-    final etfSubtotalVnd = _sumField(etfAssets, (a) => a.currentValueVnd);
-    final fdSubtotalVnd = data.fixedDeposits.fold<double>(
-        0, (sum, fd) => sum + fd.accruedValueVnd);
+    // Sort assets by active filter.
+    final sortedAssets = List<PortfolioAssetResponse>.from(data.assets);
+    switch (activeFilter.value) {
+      case 'Holding amount':
+        sortedAssets.sort(
+          (a, b) => b.currentValueUsd.compareTo(a.currentValueUsd),
+        );
+      case 'Cumulative profit':
+        sortedAssets.sort(
+          (a, b) => b.unrealizedPnlUsd.compareTo(a.unrealizedPnlUsd),
+        );
+      case 'Analysis':
+        // Sort by unrealizedPnlPercent DESC — nulls go last.
+        sortedAssets.sort((a, b) {
+          final ap = a.unrealizedPnlPercent;
+          final bp = b.unrealizedPnlPercent;
+          if (ap == null && bp == null) return 0;
+          if (ap == null) return 1;
+          if (bp == null) return -1;
+          return bp.compareTo(ap);
+        });
+    }
 
-    final totalValue = isVnd
-        ? data.summary.totalValueVnd
-        : data.summary.totalValueUsd;
+    return [
+      // 1. Hero header with total value and all-time P&L
+      SliverToBoxAdapter(
+        child: PortfolioHeroHeader(summary: data.summary, isVnd: isVnd),
+      ),
 
-    return SliverList.list(
-      children: [
-        PortfolioSummaryCard(summary: data.summary, isVnd: isVnd),
-        AllocationDonutChart(
-          allocations: data.summary.allocations,
-          totalValue: totalValue,
-          isVnd: isVnd,
+      // 2. Sticky tab bar — pinned at top during scroll
+      SliverPersistentHeader(
+        pinned: true,
+        delegate: StickyTabBarDelegate(
+          tabBar: PortfolioTabBar(selectedTab: selectedTab),
         ),
-        if (cryptoAssets.isNotEmpty)
-          AssetTypeSection(
-            title: 'Crypto',
-            assets: cryptoAssets,
+      ),
+
+      // 3. Overview tab content
+      if (selectedTab.value == 0) ...[
+        // Filter chips row
+        SliverToBoxAdapter(
+          child: PortfolioFilterChips(activeFilter: activeFilter),
+        ),
+
+        // Allocation donut chart (glow treatment deferred to Phase 37)
+        SliverToBoxAdapter(
+          child: AllocationDonutChart(
+            allocations: data.summary.allocations,
+            totalValue: totalValue,
             isVnd: isVnd,
-            subtotalUsd: cryptoSubtotalUsd,
-            subtotalVnd: cryptoSubtotalVnd,
-          ),
-        if (etfAssets.isNotEmpty)
-          AssetTypeSection(
-            title: 'ETF',
-            assets: etfAssets,
-            isVnd: isVnd,
-            subtotalUsd: etfSubtotalUsd,
-            subtotalVnd: etfSubtotalVnd,
-          ),
-        if (data.fixedDeposits.isNotEmpty)
-          AssetTypeSection(
-            title: 'Fixed Deposit',
-            fixedDeposits: data.fixedDeposits,
-            isVnd: isVnd,
-            subtotalUsd: 0,
-            subtotalVnd: fdSubtotalVnd,
-          ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: TextButton.icon(
-            onPressed: () => context.push('/portfolio/transaction-history'),
-            icon: const Icon(CupertinoIcons.clock),
-            label: const Text('View Transaction History'),
           ),
         ),
-        const SizedBox(height: 80), // Space for FAB
+
+        // Assets section header with count
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Row(
+              children: [
+                const Text(
+                  'Assets',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${sortedAssets.length}',
+                  style: const TextStyle(
+                    color: Colors.white38,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Flat asset list — sorted by active filter chip.
+        // AssetRow widgets kept for now; Plan 02 replaces with glass rows.
+        SliverList.builder(
+          itemCount: sortedAssets.length,
+          itemBuilder: (context, index) => AssetRow(
+            asset: sortedAssets[index],
+            isVnd: isVnd,
+          ),
+        ),
+
+        // Fixed deposits section (if any)
+        if (data.fixedDeposits.isNotEmpty) ...[
+          const SliverToBoxAdapter(child: Divider(indent: 16, endIndent: 16)),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+              child: const Text(
+                'Fixed Deposits',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+          SliverList.builder(
+            itemCount: data.fixedDeposits.length,
+            itemBuilder: (context, index) => FixedDepositRow(
+              fd: data.fixedDeposits[index],
+              isVnd: isVnd,
+            ),
+          ),
+        ],
+
+        // View Transaction History text button
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: TextButton.icon(
+              onPressed: () => context.push('/portfolio/transaction-history'),
+              icon: const Icon(CupertinoIcons.clock),
+              label: const Text('View Transaction History'),
+            ),
+          ),
+        ),
+
+        // FAB clearance
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
       ],
-    );
+
+      // 4. Transactions tab — deferred to future phase; navigate directly.
+      if (selectedTab.value == 1) ...[
+        SliverFillRemaining(
+          child: Center(
+            child: TextButton.icon(
+              onPressed: () => context.push('/portfolio/transaction-history'),
+              icon: const Icon(CupertinoIcons.clock),
+              label: const Text('View Full Transaction History'),
+            ),
+          ),
+        ),
+      ],
+    ];
   }
 
-  /// Skeleton loading state — summary card + donut chart placeholder + asset rows.
+  /// Skeleton loading state — hero card + donut chart placeholder + asset rows.
   Widget _buildLoadingSkeleton() {
     return AppShimmer(
       enabled: true,
       child: Column(
         children: [
-          // Summary card placeholder
+          // Hero header placeholder
           Card(
             margin: const EdgeInsets.all(16),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Bone.text(words: 2, fontSize: 14),
                   const SizedBox(height: 8),
-                  Bone.text(words: 1, fontSize: 28),
+                  Bone.text(words: 1, fontSize: 32),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Bone.text(words: 2, fontSize: 14),
-                      Bone.text(words: 2, fontSize: 14),
-                    ],
-                  ),
+                  Bone.text(words: 3, fontSize: 14),
                 ],
               ),
             ),
@@ -223,12 +331,5 @@ class PortfolioScreen extends HookConsumerWidget {
         ],
       ),
     );
-  }
-
-  double _sumField(
-    List<PortfolioAssetResponse> assets,
-    double Function(PortfolioAssetResponse) selector,
-  ) {
-    return assets.fold<double>(0, (sum, a) => sum + selector(a));
   }
 }
