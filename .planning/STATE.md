@@ -13,10 +13,10 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 ## Current Position
 
-Phase: 35.2 of 38 (DCA Bot Detail Screen)
-Plan: 3 of 3 complete
-Status: Complete
-Last activity: 2026-02-22 -- 35.2-03 complete (navigation entry point wired: GestureDetector on PortfolioStatsSection, context.push('/home/bot-detail'), chevron affordance)
+Phase: 35 of 38 (Chart Redesign)
+Plan: 1 of 2 complete
+Status: In Progress
+Last activity: 2026-02-22 -- 35-01 complete (GlowDotPainter + PriceLineChart draw-in animation + enhanced gradient)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -57,6 +57,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | 35.2 | 01 | 3min | 2 | 5 |
 | 35.2 | 02 | 3min | 2 | 3 |
 | Phase 35.2 P03 | 1 | 1 tasks | 1 files |
+| 35 | 01 | 3min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35.2]: History tab uses useEffect + useScrollController hook; pagination triggers at maxScrollExtent - 200px threshold
 - [Phase 35.2]: GestureDetector chosen over PressableScale for PortfolioStatsSection navigation tap -- large content section; scale animation too heavy
 - [Phase 35.2]: _buildContent accepts BuildContext as first parameter to enable context.push from helper methods
+- [Phase 35-01]: GlowDotPainter implements lerp + props (EquatableMixin) -- required abstract members of FlDotPainter not noted in plan; auto-fixed
+- [Phase 35-01]: useRef(false) as hasAnimated guard -- fires draw-in animation only on first mount, not on tab revisit
+- [Phase 35-01]: controller.isCompleted used for purchase dot show guard -- dots only appear when full line is drawn
 
 ### Roadmap Evolution
 
@@ -119,8 +123,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: Completed 35.2-03-PLAN.md. Navigation entry point from HomeScreen to DCA Bot Detail screen wired. DCA-UI-01 fully satisfied.
-Next step: Execute Phase 36
+Stopped at: Completed 35-01-PLAN.md. GlowDotPainter + PriceLineChart draw-in animation + enhanced gradient (CHART-01, CHART-02, CHART-03 partially done).
+Next step: Execute Phase 35 Plan 02 (glass tooltip overlay)
 
 ---
 *State updated: 2026-02-22 after 35.2-03 complete*

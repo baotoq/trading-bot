@@ -18,9 +18,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 
 ### Charts
 
-- [ ] **CHART-01**: Price chart displays a gradient glow fill area beneath the line with orange-to-transparent gradient
-- [ ] **CHART-02**: Price chart animates left-to-right draw-in on initial tab entry
-- [ ] **CHART-03**: Purchase marker dots display an orange radial glow effect
+- [x] **CHART-01**: Price chart displays a gradient glow fill area beneath the line with orange-to-transparent gradient
+- [x] **CHART-02**: Price chart animates left-to-right draw-in on initial tab entry
+- [x] **CHART-03**: Purchase marker dots display an orange radial glow effect
 - [ ] **CHART-04**: Chart tooltip uses a frosted glass style with rounded corners and formatted numbers
 
 ### Animations
@@ -88,9 +88,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | DESIGN-04 | Phase 33 | Complete |
 | DESIGN-05 | Phase 33 | Complete |
 | DESIGN-06 | Phase 33 | Complete |
-| CHART-01 | Phase 35 | Pending |
-| CHART-02 | Phase 35 | Pending |
-| CHART-03 | Phase 35 | Pending |
+| CHART-01 | Phase 35 | Complete |
+| CHART-02 | Phase 35 | Complete |
+| CHART-03 | Phase 35 | Complete |
 | CHART-04 | Phase 35 | Pending |
 | ANIM-01 | Phase 34 | Complete |
 | ANIM-02 | Phase 36 | Pending |
