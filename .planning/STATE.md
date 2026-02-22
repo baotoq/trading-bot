@@ -9,14 +9,14 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Single view of all investments (crypto, ETF, savings) with real P&L, plus automated BTC DCA -- now with a premium glassmorphism UI
-**Current focus:** Phase 35.2 complete -- DCA Bot Detail Screen fully implemented (next: Phase 36)
+**Current focus:** Phase 35.2 complete -- DCA Bot Detail Screen fully implemented with navigation entry point wired (next: Phase 36)
 
 ## Current Position
 
 Phase: 35.2 of 38 (DCA Bot Detail Screen)
-Plan: 2 of 2 complete
+Plan: 3 of 3 complete
 Status: Complete
-Last activity: 2026-02-22 -- 35.2-02 complete (PnlChartCard, BotInfoCard, History tab, Parameters tab, loading skeleton)
+Last activity: 2026-02-22 -- 35.2-03 complete (navigation entry point wired: GestureDetector on PortfolioStatsSection, context.push('/home/bot-detail'), chevron affordance)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -56,6 +56,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | 35.1 | 02 | 3min | 2 | 2 |
 | 35.2 | 01 | 3min | 2 | 5 |
 | 35.2 | 02 | 3min | 2 | 3 |
+| Phase 35.2 P03 | 1 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -95,6 +96,8 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35.2]: _PnlChartSection and _EventHistoryPreviewSection isolated as private HookConsumerWidgets to scope provider subscriptions
 - [Phase 35.2]: BotInfoCard derives Bot ID as firstPurchaseDate.millisecondsSinceEpoch.toString() — stable unique ID without server-side bot ID endpoint
 - [Phase 35.2]: History tab uses useEffect + useScrollController hook; pagination triggers at maxScrollExtent - 200px threshold
+- [Phase 35.2]: GestureDetector chosen over PressableScale for PortfolioStatsSection navigation tap -- large content section; scale animation too heavy
+- [Phase 35.2]: _buildContent accepts BuildContext as first parameter to enable context.push from helper methods
 
 ### Roadmap Evolution
 
@@ -116,8 +119,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: 35.2-02-PLAN.md complete. DCA Bot Detail Screen feature-complete (PnlChartCard, BotInfoCard, History tab, Parameters tab, loading skeleton).
+Stopped at: Completed 35.2-03-PLAN.md. Navigation entry point from HomeScreen to DCA Bot Detail screen wired. DCA-UI-01 fully satisfied.
 Next step: Execute Phase 36
 
 ---
-*State updated: 2026-02-22 after 35.2-02 complete*
+*State updated: 2026-02-22 after 35.2-03 complete*
