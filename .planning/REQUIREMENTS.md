@@ -38,6 +38,16 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [x] **PORT-UI-02**: Portfolio screen has Overview/Transactions tab switcher with sticky tab bar and horizontal filter chips that sort the asset list
 - [x] **PORT-UI-03**: Portfolio asset rows render in GlassCard scrollItem variant with colored ticker badge, price + P&L%, and holding value + quantity
 
+### DCA Bot Detail Screen (Phase 35.2 — Inserted)
+
+- [ ] **DCA-UI-01**: DCA Bot Detail screen is accessible via full-screen push from home, with back button and no bottom nav bar
+- [ ] **DCA-UI-02**: Overview tab shows bot identity (BTC icon, name, uptime), stats grid (invested, PnL, frequency, amount, avg price, next purchase), and action buttons
+- [ ] **DCA-UI-03**: Overview tab shows a PnL area chart with gradient fill colored by profit/loss direction, derived from existing price data
+- [ ] **DCA-UI-04**: Overview tab shows Bot info card with copyable Bot ID and creation time
+- [ ] **DCA-UI-05**: Overview tab shows the 5 most recent purchase events as a preview
+- [ ] **DCA-UI-06**: History tab shows the full paginated purchase history reusing PurchaseListItem
+- [ ] **DCA-UI-07**: Parameters tab shows read-only DCA config values in GlassCard sections (Schedule, Strategy, Tiers)
+
 ### Screen Redesign
 
 - [ ] **SCRN-01**: Home screen uses dashboard overview layout with hero balance, mini allocation chart, recent activity, and quick actions
@@ -96,12 +106,19 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | PORT-UI-01 | Phase 35.1 | Complete |
 | PORT-UI-02 | Phase 35.1 | Complete |
 | PORT-UI-03 | Phase 35.1 | Complete |
+| DCA-UI-01 | Phase 35.2 | Pending |
+| DCA-UI-02 | Phase 35.2 | Pending |
+| DCA-UI-03 | Phase 35.2 | Pending |
+| DCA-UI-04 | Phase 35.2 | Pending |
+| DCA-UI-05 | Phase 35.2 | Pending |
+| DCA-UI-06 | Phase 35.2 | Pending |
+| DCA-UI-07 | Phase 35.2 | Pending |
 
 **Coverage:**
-- v5.0 requirements: 24 total
-- Mapped to phases: 24
+- v5.0 requirements: 31 total
+- Mapped to phases: 31
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-22 after Phase 35.1 requirements added*
+*Last updated: 2026-02-22 after Phase 35.2 requirements added*

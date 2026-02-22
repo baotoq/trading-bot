@@ -139,12 +139,21 @@ Plans:
 
 ### Phase 35.2: DCA Bot Detail Screen (INSERTED)
 
-**Goal:** [Urgent work - to be planned]
-**Depends on:** Phase 35
-**Plans:** 0 plans
+**Goal:** A dedicated DCA Bot Detail screen with 3-tab layout (Overview, History, Parameters) showing bot identity, stats grid, PnL chart, bot info, event history, purchase list, and read-only config -- all using glass primitives and existing API data
+**Depends on:** Phase 34
+**Requirements:** DCA-UI-01, DCA-UI-02, DCA-UI-03, DCA-UI-04, DCA-UI-05, DCA-UI-06, DCA-UI-07
+**Success Criteria** (what must be TRUE):
+  1. Navigating to /home/bot-detail pushes a full-screen detail page above the tab bar with back navigation
+  2. Overview tab shows BTC identity header, 6-field stats grid, action buttons, PnL area chart, bot info card, and 5 most recent purchases
+  3. History tab shows paginated purchase history with PurchaseListItem and scroll-to-load-more
+  4. Parameters tab shows DCA config in 3 GlassCard sections (Schedule, Strategy, Tiers) read-only
+  5. PnL chart gradient fill is colored green for profit, red for loss, derived from existing price + average cost data
+  6. Bot ID is copyable to clipboard with SnackBar confirmation
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 35.2 to break down)
+- [ ] 35.2-01-PLAN.md -- Screen shell, route, Overview tab with identity header, stats grid, action buttons
+- [ ] 35.2-02-PLAN.md -- PnL chart, Bot info card, event history, History tab, Parameters tab, loading skeleton
 
 ### Phase 35.1: Portfolio Overview Screen (INSERTED)
 
