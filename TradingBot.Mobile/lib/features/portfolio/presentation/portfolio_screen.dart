@@ -8,14 +8,15 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../app/theme.dart';
 import '../../../core/api/api_exception.dart';
 import '../../../core/widgets/error_snackbar.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/retry_widget.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../data/currency_provider.dart';
 import '../data/models/portfolio_asset_response.dart';
 import '../data/portfolio_providers.dart';
 import 'widgets/allocation_donut_chart.dart';
-import 'widgets/asset_row.dart';
 import 'widgets/fixed_deposit_row.dart';
+import 'widgets/portfolio_asset_list_item.dart';
 import 'widgets/portfolio_filter_chips.dart';
 import 'widgets/portfolio_hero_header.dart';
 import 'widgets/portfolio_tab_bar.dart';
@@ -194,10 +195,10 @@ class PortfolioScreen extends HookConsumerWidget {
         ),
 
         // Flat asset list — sorted by active filter chip.
-        // AssetRow widgets kept for now; Plan 02 replaces with glass rows.
+        // Glass-styled rows with colored ticker badge, PressableScale, no BackdropFilter.
         SliverList.builder(
           itemCount: sortedAssets.length,
-          itemBuilder: (context, index) => AssetRow(
+          itemBuilder: (context, index) => PortfolioAssetListItem(
             asset: sortedAssets[index],
             isVnd: isVnd,
           ),
@@ -258,29 +259,76 @@ class PortfolioScreen extends HookConsumerWidget {
     ];
   }
 
-  /// Skeleton loading state — hero card + donut chart placeholder + asset rows.
+  /// Skeleton loading state matching the new layout structure.
+  ///
+  /// Uses actual [GlassCard] widgets (default for hero, [GlassVariant.scrollItem]
+  /// for list items) so the skeleton surface matches the loaded state's
+  /// glass appearance. [Bone] shapes fill each section with correct proportions.
   Widget _buildLoadingSkeleton() {
     return AppShimmer(
       enabled: true,
       child: Column(
         children: [
-          // Hero header placeholder
-          Card(
+          // Hero header skeleton — GlassCard stationary shape
+          GlassCard(
             margin: const EdgeInsets.all(16),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Bone.text(words: 2, fontSize: 14),
-                  const SizedBox(height: 8),
-                  Bone.text(words: 1, fontSize: 32),
-                  const SizedBox(height: 8),
-                  Bone.text(words: 3, fontSize: 14),
-                ],
-              ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Bone.text(words: 2, fontSize: 14),
+                    const Spacer(),
+                    const Bone(width: 60, height: 24),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Bone.text(words: 1, fontSize: 28), // Total value
+                const SizedBox(height: 12),
+                Bone.text(words: 3, fontSize: 14), // P&L row
+              ],
             ),
           ),
+
+          // Tab bar skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(child: Bone.text(words: 1, fontSize: 14)),
+                const SizedBox(width: 16),
+                Expanded(child: Bone.text(words: 1, fontSize: 14)),
+              ],
+            ),
+          ),
+
+          // Filter chips skeleton
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Bone(
+                  width: 100,
+                  height: 32,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                const SizedBox(width: 8),
+                Bone(
+                  width: 120,
+                  height: 32,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                const SizedBox(width: 8),
+                Bone(
+                  width: 80,
+                  height: 32,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ],
+            ),
+          ),
+
           // Donut chart placeholder
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -290,44 +338,49 @@ class PortfolioScreen extends HookConsumerWidget {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
+
           const SizedBox(height: 16),
-          // Asset section header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Bone.text(words: 1, fontSize: 16),
-          ),
-          // Asset rows
+
+          // Asset list item skeletons (4 rows matching glass scrollItem layout)
           ...List.generate(
-            3,
+            4,
             (_) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              child: Row(
-                children: [
-                  const Bone.icon(size: 40),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: GlassCard(
+                variant: GlassVariant.scrollItem,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    const Bone.circle(size: 40), // Ticker badge
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Bone.text(words: 1, fontSize: 14),
+                          const SizedBox(height: 4),
+                          Bone.text(words: 2, fontSize: 12),
+                        ],
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Bone.text(words: 1, fontSize: 14),
                         const SizedBox(height: 4),
-                        Bone.text(words: 2, fontSize: 12),
+                        Bone.text(words: 1, fontSize: 12),
                       ],
                     ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Bone.text(words: 1, fontSize: 14),
-                      const SizedBox(height: 4),
-                      Bone.text(words: 1, fontSize: 12),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 80), // Space for FAB
+
+          const SizedBox(height: 80), // FAB clearance
         ],
       ),
     );
