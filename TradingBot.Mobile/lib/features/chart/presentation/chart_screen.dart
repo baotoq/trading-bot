@@ -37,53 +37,54 @@ class ChartScreen extends HookConsumerWidget {
     );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Price Chart')),
+      // Transparent AppBar lets AmbientBackground orbs show through the app bar area
+      appBar: AppBar(
+        title: const Text('Price Chart'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(
           chartDataProvider(timeframe: selectedTimeframe.value).future,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: TimeframeSelector(
-                selected: selectedTimeframe.value,
-                onChanged: (tf) => selectedTimeframe.value = tf,
+        // AlwaysScrollableScrollPhysics ensures pull-to-refresh works even when
+        // content does not fill the viewport (chart + timeframe selector is short).
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: TimeframeSelector(
+                  selected: selectedTimeframe.value,
+                  onChanged: (tf) => selectedTimeframe.value = tf,
+                ),
               ),
-            ),
-            Expanded(
-              child: switch (chartData) {
-                AsyncData(:final value) => SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: PriceLineChart(
-                        data: value,
-                        timeframe: selectedTimeframe.value,
+              // Chart area — PriceLineChart uses AspectRatio(1.6) for intrinsic height,
+              // so no Expanded needed here. Stack overlay from PriceLineChart works
+              // correctly inside a Column without nested scroll views.
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: switch (chartData) {
+                  AsyncData(:final value) => PriceLineChart(
+                      data: value,
+                      timeframe: selectedTimeframe.value,
+                    ),
+                  AsyncError() when cachedValue != null => PriceLineChart(
+                      data: cachedValue,
+                      timeframe: selectedTimeframe.value,
+                    ),
+                  AsyncError() => RetryWidget(
+                      onRetry: () => ref.invalidate(
+                        chartDataProvider(timeframe: selectedTimeframe.value),
                       ),
                     ),
-                  ),
-                AsyncError() when cachedValue != null =>
-                  SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: PriceLineChart(
-                        data: cachedValue,
-                        timeframe: selectedTimeframe.value,
-                      ),
-                    ),
-                  ),
-                AsyncError() => RetryWidget(
-                    onRetry: () => ref.invalidate(
-                      chartDataProvider(timeframe: selectedTimeframe.value),
-                    ),
-                  ),
-                _ => _buildLoadingSkeleton(),
-              },
-            ),
-          ],
+                  _ => _buildLoadingSkeleton(),
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
