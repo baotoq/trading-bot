@@ -14,9 +14,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 35.2 of 38 (DCA Bot Detail Screen)
-Plan: 0 of TBD complete
+Plan: 1 of TBD complete
 Status: In Progress
-Last activity: 2026-02-22 -- 35.1-02 complete (PortfolioAssetListItem glass rows, updated loading skeleton)
+Last activity: 2026-02-22 -- 35.2-01 complete (DcaBotDetailScreen structural shell: 3-tab layout, bot identity header, stats grid, action buttons, /home/bot-detail route)
 
 Progress: [██░░░░░░░░] 10% (v5.0)
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | 34 | 02 | 6min | 2 | 7 |
 | 35.1 | 01 | 3min | 2 | 4 |
 | 35.1 | 02 | 3min | 2 | 2 |
+| 35.2 | 01 | 3min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -87,6 +88,9 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 35.1-02]: PortfolioAssetListItem uses GlassVariant.scrollItem — no BackdropFilter in list items, preserving 60fps scroll per Impeller constraint from Phase 34
 - [Phase 35.1-02]: ticker.hashCode.abs() % 6 for badge palette color — .abs() guards against negative hashCode on some Dart runtimes
 - [Phase 35.1-02]: Skeleton rebuilt with actual GlassCard(scrollItem) for asset row bones — surface color matches loaded state without separate color values
+- [Phase 35.2]: DcaBotDetailScreen uses no Scaffold backgroundColor — global transparent allows AmbientBackground orbs through
+- [Phase 35.2]: parentNavigatorKey: rootNavigatorKey on /home/bot-detail — full-screen push above tab shell
+- [Phase 35.2]: Frequency label 'Daily at HH:MM / N' — correct for once-daily DCA, reference screenshot was from different product
 
 ### Roadmap Evolution
 
@@ -108,8 +112,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-22
-Stopped at: 35.1-02-PLAN.md complete. Phase 35.1 Portfolio Overview Screen fully delivered (glass hero header, pinned tab bar, filter chips, glass asset rows, updated skeleton).
-Next step: Execute Phase 35.2 DCA Bot Detail Screen
+Stopped at: 35.2-01-PLAN.md complete. DCA Bot Detail Screen structural shell delivered (DcaBotDetailScreen 3-tab layout, BotIdentityHeader, BotStatsGrid, BotActionButtons, /home/bot-detail route).
+Next step: Execute Phase 35.2 Plan 02 (PnL chart card, bot info card, event history, History tab, Parameters tab)
 
 ---
-*State updated: 2026-02-22 after 35.1-02 complete*
+*State updated: 2026-02-22 after 35.2-01 complete*

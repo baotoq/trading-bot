@@ -40,9 +40,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 
 ### DCA Bot Detail Screen (Phase 35.2 — Inserted)
 
-- [ ] **DCA-UI-01**: DCA Bot Detail screen is accessible via full-screen push from home, with back button and no bottom nav bar
-- [ ] **DCA-UI-02**: Overview tab shows bot identity (BTC icon, name, uptime), stats grid (invested, PnL, frequency, amount, avg price, next purchase), and action buttons
-- [ ] **DCA-UI-03**: Overview tab shows a PnL area chart with gradient fill colored by profit/loss direction, derived from existing price data
+- [x] **DCA-UI-01**: DCA Bot Detail screen is accessible via full-screen push from home, with back button and no bottom nav bar
+- [x] **DCA-UI-02**: Overview tab shows bot identity (BTC icon, name, uptime), stats grid (invested, PnL, frequency, amount, avg price, next purchase), and action buttons
+- [x] **DCA-UI-03**: Overview tab shows a PnL area chart with gradient fill colored by profit/loss direction, derived from existing price data
 - [ ] **DCA-UI-04**: Overview tab shows Bot info card with copyable Bot ID and creation time
 - [ ] **DCA-UI-05**: Overview tab shows the 5 most recent purchase events as a preview
 - [ ] **DCA-UI-06**: History tab shows the full paginated purchase history reusing PurchaseListItem
@@ -106,9 +106,9 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | PORT-UI-01 | Phase 35.1 | Complete |
 | PORT-UI-02 | Phase 35.1 | Complete |
 | PORT-UI-03 | Phase 35.1 | Complete |
-| DCA-UI-01 | Phase 35.2 | Pending |
-| DCA-UI-02 | Phase 35.2 | Pending |
-| DCA-UI-03 | Phase 35.2 | Pending |
+| DCA-UI-01 | Phase 35.2 | Complete |
+| DCA-UI-02 | Phase 35.2 | Complete |
+| DCA-UI-03 | Phase 35.2 | Complete |
 | DCA-UI-04 | Phase 35.2 | Pending |
 | DCA-UI-05 | Phase 35.2 | Pending |
 | DCA-UI-06 | Phase 35.2 | Pending |
