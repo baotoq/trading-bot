@@ -132,7 +132,7 @@ Plans:
   2. On first entry to the Chart tab each session, the chart line draws in from left to right over approximately 1 second
   3. Purchase marker dots on the chart display an orange radial glow halo distinct from the dot itself
   4. Touching the chart displays a frosted glass tooltip with rounded corners and locale-formatted numbers
-**Plans:** 0/2 plans executed
+**Plans:** 2 plans
 Plans:
 - [ ] 35-01-PLAN.md -- GlowDotPainter, draw-in animation, enhanced gradient glow fill on PriceLineChart
 - [ ] 35-02-PLAN.md -- Frosted glass tooltip overlay, ChartScreen layout update for premium chart
