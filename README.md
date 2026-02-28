@@ -9,7 +9,7 @@ A personal investment platform that automatically accumulates Bitcoin on the Hyp
 - [Prerequisites](#prerequisites)
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
-- [Architecture](#architecture)
+- [Architecture](#architecture) 
 - [Mobile App](#mobile-app)
 - [Web Dashboard](#web-dashboard)
 - [Backtesting Engine](#backtesting-engine)
