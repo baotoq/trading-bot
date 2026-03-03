@@ -18,7 +18,7 @@ A personal investment platform that automatically accumulates Bitcoin on the Hyp
 - [Available Commands](#available-commands)
 - [Troubleshooting](#troubleshooting)
 - [Development Roadmap](#development-roadmap)
-- [License](#license)
+- [License](#license) 
 
 ## Key Features
 
