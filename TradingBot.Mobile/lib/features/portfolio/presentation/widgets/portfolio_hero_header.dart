@@ -5,6 +5,7 @@ import '../../../../app/theme.dart';
 import '../../data/models/portfolio_summary_response.dart';
 import '../../../../core/widgets/glass_card.dart';
 import 'currency_toggle.dart';
+import 'slot_flip_value.dart';
 import 'staleness_label.dart';
 
 /// Glass hero header for the Portfolio screen.
@@ -77,9 +78,10 @@ class PortfolioHeroHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          // Total value — headlineLarge + moneyStyle tabular figures
-          Text(
-            _formatValue(summary.totalValueUsd, summary.totalValueVnd),
+          // Total value — headlineLarge + moneyStyle tabular figures.
+          // SlotFlipValue animates with a vertical slot-flip on currency toggle (ANIM-06).
+          SlotFlipValue(
+            value: _formatValue(summary.totalValueUsd, summary.totalValueVnd),
             style: Theme.of(context).textTheme.headlineLarge?.merge(
                   AppTheme.moneyStyle.copyWith(fontWeight: FontWeight.bold),
                 ),
@@ -92,8 +94,10 @@ class PortfolioHeroHeader extends StatelessWidget {
                 'All time: ',
                 style: TextStyle(color: Colors.white54),
               ),
-              Text(
-                pnlValue >= 0 ? '+$pnlFormatted' : '-$pnlFormatted',
+              // PnL amount — flips on currency toggle (ANIM-06).
+              // PnL % label does NOT use SlotFlipValue (percentage does not change on toggle).
+              SlotFlipValue(
+                value: pnlValue >= 0 ? '+$pnlFormatted' : '-$pnlFormatted',
                 style: TextStyle(
                   color: pnlColor,
                   fontWeight: FontWeight.w600,

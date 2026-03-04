@@ -6,6 +6,7 @@ import '../../../../app/theme.dart';
 import '../../../../core/widgets/glass_card.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../data/models/portfolio_asset_response.dart';
+import 'slot_flip_value.dart';
 
 /// Glass-styled asset row for the portfolio screen's flat asset list.
 ///
@@ -180,8 +181,10 @@ class PortfolioAssetListItem extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  _formatValue(asset.currentValueUsd, asset.currentValueVnd),
+                // Holding value — flips on currency toggle (ANIM-06).
+                // Quantity label does NOT use SlotFlipValue (quantity does not change on toggle).
+                SlotFlipValue(
+                  value: _formatValue(asset.currentValueUsd, asset.currentValueVnd),
                   style: AppTheme.moneyStyle.copyWith(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
