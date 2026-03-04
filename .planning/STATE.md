@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v5.0
+milestone_name: Stunning Mobile UI
+status: completed
+stopped_at: Completed 37-01-PLAN.md. SlotFlipValue widget + donut ambient glow + GlassCard wrapping. SCRN-05, ANIM-06 done.
+last_updated: "2026-03-04T11:50:04.356Z"
+last_activity: 2026-02-23 -- 36-01 complete (4 GlassCard dashboard widgets + HomeScreen rebuild with staggered entrance animation, count-up balance, SCRN-01, ANIM-02, ANIM-03)
+progress:
+  total_phases: 8
+  completed_phases: 7
+  total_plans: 14
+  completed_plans: 14
+  percent: 100
+---
+
 # Project State
 
 **Project:** BTC Smart DCA Bot
@@ -18,7 +34,7 @@ Plan: 2 of 2 complete
 Status: Complete
 Last activity: 2026-02-23 -- 36-01 complete (4 GlassCard dashboard widgets + HomeScreen rebuild with staggered entrance animation, count-up balance, SCRN-01, ANIM-02, ANIM-03)
 
-Progress: [██░░░░░░░░] 10% (v5.0)
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
@@ -61,6 +77,7 @@ Progress: [██░░░░░░░░] 10% (v5.0)
 | Phase 35 P02 | 2min | 2 tasks | 3 files |
 | Phase 36 P02 | 1min | 1 tasks | 1 files |
 | 36 | 01 | 2min | 2 | 5 |
+| Phase 37 P01 | 2min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -113,6 +130,10 @@ Recent decisions affecting v5.0 (phase 34 additions):
 - [Phase 36-01]: _animatedCard and _cardEntrance defined as top-level functions outside HomeScreen class -- no instance state needed, cleaner file organization
 - [Phase 36-01]: portfolioValue computed as currentPrice * totalBtc when available, falls back to totalCost -- consistent with DcaBotDetailScreen computation pattern
 - [Phase 36-01]: HomeRecentActivityCard wraps 3 PurchaseListItem in Column inside GlassCard.stationary -- BackdropFilter-safe because items not in scrollable list
+- [Phase 37]: SlotFlipValue uses animation.status != AnimationStatus.reverse to distinguish incoming vs outgoing child — directional slot-flip with different Tweens per direction
+- [Phase 37]: centerSpaceColor: Colors.transparent so RadialGradient glow shows through donut hole
+- [Phase 37]: ClipRect wraps AnimatedSwitcher in SlotFlipValue to prevent overflow during slide transition
+- [Phase 37]: _kGlowCenterAlpha = 51 tunable constant — Color.withAlpha(int) project pattern for ambient glow opacity
 
 ### Roadmap Evolution
 
@@ -133,8 +154,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23
-Stopped at: Completed 36-01-PLAN.md. HomeScreen rebuilt with 4 GlassCard dashboard sections, staggered entrance animation (ANIM-03), count-up balance (ANIM-02), SCRN-01. Phase 36 Home Screen Redesign fully complete.
+Last session: 2026-03-04T11:50:04.352Z
+Stopped at: Completed 37-01-PLAN.md. SlotFlipValue widget + donut ambient glow + GlassCard wrapping. SCRN-05, ANIM-06 done.
 Next step: Execute Phase 37
 
 ---

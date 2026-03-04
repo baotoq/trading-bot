@@ -90,7 +90,7 @@
 - [x] **Phase 34: Shared Glass Primitives** - GlassCard widget, shimmer skeletons, and press micro-interactions as the shared building blocks (completed 2026-02-21)
 - [x] **Phase 35: Chart Redesign** - Gradient glow chart, animated draw-in, glow markers, and glass tooltip on ChartScreen (completed 2026-02-22)
 - [x] **Phase 36: Home Screen Redesign** - Dashboard overview layout with hero balance, mini allocation chart, staggered entrance, and animated counters (completed 2026-02-22)
-- [ ] **Phase 37: Portfolio Screen Restyle** - Glass cards, animated donut, per-asset glass rows, and currency toggle slot-flip
+- [x] **Phase 37: Portfolio Screen Restyle** - Glass cards, animated donut, per-asset glass rows, and currency toggle slot-flip (completed 2026-03-04)
 - [ ] **Phase 38: History, Config, and Navigation Shell** - Glass restyles for remaining tabs and smooth page transitions
 
 ## Phase Details
@@ -195,7 +195,7 @@ Plans:
   1. Portfolio summary and each per-asset row render inside glass-styled cards (non-blur variant for the scrollable asset list)
   2. The allocation donut chart is surrounded by a colored ambient glow matching the dominant asset color
   3. Tapping the VND/USD currency toggle causes the displayed value labels to flip with a vertical slot animation rather than updating instantly
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 Plans:
 - [ ] 37-01-PLAN.md -- SlotFlipValue widget, donut ambient glow, GlassCard-wrapped donut, slot-flip integration in hero header and asset list items
 
@@ -252,7 +252,7 @@ Plans:
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
 | 36. Home Screen Redesign | 2/2 | Complete    | 2026-02-22 | - |
-| 37. Portfolio Screen Restyle | v5.0 | 0/1 | Not started | - |
+| 37. Portfolio Screen Restyle | 1/1 | Complete   | 2026-03-04 | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
 
 ---

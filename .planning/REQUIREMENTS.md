@@ -30,7 +30,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [x] **ANIM-03**: Dashboard cards cascade in with staggered entrance animation (40-60ms offset)
 - [x] **ANIM-04**: All tappable cards respond with a press-scale micro-interaction and haptic feedback
 - [x] **ANIM-05**: Tab and modal routes use smooth fade+scale page transitions
-- [ ] **ANIM-06**: Currency toggle animates value labels with a slot-flip effect
+- [x] **ANIM-06**: Currency toggle animates value labels with a slot-flip effect
 
 ### Portfolio UI Redesign (Phase 35.1 — Inserted)
 
@@ -54,7 +54,7 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 - [x] **SCRN-02**: Chart screen displays gradient glow chart with premium glass tooltip and animated draw-in
 - [ ] **SCRN-03**: History screen uses glass-styled list items (non-blur) with glass filter bottom sheet
 - [ ] **SCRN-04**: Config screen uses glass cards for settings groups with polished edit form
-- [ ] **SCRN-05**: Portfolio screen uses glass cards with animated allocation donut and per-asset glass rows
+- [x] **SCRN-05**: Portfolio screen uses glass cards with animated allocation donut and per-asset glass rows
 
 ## Future Requirements
 
@@ -97,12 +97,12 @@ Requirements for v5.0 Stunning Mobile UI. Each maps to roadmap phases.
 | ANIM-03 | Phase 36 | Complete |
 | ANIM-04 | Phase 34 | Complete |
 | ANIM-05 | Phase 36 | Complete |
-| ANIM-06 | Phase 37 | Pending |
+| ANIM-06 | Phase 37 | Complete |
 | SCRN-01 | Phase 36 | Complete |
 | SCRN-02 | Phase 35 | Complete |
 | SCRN-03 | Phase 38 | Pending |
 | SCRN-04 | Phase 38 | Pending |
-| SCRN-05 | Phase 37 | Pending |
+| SCRN-05 | Phase 37 | Complete |
 | PORT-UI-01 | Phase 35.1 | Complete |
 | PORT-UI-02 | Phase 35.1 | Complete |
 | PORT-UI-03 | Phase 35.1 | Complete |
