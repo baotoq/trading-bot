@@ -252,7 +252,7 @@ Plans:
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
 | 36. Home Screen Redesign | 2/2 | Complete    | 2026-02-22 | - |
-| 37. Portfolio Screen Restyle | 1/1 | Complete   | 2026-03-04 | - |
+| 37. Portfolio Screen Restyle | 1/1 | Complete    | 2026-03-04 | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
 
 ---
