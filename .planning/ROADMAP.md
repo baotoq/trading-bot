@@ -195,7 +195,9 @@ Plans:
   1. Portfolio summary and each per-asset row render inside glass-styled cards (non-blur variant for the scrollable asset list)
   2. The allocation donut chart is surrounded by a colored ambient glow matching the dominant asset color
   3. Tapping the VND/USD currency toggle causes the displayed value labels to flip with a vertical slot animation rather than updating instantly
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 37-01-PLAN.md -- SlotFlipValue widget, donut ambient glow, GlassCard-wrapped donut, slot-flip integration in hero header and asset list items
 
 ### Phase 38: History, Config, and Navigation Shell
 **Goal**: History and Config tabs receive glass restyles, and the navigation shell gains smooth tab-to-tab page transitions -- completing visual consistency across all 5 tabs
@@ -250,8 +252,8 @@ Plans:
 | 34. Shared Glass Primitives | 2/2 | Complete   | 2026-02-21 | - |
 | 35. Chart Redesign | 2/2 | Complete    | 2026-02-22 | - |
 | 36. Home Screen Redesign | 2/2 | Complete    | 2026-02-22 | - |
-| 37. Portfolio Screen Restyle | v5.0 | 0/? | Not started | - |
+| 37. Portfolio Screen Restyle | v5.0 | 0/1 | Not started | - |
 | 38. History, Config, and Navigation Shell | v5.0 | 0/? | Not started | - |
 
 ---
-*Roadmap updated: 2026-02-21 after v5.0 roadmap created*
+*Roadmap updated: 2026-03-04 after Phase 37 planning complete*
