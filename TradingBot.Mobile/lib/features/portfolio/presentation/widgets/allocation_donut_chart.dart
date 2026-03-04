@@ -4,6 +4,14 @@ import 'package:intl/intl.dart';
 
 import '../../../../app/theme.dart';
 import '../../data/models/portfolio_summary_response.dart';
+import 'slot_flip_value.dart';
+
+/// Alpha value (~20% opacity) for the ambient glow halo center color.
+///
+/// Tunable constant — adjust if the glow is too prominent or too subtle
+/// on a physical device. Project convention: Color.withAlpha(int) over
+/// withOpacity(float) for consistent int-based alpha values.
+const int _kGlowCenterAlpha = 51;
 
 class AllocationDonutChart extends StatefulWidget {
   const AllocationDonutChart({
@@ -35,6 +43,17 @@ class _AllocationDonutChartState extends State<AllocationDonutChart> {
     decimalDigits: 2,
     locale: 'en_US',
   );
+
+  /// Returns the color of the largest-percentage allocation segment.
+  ///
+  /// Defaults to [AppTheme.bitcoinOrange] when [allocations] is empty.
+  Color _dominantColor() {
+    if (widget.allocations.isEmpty) return AppTheme.bitcoinOrange;
+    final dominant = widget.allocations.reduce(
+      (a, b) => a.percentage >= b.percentage ? a : b,
+    );
+    return _colorForType(dominant.assetType);
+  }
 
   Color _colorForType(String assetType) {
     switch (assetType) {
@@ -78,77 +97,96 @@ class _AllocationDonutChartState extends State<AllocationDonutChart> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 200,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                PieChart(
-                  PieChartData(
-                    centerSpaceRadius: 55,
-                    centerSpaceColor: AppTheme.surfaceDark,
-                    sectionsSpace: 2,
-                    pieTouchData: PieTouchData(
-                      touchCallback: (event, response) {
-                        setState(() {
-                          if (!event.isInterestedForInteractions ||
-                              response == null ||
-                              response.touchedSection == null) {
-                            _touchedIndex = -1;
-                            return;
-                          }
-                          _touchedIndex =
-                              response.touchedSection!.touchedSectionIndex;
-                        });
-                      },
-                    ),
-                    sections: widget.allocations
-                        .asMap()
-                        .entries
-                        .map((entry) {
-                      final isTouched = entry.key == _touchedIndex;
-                      return PieChartSectionData(
-                        value: entry.value.percentage,
-                        color: _colorForType(entry.value.assetType),
-                        radius: isTouched ? 65 : 55,
-                        showTitle: false,
-                      );
-                    }).toList(),
+    return Column(
+      children: [
+        SizedBox(
+          height: 200,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Layer 1: Ambient glow halo — RadialGradient behind the donut ring.
+              // Color matches the largest-percentage allocation segment.
+              // centerSpaceColor is transparent so the glow shows through the donut hole.
+              Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      _dominantColor().withAlpha(_kGlowCenterAlpha),
+                      _dominantColor().withAlpha(0),
+                    ],
+                    stops: const [0.0, 1.0],
                   ),
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      _formatValue(widget.totalValue),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    Text(
-                      'Total',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.white54,
-                          ),
-                    ),
-                  ],
+              ),
+
+              // Layer 2: PieChart (existing chart, centerSpaceColor transparent
+              // so the glow halo shows through the donut hole).
+              PieChart(
+                PieChartData(
+                  centerSpaceRadius: 55,
+                  centerSpaceColor: Colors.transparent,
+                  sectionsSpace: 2,
+                  pieTouchData: PieTouchData(
+                    touchCallback: (event, response) {
+                      setState(() {
+                        if (!event.isInterestedForInteractions ||
+                            response == null ||
+                            response.touchedSection == null) {
+                          _touchedIndex = -1;
+                          return;
+                        }
+                        _touchedIndex =
+                            response.touchedSection!.touchedSectionIndex;
+                      });
+                    },
+                  ),
+                  sections: widget.allocations
+                      .asMap()
+                      .entries
+                      .map((entry) {
+                    final isTouched = entry.key == _touchedIndex;
+                    return PieChartSectionData(
+                      value: entry.value.percentage,
+                      color: _colorForType(entry.value.assetType),
+                      radius: isTouched ? 65 : 55,
+                      showTitle: false,
+                    );
+                  }).toList(),
                 ),
-              ],
-            ),
+              ),
+
+              // Layer 3: Center label with SlotFlipValue for currency-toggle animation.
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SlotFlipValue(
+                    value: _formatValue(widget.totalValue),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    'Total',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white54,
+                        ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          if (_touchedIndex >= 0 &&
-              _touchedIndex < widget.allocations.length) ...[
-            const SizedBox(height: 8),
-            _buildTooltip(widget.allocations[_touchedIndex]),
-          ],
+        ),
+        if (_touchedIndex >= 0 &&
+            _touchedIndex < widget.allocations.length) ...[
           const SizedBox(height: 8),
-          _buildLegend(),
+          _buildTooltip(widget.allocations[_touchedIndex]),
         ],
-      ),
+        const SizedBox(height: 8),
+        _buildLegend(),
+      ],
     );
   }
 

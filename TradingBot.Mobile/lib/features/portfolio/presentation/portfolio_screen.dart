@@ -159,12 +159,17 @@ class PortfolioScreen extends HookConsumerWidget {
           child: PortfolioFilterChips(activeFilter: activeFilter),
         ),
 
-        // Allocation donut chart (glow treatment deferred to Phase 37)
+        // Allocation donut chart with ambient glow, wrapped in GlassCard for
+        // visual consistency with the hero header (SCRN-05).
         SliverToBoxAdapter(
-          child: AllocationDonutChart(
-            allocations: data.summary.allocations,
-            totalValue: totalValue,
-            isVnd: isVnd,
+          child: GlassCard(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
+            child: AllocationDonutChart(
+              allocations: data.summary.allocations,
+              totalValue: totalValue,
+              isVnd: isVnd,
+            ),
           ),
         ),
 
@@ -329,17 +334,16 @@ class PortfolioScreen extends HookConsumerWidget {
             ),
           ),
 
-          // Donut chart placeholder
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+          // Donut chart placeholder — GlassCard wrapper matches live chart layout (SCRN-05).
+          GlassCard(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.all(16),
             child: Bone(
               width: double.infinity,
               height: 200,
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-
-          const SizedBox(height: 16),
 
           // Asset list item skeletons (4 rows matching glass scrollItem layout)
           ...List.generate(
