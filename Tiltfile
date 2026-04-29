@@ -45,7 +45,7 @@ docker_build_with_restart(
     'tradingbot',
     '.',
     entrypoint=entrypoint,
-    dockerfile='Dockerfile.dev.debug' if debug else 'Dockerfile.dev',
+    dockerfile='app/tradingbot/Dockerfile.dev.debug' if debug else 'app/tradingbot/Dockerfile.dev',
     only=['./dist'],
     live_update=[
         sync('./dist/tradingbot', '/app/tradingbot'),
