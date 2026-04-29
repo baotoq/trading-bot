@@ -30,5 +30,5 @@ vendor/
 
 # Helm chart tarballs (fetched by helm dependency update)
 deploy/helm/charts/
-deploy/helm/tmpcharts/
+deploy/helm/tmpcharts*/
 deploy/helm/Chart.lock

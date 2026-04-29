@@ -62,9 +62,8 @@ k8s_yaml(helm(
     values=['deploy/helm/values.yaml'],
 ))
 
-k8s_yaml(local('kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/k8s/overlays/debug', quiet=True))
+k8s_yaml(kustomize('deploy/k8s/overlays/debug', flags=['--load-restrictor=LoadRestrictionsNone']))
 watch_file('app/tradingbot/configs/config.yaml')
-watch_file('deploy/k8s/')
 
 k8s_resource('postgres', port_forwards=['5432:5432'], labels=['infra'])
 k8s_resource('redis',    port_forwards=['6379:6379'], labels=['infra'])

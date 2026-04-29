@@ -61,11 +61,6 @@ generate:
 dev:
 	tilt up
 
-.PHONY: debug
-# start dev environment with Delve attached on :2345
-debug:
-	tilt up -- --debug
-
 .PHONY: all
 # generate all
 all:
