@@ -7,11 +7,14 @@
 package main
 
 import (
+	"context"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"tradingbot/app/tradingbot/internal/biz"
 	"tradingbot/app/tradingbot/internal/conf"
 	"tradingbot/app/tradingbot/internal/data"
+	"tradingbot/app/tradingbot/internal/data/hyperliquid"
 	"tradingbot/app/tradingbot/internal/server"
 	"tradingbot/app/tradingbot/internal/service"
 )
@@ -23,7 +26,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -33,8 +36,28 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	greeterService := service.NewGreeterService(greeterUsecase)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	redisClient, cleanup2, err := data.NewRedisClient(confData, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	strategyStateRepo := data.NewStrategyStateRepo(redisClient, logger)
+	exchangeConf := newExchangeConf(bootstrap)
+	ctx := context.Background()
+	hlEx, err := hyperliquid.NewHyperliquidExchange(ctx, exchangeConf, logger)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	var exchange biz.Exchange = hlEx
+	cloidDeriver := hyperliquid.NewCloidDeriver()
+	recursiveBuyUsecase := biz.NewRecursiveBuyUsecase(exchange, strategyStateRepo, cloidDeriver, logger)
+	strategies := server.NewStrategies(bootstrap)
+	scheduler := server.NewSchedulerServer(strategies, recursiveBuyUsecase, logger)
+	app := newApp(logger, grpcServer, httpServer, scheduler)
 	return app, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }
