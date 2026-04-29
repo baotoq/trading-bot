@@ -1,36 +1,62 @@
-# Clean Architecture Template
+# Kratos Admin Template
 
-What's included in the template?
+## Best Practice
+Google AIP(https://google.aip.dev/general):
+1. Resource-oriented design
+2. Filtering
+3. Pagination
+4. Field masks
+5. Field behavior
 
-- SharedKernel project with common Domain-Driven Design abstractions.
-- Domain layer with sample entities.
-- Application layer with abstractions for:
-  - CQRS
-  - Example use cases
-  - Cross-cutting concerns (logging, validation)
-- Infrastructure layer with:
-  - Authentication
-  - Permission authorization
-  - EF Core, PostgreSQL
-  - Serilog
-- Seq for searching and analyzing structured logs
-  - Seq is available at http://localhost:8081 by default
-- Testing projects
-  - Architecture testing
+## Generate API files
+```shell
+# Download and update dependencies
+make init
+# Generate API files (include: pb.go, http, grpc, validate, swagger, index.ts) by proto file
+make api
+```
 
-I'm open to hearing your feedback about the template and what you'd like to see in future iterations.
+## Run Web Application
+```shell
+# Enter web directory, install dependencies and start development server
+cd web
+npm install
+npm run dev
+```
 
-If you're ready to learn more, check out [**Pragmatic Clean Architecture**](https://www.milanjovanovic.tech/pragmatic-clean-architecture?utm_source=ca-template):
+The generated clients work with any Promise-based HTTP client that returns JSON.  
+Services are defined and re-exported from this file: `web/src/services/index.ts`.  
+```typescript
+import { createAdminServiceClient } from "@/services/kratos/admin/v1/index";
 
-- Domain-Driven Design
-- Role-based authorization
-- Permission-based authorization
-- Distributed caching with Redis
-- OpenTelemetry
-- Outbox pattern
-- API Versioning
-- Unit testing
-- Functional testing
-- Integration testing
+type Request = {
+  path: string;
+  method: string;
+  body: string | null;
+};
 
-Stay awesome!
+function requestHandler({ path, method, body }: Request) { ... }
+
+export function createAdminService() {
+  return createAdminServiceClient(requestHandler);
+}
+```
+
+Example using the generated client:
+```typescript
+import { createAdminService } from "@/services/index";
+
+const adminService = createAdminService();
+
+const handleLogin = async (username: string, password: string) => {
+  try {
+    const response = await adminService.Login({
+      username: username,
+      password: password,
+    });
+    console.log("Login successful:", response);
+  } catch (error) {
+    console.error("Login failed:", error);
+  }
+};
+```
