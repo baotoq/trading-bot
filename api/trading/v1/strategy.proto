@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package trading.v1;
+
+option go_package = "tradingbot/api/trading/v1;v1";
+
+import "google/api/annotations.proto";
+
+service StrategyService {
+  rpc Status(StatusRequest) returns (StatusReply) {
+    option (google.api.http) = {
+      get: "/v1/strategies/{strategy_id}/status"
+    };
+  }
+}
+
+message StatusRequest {
+  string strategy_id = 1;
+}
+
+message RunSummary {
+  string run_id  = 1;
+  string ts      = 2;
+  string status  = 3;
+  int32  placed  = 4;
+  int32  filled  = 5;
+}
+
+message StatusReply {
+  string             strategy_id = 1;
+  repeated RunSummary runs       = 2;
+}

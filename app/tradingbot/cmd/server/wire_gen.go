@@ -34,14 +34,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Boots
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
 	redisClient, cleanup2, err := data.NewRedisClient(confData, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
 	strategyStateRepo := data.NewStrategyStateRepo(redisClient, logger)
+	strategyService := service.NewStrategyService(strategyStateRepo, logger)
+	grpcServer := server.NewGRPCServer(confServer, greeterService, strategyService, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, strategyService, logger)
 	exchangeConf := newExchangeConf(bootstrap)
 	ctx := context.Background()
 	hlEx, err := hyperliquid.NewHyperliquidExchange(ctx, exchangeConf, logger)

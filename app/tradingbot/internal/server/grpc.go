@@ -1,7 +1,8 @@
 package server
 
 import (
-	v1 "tradingbot/api/helloworld/v1"
+	helloworldv1 "tradingbot/api/helloworld/v1"
+	tradingv1 "tradingbot/api/trading/v1"
 	"tradingbot/app/tradingbot/internal/conf"
 	"tradingbot/app/tradingbot/internal/service"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *grpc.Server {
+func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, strategy *service.StrategyService, logger log.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -27,6 +28,7 @@ func NewGRPCServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterGreeterServer(srv, greeter)
+	helloworldv1.RegisterGreeterServer(srv, greeter)
+	tradingv1.RegisterStrategyServiceServer(srv, strategy)
 	return srv
 }
