@@ -59,10 +59,13 @@ k8s_yaml(helm(
     values=['deploy/helm/values.yaml'],
 ))
 
-k8s_yaml(kustomize('deploy/k8s/overlays/debug' if debug else 'deploy/k8s/overlays/local'))
+overlay = 'deploy/k8s/overlays/debug' if debug else 'deploy/k8s/overlays/local'
+k8s_yaml(local('kubectl kustomize --load-restrictor LoadRestrictionsNone ' + overlay, quiet=True))
+watch_file('configs/config.yaml')
 
 k8s_resource('postgres', port_forwards=['5432:5432'], labels=['infra'])
 k8s_resource('redis',    port_forwards=['6379:6379'], labels=['infra'])
+k8s_resource('pgadmin',  port_forwards=['5050:80'],   labels=['infra'], resource_deps=['postgres'])
 
 app_ports = ['8000:8000', '9000:9000']
 if debug:

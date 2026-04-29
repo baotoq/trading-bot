@@ -23,6 +23,10 @@ spec:
     metadata:
       labels:
         app: tradingbot
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "tradingbot"
+        dapr.io/log-as-json: "true"
     spec:
       containers:
         - name: tradingbot
