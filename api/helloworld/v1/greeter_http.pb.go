@@ -19,16 +19,21 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
+const OperationGreeterCreateGreeter = "/helloworld.v1.Greeter/CreateGreeter"
+const OperationGreeterGetGreeter = "/helloworld.v1.Greeter/GetGreeter"
 const OperationGreeterSayHello = "/helloworld.v1.Greeter/SayHello"
 
 type GreeterHTTPServer interface {
-	// SayHello Sends a greeting
+	CreateGreeter(context.Context, *CreateGreeterRequest) (*CreateGreeterReply, error)
+	GetGreeter(context.Context, *GetGreeterRequest) (*GetGreeterReply, error)
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 }
 
 func RegisterGreeterHTTPServer(s *http.Server, srv GreeterHTTPServer) {
 	r := s.Route("/")
 	r.GET("/helloworld/{name}", _Greeter_SayHello0_HTTP_Handler(srv))
+	r.GET("/greeter/create/{hello}", _Greeter_CreateGreeter0_HTTP_Handler(srv))
+	r.GET("/greeter/{id}", _Greeter_GetGreeter0_HTTP_Handler(srv))
 }
 
 func _Greeter_SayHello0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Context) error {
@@ -53,8 +58,53 @@ func _Greeter_SayHello0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Contex
 	}
 }
 
+func _Greeter_CreateGreeter0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateGreeterRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGreeterCreateGreeter)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateGreeter(ctx, req.(*CreateGreeterRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateGreeterReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Greeter_GetGreeter0_HTTP_Handler(srv GreeterHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetGreeterRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationGreeterGetGreeter)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetGreeter(ctx, req.(*GetGreeterRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetGreeterReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type GreeterHTTPClient interface {
-	// SayHello Sends a greeting
+	CreateGreeter(ctx context.Context, req *CreateGreeterRequest, opts ...http.CallOption) (rsp *CreateGreeterReply, err error)
+	GetGreeter(ctx context.Context, req *GetGreeterRequest, opts ...http.CallOption) (rsp *GetGreeterReply, err error)
 	SayHello(ctx context.Context, req *HelloRequest, opts ...http.CallOption) (rsp *HelloReply, err error)
 }
 
@@ -66,7 +116,32 @@ func NewGreeterHTTPClient(client *http.Client) GreeterHTTPClient {
 	return &GreeterHTTPClientImpl{client}
 }
 
-// SayHello Sends a greeting
+func (c *GreeterHTTPClientImpl) CreateGreeter(ctx context.Context, in *CreateGreeterRequest, opts ...http.CallOption) (*CreateGreeterReply, error) {
+	var out CreateGreeterReply
+	pattern := "/greeter/create/{hello}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationGreeterCreateGreeter))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *GreeterHTTPClientImpl) GetGreeter(ctx context.Context, in *GetGreeterRequest, opts ...http.CallOption) (*GetGreeterReply, error) {
+	var out GetGreeterReply
+	pattern := "/greeter/{id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationGreeterGetGreeter))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 func (c *GreeterHTTPClientImpl) SayHello(ctx context.Context, in *HelloRequest, opts ...http.CallOption) (*HelloReply, error) {
 	var out HelloReply
 	pattern := "/helloworld/{name}"

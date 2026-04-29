@@ -22,7 +22,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// The request message containing the user's name.
 type HelloRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -67,7 +66,6 @@ func (x *HelloRequest) GetName() string {
 	return ""
 }
 
-// The response message containing the greetings
 type HelloReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
@@ -112,6 +110,198 @@ func (x *HelloReply) GetMessage() string {
 	return ""
 }
 
+type CreateGreeterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hello         string                 `protobuf:"bytes,1,opt,name=hello,proto3" json:"hello,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateGreeterRequest) Reset() {
+	*x = CreateGreeterRequest{}
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateGreeterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGreeterRequest) ProtoMessage() {}
+
+func (x *CreateGreeterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGreeterRequest.ProtoReflect.Descriptor instead.
+func (*CreateGreeterRequest) Descriptor() ([]byte, []int) {
+	return file_helloworld_v1_greeter_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *CreateGreeterRequest) GetHello() string {
+	if x != nil {
+		return x.Hello
+	}
+	return ""
+}
+
+type CreateGreeterReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Hello         string                 `protobuf:"bytes,2,opt,name=hello,proto3" json:"hello,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateGreeterReply) Reset() {
+	*x = CreateGreeterReply{}
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateGreeterReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateGreeterReply) ProtoMessage() {}
+
+func (x *CreateGreeterReply) ProtoReflect() protoreflect.Message {
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateGreeterReply.ProtoReflect.Descriptor instead.
+func (*CreateGreeterReply) Descriptor() ([]byte, []int) {
+	return file_helloworld_v1_greeter_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *CreateGreeterReply) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *CreateGreeterReply) GetHello() string {
+	if x != nil {
+		return x.Hello
+	}
+	return ""
+}
+
+type GetGreeterRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGreeterRequest) Reset() {
+	*x = GetGreeterRequest{}
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGreeterRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGreeterRequest) ProtoMessage() {}
+
+func (x *GetGreeterRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGreeterRequest.ProtoReflect.Descriptor instead.
+func (*GetGreeterRequest) Descriptor() ([]byte, []int) {
+	return file_helloworld_v1_greeter_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetGreeterRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetGreeterReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Hello         string                 `protobuf:"bytes,2,opt,name=hello,proto3" json:"hello,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetGreeterReply) Reset() {
+	*x = GetGreeterReply{}
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetGreeterReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetGreeterReply) ProtoMessage() {}
+
+func (x *GetGreeterReply) ProtoReflect() protoreflect.Message {
+	mi := &file_helloworld_v1_greeter_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetGreeterReply.ProtoReflect.Descriptor instead.
+func (*GetGreeterReply) Descriptor() ([]byte, []int) {
+	return file_helloworld_v1_greeter_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetGreeterReply) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *GetGreeterReply) GetHello() string {
+	if x != nil {
+		return x.Hello
+	}
+	return ""
+}
+
 var File_helloworld_v1_greeter_proto protoreflect.FileDescriptor
 
 const file_helloworld_v1_greeter_proto_rawDesc = "" +
@@ -121,9 +311,22 @@ const file_helloworld_v1_greeter_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"&\n" +
 	"\n" +
 	"HelloReply\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2i\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\",\n" +
+	"\x14CreateGreeterRequest\x12\x14\n" +
+	"\x05hello\x18\x01 \x01(\tR\x05hello\":\n" +
+	"\x12CreateGreeterReply\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x05hello\x18\x02 \x01(\tR\x05hello\"#\n" +
+	"\x11GetGreeterRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"7\n" +
+	"\x0fGetGreeterReply\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x14\n" +
+	"\x05hello\x18\x02 \x01(\tR\x05hello2\xca\x02\n" +
 	"\aGreeter\x12^\n" +
-	"\bSayHello\x12\x1b.helloworld.v1.HelloRequest\x1a\x19.helloworld.v1.HelloReply\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/helloworld/{name}BT\n" +
+	"\bSayHello\x12\x1b.helloworld.v1.HelloRequest\x1a\x19.helloworld.v1.HelloReply\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/helloworld/{name}\x12x\n" +
+	"\rCreateGreeter\x12#.helloworld.v1.CreateGreeterRequest\x1a!.helloworld.v1.CreateGreeterReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/greeter/create/{hello}\x12e\n" +
+	"\n" +
+	"GetGreeter\x12 .helloworld.v1.GetGreeterRequest\x1a\x1e.helloworld.v1.GetGreeterReply\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/greeter/{id}BT\n" +
 	"\x1cdev.kratos.api.helloworld.v1B\x11HelloworldProtoV1P\x01Z\x1ftradingbot/api/helloworld/v1;v1b\x06proto3"
 
 var (
@@ -138,16 +341,24 @@ func file_helloworld_v1_greeter_proto_rawDescGZIP() []byte {
 	return file_helloworld_v1_greeter_proto_rawDescData
 }
 
-var file_helloworld_v1_greeter_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_helloworld_v1_greeter_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_helloworld_v1_greeter_proto_goTypes = []any{
-	(*HelloRequest)(nil), // 0: helloworld.v1.HelloRequest
-	(*HelloReply)(nil),   // 1: helloworld.v1.HelloReply
+	(*HelloRequest)(nil),         // 0: helloworld.v1.HelloRequest
+	(*HelloReply)(nil),           // 1: helloworld.v1.HelloReply
+	(*CreateGreeterRequest)(nil), // 2: helloworld.v1.CreateGreeterRequest
+	(*CreateGreeterReply)(nil),   // 3: helloworld.v1.CreateGreeterReply
+	(*GetGreeterRequest)(nil),    // 4: helloworld.v1.GetGreeterRequest
+	(*GetGreeterReply)(nil),      // 5: helloworld.v1.GetGreeterReply
 }
 var file_helloworld_v1_greeter_proto_depIdxs = []int32{
 	0, // 0: helloworld.v1.Greeter.SayHello:input_type -> helloworld.v1.HelloRequest
-	1, // 1: helloworld.v1.Greeter.SayHello:output_type -> helloworld.v1.HelloReply
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: helloworld.v1.Greeter.CreateGreeter:input_type -> helloworld.v1.CreateGreeterRequest
+	4, // 2: helloworld.v1.Greeter.GetGreeter:input_type -> helloworld.v1.GetGreeterRequest
+	1, // 3: helloworld.v1.Greeter.SayHello:output_type -> helloworld.v1.HelloReply
+	3, // 4: helloworld.v1.Greeter.CreateGreeter:output_type -> helloworld.v1.CreateGreeterReply
+	5, // 5: helloworld.v1.Greeter.GetGreeter:output_type -> helloworld.v1.GetGreeterReply
+	3, // [3:6] is the sub-list for method output_type
+	0, // [0:3] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -164,7 +375,7 @@ func file_helloworld_v1_greeter_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_helloworld_v1_greeter_proto_rawDesc), len(file_helloworld_v1_greeter_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

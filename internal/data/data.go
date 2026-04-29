@@ -1,24 +1,34 @@
 package data
 
 import (
+	"context"
+	"tradingbot/internal/data/ent"
 	"tradingbot/internal/conf"
 
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	_ "github.com/lib/pq"
 )
 
-// ProviderSet is data providers.
 var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
 
-// Data .
 type Data struct {
-	// TODO wrapped database client
+	db *ent.Client
 }
 
-// NewData .
-func NewData(c *conf.Data) (*Data, func(), error) {
-	cleanup := func() {
-		log.Info("closing the data resources")
+func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
+	client, err := ent.Open(c.Database.Driver, c.Database.Source)
+	if err != nil {
+		return nil, nil, err
 	}
-	return &Data{}, cleanup, nil
+	if err := client.Schema.Create(context.Background()); err != nil {
+		_ = client.Close()
+		return nil, nil, err
+	}
+	cleanup := func() {
+		if err := client.Close(); err != nil {
+			log.NewHelper(logger).Error(err)
+		}
+	}
+	return &Data{db: client}, cleanup, nil
 }

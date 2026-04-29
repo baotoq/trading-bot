@@ -13,7 +13,6 @@ type greeterRepo struct {
 	log  *log.Helper
 }
 
-// NewGreeterRepo .
 func NewGreeterRepo(data *Data, logger log.Logger) biz.GreeterRepo {
 	return &greeterRepo{
 		data: data,
@@ -22,15 +21,23 @@ func NewGreeterRepo(data *Data, logger log.Logger) biz.GreeterRepo {
 }
 
 func (r *greeterRepo) Save(ctx context.Context, g *biz.Greeter) (*biz.Greeter, error) {
-	return g, nil
+	out, err := r.data.db.Greeter.Create().SetHello(g.Hello).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &biz.Greeter{ID: out.ID, Hello: out.Hello}, nil
+}
+
+func (r *greeterRepo) FindByID(ctx context.Context, id int64) (*biz.Greeter, error) {
+	out, err := r.data.db.Greeter.Get(ctx, int(id))
+	if err != nil {
+		return nil, err
+	}
+	return &biz.Greeter{ID: out.ID, Hello: out.Hello}, nil
 }
 
 func (r *greeterRepo) Update(ctx context.Context, g *biz.Greeter) (*biz.Greeter, error) {
 	return g, nil
-}
-
-func (r *greeterRepo) FindByID(context.Context, int64) (*biz.Greeter, error) {
-	return nil, nil
 }
 
 func (r *greeterRepo) ListByHello(context.Context, string) ([]*biz.Greeter, error) {
