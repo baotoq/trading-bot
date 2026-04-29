@@ -26,18 +26,18 @@ func NewHyperliquidExchange(
 	ctx context.Context,
 	conf *confpkg.Exchange_Hyperliquid,
 	logger log.Logger,
-) (*hlExchange, error) {
+) (biz.Exchange, error) {
 	info, ex, err := NewHyperliquidClients(ctx, conf)
 	if err != nil {
 		return nil, err
 	}
 
-	return &hlExchange{
+	return biz.Exchange(&hlExchange{
 		info:       info,
 		ex:         ex,
 		masterAddr: conf.GetMasterAddress(),
 		log:        log.NewHelper(logger),
-	}, nil
+	}), nil
 }
 
 // MidPx returns the mid price for the given coin.

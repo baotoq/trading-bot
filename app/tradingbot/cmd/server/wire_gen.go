@@ -7,8 +7,6 @@
 package main
 
 import (
-	"context"
-
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"tradingbot/app/tradingbot/internal/biz"
@@ -34,28 +32,27 @@ func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Boots
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	redisClient, cleanup2, err := data.NewRedisClient(confData, logger)
+	client, cleanup2, err := data.NewRedisClient(confData, logger)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	strategyStateRepo := data.NewStrategyStateRepo(redisClient, logger)
+	strategyStateRepo := data.NewStrategyStateRepo(client, logger)
 	strategyService := service.NewStrategyService(strategyStateRepo, logger)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, strategyService, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, strategyService, logger)
-	exchangeConf := newExchangeConf(bootstrap)
-	ctx := context.Background()
-	hlEx, err := hyperliquid.NewHyperliquidExchange(ctx, exchangeConf, logger)
+	v := server.NewStrategies(bootstrap)
+	context := newContext()
+	exchange_Hyperliquid := newExchangeConf(bootstrap)
+	exchange, err := hyperliquid.NewHyperliquidExchange(context, exchange_Hyperliquid, logger)
 	if err != nil {
 		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
-	var exchange biz.Exchange = hlEx
-	cloidDeriver := hyperliquid.NewCloidDeriver()
-	recursiveBuyUsecase := biz.NewRecursiveBuyUsecase(exchange, strategyStateRepo, cloidDeriver, logger)
-	strategies := server.NewStrategies(bootstrap)
-	scheduler := server.NewSchedulerServer(strategies, recursiveBuyUsecase, logger)
+	v2 := hyperliquid.NewCloidDeriver()
+	recursiveBuyUsecase := biz.NewRecursiveBuyUsecase(exchange, strategyStateRepo, v2, logger)
+	scheduler := server.NewSchedulerServer(v, recursiveBuyUsecase, logger)
 	app := newApp(logger, grpcServer, httpServer, scheduler)
 	return app, func() {
 		cleanup2()
