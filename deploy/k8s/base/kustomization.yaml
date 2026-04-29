@@ -4,6 +4,4 @@ namespace: trading-bot
 resources:
   - namespace.yaml
   - configmap.yaml
-  - mysql.yaml
-  - redis.yaml
   - tradingbot.yaml

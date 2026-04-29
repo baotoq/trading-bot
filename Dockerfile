@@ -1,9 +1,17 @@
+# syntax=docker/dockerfile:1
 FROM golang:1.26 AS builder
 
-COPY . /src
 WORKDIR /src
 
-RUN make build
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    make build
 
 FROM debian:stable-slim
 

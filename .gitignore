@@ -28,6 +28,11 @@ Thumbs.db
 *.key
 *.log
 bin/
+dist/
+
+# Helm chart tarballs
+deploy/helm/charts/
+deploy/helm/tmpcharts/
 
 # Develop tools
 .idea/

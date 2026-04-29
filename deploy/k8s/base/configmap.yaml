@@ -13,8 +13,8 @@ data:
         timeout: 1s
     data:
       database:
-        driver: mysql
-        source: root:root@tcp(mysql:3306)/tradingbot?parseTime=True&loc=Local
+        driver: postgres
+        source: host=postgres port=5432 user=tradingbot password=tradingbot dbname=tradingbot sslmode=disable
       redis:
         addr: redis:6379
         read_timeout: 0.2s
