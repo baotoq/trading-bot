@@ -23,7 +23,6 @@ init:
 	go install github.com/go-kratos/kratos/cmd/kratos/v2@latest
 	go install github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2@latest
 	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
-	go install go.einride.tech/protoc-gen-typescript-http@latest
 	go install github.com/google/wire/cmd/wire@latest
 
 .PHONY: config
@@ -43,7 +42,6 @@ api:
  	       --go-http_out=paths=source_relative:./api \
  	       --go-grpc_out=paths=source_relative:./api \
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
-		   --typescript-http_out ./web/src/services \
 	       $(API_PROTO_FILES)
 
 .PHONY: build
@@ -60,9 +58,9 @@ generate:
 .PHONY: all
 # generate all
 all:
-	make api;
-	make config;
-	make generate;
+	make api
+	make config
+	make generate
 
 # show help
 help:

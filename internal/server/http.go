@@ -1,25 +1,20 @@
 package server
 
 import (
-	v1 "tradingbot/api/kratos/admin/v1"
+	v1 "tradingbot/api/helloworld/v1"
 	"tradingbot/internal/conf"
 	"tradingbot/internal/service"
-	"tradingbot/pkg/auth"
-	"tradingbot/pkg/validate"
 
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, admin *service.AdminService) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
-		http.Filter(
-			auth.Middleware(),
-		),
 		http.Middleware(
 			recovery.Recovery(),
-			validate.Middleware(),
 		),
 	}
 	if c.Http.Network != "" {
@@ -32,6 +27,6 @@ func NewHTTPServer(c *conf.Server, admin *service.AdminService) *http.Server {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterAdminServiceHTTPServer(srv, admin)
+	v1.RegisterGreeterHTTPServer(srv, greeter)
 	return srv
 }

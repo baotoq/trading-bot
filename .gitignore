@@ -31,10 +31,8 @@ Thumbs.db
 *.key
 *.log
 bin/
-/cmd/kratos-admin
 
 # Develop tools
 .vscode/
-.cache/
 .idea/
 *.swp

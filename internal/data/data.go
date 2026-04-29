@@ -1,43 +1,24 @@
 package data
 
 import (
-	"context"
-	"log"
-	"os"
-
 	"tradingbot/internal/conf"
-	"tradingbot/internal/data/ent"
-	"tradingbot/internal/data/ent/migrate"
-	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewAdminRepo)
+var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
 
-// Data is a struct that contains the database client.
+// Data .
 type Data struct {
-	db *ent.Client
+	// TODO wrapped database client
 }
 
-// NewData creates a new Data instance.
+// NewData .
 func NewData(c *conf.Data) (*Data, func(), error) {
-	db, err := ent.Open(c.Database.Driver, c.Database.Source)
-	if err != nil {
-		log.Fatalf("failed opening connection to database: %v", err)
-	}
-	if os.Getenv("DEPLOY_ENV") == "dev" {
-		// Enable debug mode for detailed logging.
-		db = db.Debug()
-		// Run the auto migration tool.
-		if err = db.Schema.Create(context.Background(), migrate.WithDropIndex(true)); err != nil {
-			return nil, nil, err
-		}
-	}
 	cleanup := func() {
-		db.Close()
+		log.Info("closing the data resources")
 	}
-	return &Data{
-		db: db,
-	}, cleanup, nil
+	return &Data{}, cleanup, nil
 }
