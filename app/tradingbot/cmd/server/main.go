@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
+	"time"
 
 	"tradingbot/app/tradingbot/internal/conf"
 
+	dapr "github.com/dapr/go-sdk/client"
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
@@ -48,6 +51,9 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 }
 
 func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Second*10))
+	defer cancel()
+
 	flag.Parse()
 	logger := log.With(log.NewStdLogger(os.Stdout),
 		"ts", log.DefaultTimestamp,
@@ -58,6 +64,7 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
@@ -69,9 +76,27 @@ func main() {
 		panic(err)
 	}
 
+	client, err := dapr.NewClient()
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close()
+
+	secret, err := client.GetSecret(ctx, "secretstore", "secrets", nil)
+	if err != nil {
+		panic(err)
+	}
+
 	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
+	}
+
+	if v := secret["DATABASE_CONNECTION_STRING"]; v != "" {
+		bc.Data.Database.Source = v
+	}
+	if v := secret["REDIS_HOST"]; v != "" {
+		bc.Data.Redis.Addr = v
 	}
 
 	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)

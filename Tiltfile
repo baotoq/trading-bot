@@ -1,21 +1,10 @@
 load('ext://restart_process', 'docker_build_with_restart')
-
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
 allow_k8s_contexts(['docker-desktop', 'orbstack'])
-
-# Usage:
-#   tilt up                  normal build
-#   tilt up -- --debug       build with Delve, attach VS Code on :2345
-#   tilt args -- --debug     toggle without restarting Tilt
-config.define_bool('debug')
-cfg = config.parse()
-debug = cfg.get('debug', False)
 
 entrypoint = ['/app/entrypoint.sh']
 
-if debug:
-    compile_cmd = 'mkdir -p dist && GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -gcflags="all=-N -l" -ldflags "-X main.Version=dev" -o ./dist/tradingbot ./app/tradingbot/cmd/server'
-else:
-    compile_cmd = 'mkdir -p dist && GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -ldflags "-X main.Version=$(git describe --tags --always 2>/dev/null || echo dev)" -o ./dist/tradingbot ./app/tradingbot/cmd/server'
+compile_cmd = 'mkdir -p dist && GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -gcflags="all=-N -l" -ldflags "-X main.Version=dev" -o ./dist/tradingbot ./app/tradingbot/cmd/server'
 
 # Ensure binary exists at load time so docker_build doesn't race on first tilt up.
 local('mkdir -p dist && [ -f dist/tradingbot ] || ' + compile_cmd, quiet=True)
@@ -38,14 +27,28 @@ local_resource('helm-deps',
     labels=['build'],
 )
 
-# Tilt-optimised Dockerfiles contain no Go toolchain — they just copy ./dist/tradingbot.
+helm_repo('dapr-repo', 'https://dapr.github.io/helm-charts/', labels=['infra'])
+helm_resource(
+    'dapr',
+    'dapr-repo/dapr',
+    namespace='dapr-system',
+    flags=[
+        '--version=1.17.6',
+        '--create-namespace',
+        '--set=global.ha.enabled=false',
+    ],
+    resource_deps=['dapr-repo'],
+    labels=['infra'],
+)
+
+# Tilt-optimised Dockerfile contains no Go toolchain — it just copies ./dist/tradingbot.
 # only=['./dist'] means docker_build watches *only* that dir, so Go source file
 # changes never trigger an image rebuild; they go through compile → sync instead.
 docker_build_with_restart(
     'tradingbot',
     '.',
     entrypoint=entrypoint,
-    dockerfile='app/tradingbot/Dockerfile.dev.debug' if debug else 'app/tradingbot/Dockerfile.dev',
+    dockerfile='app/tradingbot/Dockerfile.dev.debug',
     only=['./dist'],
     live_update=[
         sync('./dist/tradingbot', '/app/tradingbot'),
@@ -59,20 +62,26 @@ k8s_yaml(helm(
     values=['deploy/helm/values.yaml'],
 ))
 
-overlay = 'deploy/k8s/overlays/debug' if debug else 'deploy/k8s/overlays/local'
-k8s_yaml(local('kubectl kustomize --load-restrictor LoadRestrictionsNone ' + overlay, quiet=True))
+k8s_yaml(local('kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/k8s/overlays/debug', quiet=True))
 watch_file('app/tradingbot/configs/config.yaml')
+watch_file('deploy/k8s/')
 
 k8s_resource('postgres', port_forwards=['5432:5432'], labels=['infra'])
 k8s_resource('redis',    port_forwards=['6379:6379'], labels=['infra'])
 k8s_resource('pgadmin',  port_forwards=['5050:80'],   labels=['infra'], resource_deps=['postgres'])
 
-app_ports = ['8000:8000', '9000:9000']
-if debug:
-    app_ports.append('2345:2345')
+k8s_resource(
+    objects=[
+        'pubsub:Component',
+        'secretstore:Component',
+    ],
+    new_name='dapr-components',
+    resource_deps=['dapr'],
+    labels=['infra'],
+)
 
 k8s_resource('tradingbot',
-    port_forwards=app_ports,
-    resource_deps=['postgres', 'redis', 'compile'],
+    port_forwards=['8000:8000', '9000:9000', '2345:2345'],
+    resource_deps=['postgres', 'redis', 'compile', 'dapr-components'],
     labels=['app'],
 )

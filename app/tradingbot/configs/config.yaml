@@ -8,9 +8,9 @@ server:
 data:
   database:
     driver: postgres
-    source: host=postgres port=5432 user=tradingbot password=tradingbot dbname=tradingbot sslmode=disable
+    source: ""
   redis:
-    addr: redis:6379
+    addr: ""
     read_timeout: 1s
     write_timeout: 1s
   pubsub:

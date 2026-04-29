@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: trading-bot
 resources:
   - namespace.yaml
+  - secrets/
   - infra/
   - app/

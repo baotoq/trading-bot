@@ -16,7 +16,7 @@ COPY dist/tradingbot            /app/tradingbot
 
 WORKDIR /app
 
-RUN printf '#!/bin/sh\nexec dlv exec /app/tradingbot --headless --listen=:2345 --api-version=2 --accept-multiclient --continue --only-same-user=false --log -- -conf /data/conf\n' \
+RUN printf '#!/bin/sh\nexec dlv exec /app/tradingbot --headless --listen=:2345 --api-version=2 --accept-multiclient --only-same-user=false --log -- -conf /data/conf\n' \
     > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 EXPOSE 8000 9000 2345

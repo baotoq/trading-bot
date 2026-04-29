@@ -8,6 +8,12 @@ spec:
   version: v1
   metadata:
     - name: redisHost
-      value: "redis:6379"
+      secretKeyRef:
+        name: secrets
+        key: REDIS_HOST
     - name: redisPassword
-      value: ""
+      secretKeyRef:
+        name: secrets
+        key: REDIS_PASSWORD
+  auth:
+    secretStore: secretstore
