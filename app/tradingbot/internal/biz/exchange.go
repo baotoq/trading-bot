@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -14,6 +15,27 @@ type Cloid [16]byte
 
 func (c Cloid) Hex() string {
 	return hex.EncodeToString(c[:])
+}
+
+func (c Cloid) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + hex.EncodeToString(c[:]) + `"`), nil
+}
+
+func (c *Cloid) UnmarshalJSON(b []byte) error {
+	s := string(b)
+	if len(s) < 2 || s[0] != '"' || s[len(s)-1] != '"' {
+		return fmt.Errorf("cloid: expected JSON string")
+	}
+	s = s[1 : len(s)-1]
+	decoded, err := hex.DecodeString(s)
+	if err != nil {
+		return fmt.Errorf("cloid: invalid hex: %w", err)
+	}
+	if len(decoded) != 16 {
+		return fmt.Errorf("cloid: expected 16 bytes, got %d", len(decoded))
+	}
+	copy(c[:], decoded)
+	return nil
 }
 
 type RunStatus string
