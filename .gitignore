@@ -37,3 +37,6 @@ deploy/helm/tmpcharts/
 # Develop tools
 .idea/
 *.swp
+
+# Git worktrees
+.worktrees/
