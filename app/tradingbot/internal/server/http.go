@@ -12,7 +12,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, strategy *service.StrategyService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, strategy *service.StrategyService, events *service.EventService, logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -30,6 +30,10 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, strategy *se
 	srv := http.NewServer(opts...)
 	helloworldv1.RegisterGreeterHTTPServer(srv, greeter)
 	tradingv1.RegisterStrategyServiceHTTPServer(srv, strategy)
-	RegisterDaprHandlers(srv)
+
+	sub := NewDaprSubscriber("pubsub")
+	Subscribe(sub, events.HandleTradingEvent)
+	sub.Mount(srv)
+
 	return srv
 }

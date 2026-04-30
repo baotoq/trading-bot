@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -14,9 +15,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type tradingEvent struct {
+	Value string `json:"value"`
+}
+
 func newDaprHandler() http.Handler {
 	srv := transhttp.NewServer()
-	server.RegisterDaprHandlers(srv)
+	sub := server.NewDaprSubscriber("pubsub")
+	server.Subscribe(sub, func(_ context.Context, _ tradingEvent) error {
+		return nil
+	})
+	sub.Mount(srv)
 	return srv
 }
 
@@ -40,15 +49,15 @@ func TestDaprSubscribe(t *testing.T) {
 	require.NoError(t, json.Unmarshal(body, &subs))
 	require.Len(t, subs, 1)
 	assert.Equal(t, "pubsub", subs[0]["pubsubname"])
-	assert.Equal(t, "trading", subs[0]["topic"])
-	assert.Equal(t, "pubsub/events/trading", subs[0]["route"])
+	assert.Equal(t, "tradingevent", subs[0]["topic"])
+	assert.Equal(t, "pubsub/handle/tradingevent", subs[0]["route"])
 }
 
 func TestDaprTradingEvent(t *testing.T) {
 	// Arrange
 	h := newDaprHandler()
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/pubsub/events/trading", nil)
+	r := httptest.NewRequest(http.MethodPost, "/pubsub/handle/tradingevent", nil)
 
 	// Act
 	h.ServeHTTP(w, r)
