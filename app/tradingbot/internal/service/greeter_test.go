@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 
-	v1 "tradingbot/app/tradingbot/api/helloworld/v1"
+	v1 "tradingbot/api/helloworld/v1"
 	"tradingbot/app/tradingbot/internal/biz"
 	"tradingbot/app/tradingbot/internal/service"
 

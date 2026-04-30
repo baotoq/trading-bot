@@ -1,8 +1,8 @@
 package server
 
 import (
-	helloworldv1 "tradingbot/app/tradingbot/api/helloworld/v1"
-	tradingv1 "tradingbot/app/tradingbot/api/trading/v1"
+	helloworldv1 "tradingbot/api/helloworld/v1"
+	tradingv1 "tradingbot/api/trading/v1"
 	"tradingbot/app/tradingbot/internal/conf"
 	"tradingbot/app/tradingbot/internal/service"
 

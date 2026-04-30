@@ -9,10 +9,10 @@ ifeq ($(GOHOSTOS), windows)
     #Git_Bash= $(subst cmd\,bin\bash.exe,$(dir $(shell where git)))
     Git_Bash=$(subst \,/,$(subst cmd\,bin\bash.exe,$(dir $(shell where git))))
     INTERNAL_PROTO_FILES=$(shell $(Git_Bash) -c "find app -name *.proto -not -path '*/api/*.proto'")
-    API_PROTO_FILES=$(shell $(Git_Bash) -c "find app/tradingbot/api -name *.proto")
+    API_PROTO_FILES=$(shell $(Git_Bash) -c "find api -name *.proto")
 else
     INTERNAL_PROTO_FILES=$(shell find app -name *.proto -not -path "*/api/*.proto")
-    API_PROTO_FILES=$(shell find app/tradingbot/api -name *.proto)
+    API_PROTO_FILES=$(shell find api -name *.proto)
 endif
 
 .PHONY: init
@@ -37,11 +37,11 @@ config:
 .PHONY: api
 # generate api proto
 api:
-	protoc --proto_path=./app/tradingbot/api \
+	protoc --proto_path=./api \
 	       --proto_path=./third_party \
-	       --go_out=paths=source_relative:./app/tradingbot/api \
-	       --go-http_out=paths=source_relative:./app/tradingbot/api \
-	       --go-grpc_out=paths=source_relative:./app/tradingbot/api \
+	       --go_out=paths=source_relative:./api \
+	       --go-http_out=paths=source_relative:./api \
+	       --go-grpc_out=paths=source_relative:./api \
 	       --openapi_out=fq_schema_naming=true,default_response=false:app/tradingbot \
 	       $(API_PROTO_FILES)
 
