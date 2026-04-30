@@ -41,7 +41,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Boots
 	strategyService := service.NewStrategyService(strategyStateRepo, logger)
 	grpcServer := server.NewGRPCServer(confServer, greeterService, strategyService, logger)
 	eventService := service.NewEventService(logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, strategyService, eventService, logger)
+	daprSubscriber := server.NewDaprSubscriberDefault()
 	v := server.NewStrategies(bootstrap)
 	context := newContext()
 	exchange_Hyperliquid := newExchangeConf(bootstrap)
@@ -53,9 +53,18 @@ func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Boots
 	}
 	v2 := hyperliquid.NewCloidDeriver()
 	recursiveBuyUsecase := biz.NewRecursiveBuyUsecase(exchange, strategyStateRepo, v2, logger)
-	scheduler := server.NewSchedulerServer(v, recursiveBuyUsecase, logger)
-	app := newApp(logger, grpcServer, httpServer, scheduler)
+	clientClient, cleanup3, err := data.NewDaprClient()
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	jobScheduler := data.NewJobScheduler(clientClient)
+	jobBootstrapper := server.NewJobBootstrapper(v, recursiveBuyUsecase, jobScheduler, daprSubscriber, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, strategyService, eventService, daprSubscriber, jobBootstrapper, logger)
+	app := newApp(logger, grpcServer, httpServer, jobBootstrapper)
 	return app, func() {
+		cleanup3()
 		cleanup2()
 		cleanup()
 	}, nil

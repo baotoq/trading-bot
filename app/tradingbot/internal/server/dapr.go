@@ -83,6 +83,12 @@ func RegisterJobHandler(s *DaprSubscriber, name string, h func(ctx context.Conte
 	})
 }
 
+// NewDaprSubscriberDefault creates a DaprSubscriber for the "pubsub" Dapr component.
+// "pubsub" is the fixed name of the Dapr component defined in deploy/k8s/base/infra/dapr/pubsub.yaml.
+func NewDaprSubscriberDefault() *DaprSubscriber {
+	return NewDaprSubscriber("pubsub")
+}
+
 // Mount registers /dapr/subscribe and all topic routes onto the HTTP server.
 func (s *DaprSubscriber) Mount(hs *khttp.Server) {
 	subsJSON, _ := json.Marshal(s.subs)
