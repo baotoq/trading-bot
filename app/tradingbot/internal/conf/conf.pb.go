@@ -230,6 +230,7 @@ type Server struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Http          *Server_HTTP           `protobuf:"bytes,1,opt,name=http,proto3" json:"http,omitempty"`
 	Grpc          *Server_GRPC           `protobuf:"bytes,2,opt,name=grpc,proto3" json:"grpc,omitempty"`
+	Dapr          *Server_Dapr           `protobuf:"bytes,3,opt,name=dapr,proto3" json:"dapr,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -274,6 +275,13 @@ func (x *Server) GetHttp() *Server_HTTP {
 func (x *Server) GetGrpc() *Server_GRPC {
 	if x != nil {
 		return x.Grpc
+	}
+	return nil
+}
+
+func (x *Server) GetDapr() *Server_Dapr {
+	if x != nil {
+		return x.Dapr
 	}
 	return nil
 }
@@ -526,6 +534,58 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 	return nil
 }
 
+type Server_Dapr struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	AppId         string                 `protobuf:"bytes,2,opt,name=app_id,json=appId,proto3" json:"app_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Server_Dapr) Reset() {
+	*x = Server_Dapr{}
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Server_Dapr) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Server_Dapr) ProtoMessage() {}
+
+func (x *Server_Dapr) ProtoReflect() protoreflect.Message {
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Server_Dapr.ProtoReflect.Descriptor instead.
+func (*Server_Dapr) Descriptor() ([]byte, []int) {
+	return file_app_tradingbot_internal_conf_conf_proto_rawDescGZIP(), []int{3, 2}
+}
+
+func (x *Server_Dapr) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
+}
+
+func (x *Server_Dapr) GetAppId() string {
+	if x != nil {
+		return x.AppId
+	}
+	return ""
+}
+
 type Data_Database struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Driver        string                 `protobuf:"bytes,1,opt,name=driver,proto3" json:"driver,omitempty"`
@@ -536,7 +596,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -548,7 +608,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[8]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -590,7 +650,7 @@ type Data_Redis struct {
 
 func (x *Data_Redis) Reset() {
 	*x = Data_Redis{}
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -602,7 +662,7 @@ func (x *Data_Redis) String() string {
 func (*Data_Redis) ProtoMessage() {}
 
 func (x *Data_Redis) ProtoReflect() protoreflect.Message {
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[9]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,7 +716,7 @@ type Data_Pubsub struct {
 
 func (x *Data_Pubsub) Reset() {
 	*x = Data_Pubsub{}
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[10]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -668,7 +728,7 @@ func (x *Data_Pubsub) String() string {
 func (*Data_Pubsub) ProtoMessage() {}
 
 func (x *Data_Pubsub) ProtoReflect() protoreflect.Message {
-	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[10]
+	mi := &file_app_tradingbot_internal_conf_conf_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -726,10 +786,11 @@ const file_app_tradingbot_internal_conf_conf_proto_rawDesc = "" +
 	"\vladder_size\x18\x05 \x01(\x05R\n" +
 	"ladderSize\x12*\n" +
 	"\x11price_offsets_bps\x18\x06 \x03(\tR\x0fpriceOffsetsBps\x12(\n" +
-	"\x10max_slippage_bps\x18\a \x01(\tR\x0emaxSlippageBps\"\xb8\x02\n" +
+	"\x10max_slippage_bps\x18\a \x01(\tR\x0emaxSlippageBps\"\x98\x03\n" +
 	"\x06Server\x12+\n" +
 	"\x04http\x18\x01 \x01(\v2\x17.kratos.api.Server.HTTPR\x04http\x12+\n" +
-	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x1ai\n" +
+	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x12+\n" +
+	"\x04dapr\x18\x03 \x01(\v2\x17.kratos.api.Server.DaprR\x04dapr\x1ai\n" +
 	"\x04HTTP\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
@@ -737,7 +798,10 @@ const file_app_tradingbot_internal_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xc2\x03\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\x1a1\n" +
+	"\x04Dapr\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x15\n" +
+	"\x06app_id\x18\x02 \x01(\tR\x05appId\"\xc2\x03\n" +
 	"\x04Data\x125\n" +
 	"\bdatabase\x18\x01 \x01(\v2\x19.kratos.api.Data.DatabaseR\bdatabase\x12,\n" +
 	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x12/\n" +
@@ -766,7 +830,7 @@ func file_app_tradingbot_internal_conf_conf_proto_rawDescGZIP() []byte {
 	return file_app_tradingbot_internal_conf_conf_proto_rawDescData
 }
 
-var file_app_tradingbot_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_app_tradingbot_internal_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_app_tradingbot_internal_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),            // 0: kratos.api.Bootstrap
 	(*Exchange)(nil),             // 1: kratos.api.Exchange
@@ -776,10 +840,11 @@ var file_app_tradingbot_internal_conf_conf_proto_goTypes = []any{
 	(*Exchange_Hyperliquid)(nil), // 5: kratos.api.Exchange.Hyperliquid
 	(*Server_HTTP)(nil),          // 6: kratos.api.Server.HTTP
 	(*Server_GRPC)(nil),          // 7: kratos.api.Server.GRPC
-	(*Data_Database)(nil),        // 8: kratos.api.Data.Database
-	(*Data_Redis)(nil),           // 9: kratos.api.Data.Redis
-	(*Data_Pubsub)(nil),          // 10: kratos.api.Data.Pubsub
-	(*durationpb.Duration)(nil),  // 11: google.protobuf.Duration
+	(*Server_Dapr)(nil),          // 8: kratos.api.Server.Dapr
+	(*Data_Database)(nil),        // 9: kratos.api.Data.Database
+	(*Data_Redis)(nil),           // 10: kratos.api.Data.Redis
+	(*Data_Pubsub)(nil),          // 11: kratos.api.Data.Pubsub
+	(*durationpb.Duration)(nil),  // 12: google.protobuf.Duration
 }
 var file_app_tradingbot_internal_conf_conf_proto_depIdxs = []int32{
 	3,  // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
@@ -787,21 +852,22 @@ var file_app_tradingbot_internal_conf_conf_proto_depIdxs = []int32{
 	1,  // 2: kratos.api.Bootstrap.exchange:type_name -> kratos.api.Exchange
 	2,  // 3: kratos.api.Bootstrap.strategies:type_name -> kratos.api.Strategy
 	5,  // 4: kratos.api.Exchange.hyperliquid:type_name -> kratos.api.Exchange.Hyperliquid
-	11, // 5: kratos.api.Strategy.interval:type_name -> google.protobuf.Duration
+	12, // 5: kratos.api.Strategy.interval:type_name -> google.protobuf.Duration
 	6,  // 6: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
 	7,  // 7: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
-	8,  // 8: kratos.api.Data.database:type_name -> kratos.api.Data.Database
-	9,  // 9: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
-	10, // 10: kratos.api.Data.pubsub:type_name -> kratos.api.Data.Pubsub
-	11, // 11: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	11, // 12: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	11, // 13: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	11, // 14: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	15, // [15:15] is the sub-list for method output_type
-	15, // [15:15] is the sub-list for method input_type
-	15, // [15:15] is the sub-list for extension type_name
-	15, // [15:15] is the sub-list for extension extendee
-	0,  // [0:15] is the sub-list for field type_name
+	8,  // 8: kratos.api.Server.dapr:type_name -> kratos.api.Server.Dapr
+	9,  // 9: kratos.api.Data.database:type_name -> kratos.api.Data.Database
+	10, // 10: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
+	11, // 11: kratos.api.Data.pubsub:type_name -> kratos.api.Data.Pubsub
+	12, // 12: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	12, // 13: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	12, // 14: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	12, // 15: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	16, // [16:16] is the sub-list for method output_type
+	16, // [16:16] is the sub-list for method input_type
+	16, // [16:16] is the sub-list for extension type_name
+	16, // [16:16] is the sub-list for extension extendee
+	0,  // [0:16] is the sub-list for field type_name
 }
 
 func init() { file_app_tradingbot_internal_conf_conf_proto_init() }
@@ -815,7 +881,7 @@ func file_app_tradingbot_internal_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_app_tradingbot_internal_conf_conf_proto_rawDesc), len(file_app_tradingbot_internal_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

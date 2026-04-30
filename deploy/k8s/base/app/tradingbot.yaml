@@ -26,6 +26,8 @@ spec:
       annotations:
         dapr.io/enabled: "true"
         dapr.io/app-id: "tradingbot"
+        dapr.io/app-port: "8000"
+        dapr.io/app-protocol: "http"
         dapr.io/log-as-json: "true"
     spec:
       containers:

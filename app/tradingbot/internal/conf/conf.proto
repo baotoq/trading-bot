@@ -43,8 +43,13 @@ message Server {
     string addr = 2;
     google.protobuf.Duration timeout = 3;
   }
+  message Dapr {
+    string addr = 1;
+    string app_id = 2;
+  }
   HTTP http = 1;
   GRPC grpc = 2;
+  Dapr dapr = 3;
 }
 
 message Data {

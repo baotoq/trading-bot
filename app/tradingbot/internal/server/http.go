@@ -30,5 +30,6 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, strategy *se
 	srv := http.NewServer(opts...)
 	helloworldv1.RegisterGreeterHTTPServer(srv, greeter)
 	tradingv1.RegisterStrategyServiceHTTPServer(srv, strategy)
+	RegisterDaprHandlers(srv)
 	return srv
 }
