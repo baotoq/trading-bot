@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"tradingbot/app/tradingbot/internal/conf"
+	"tradingbot/app/tradingbot/internal/server"
 
 	dapr "github.com/dapr/go-sdk/client"
 	"github.com/go-kratos/kratos/v2"
@@ -36,7 +37,7 @@ func init() {
 	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
 }
 
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
+func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server, ss *server.Scheduler) *kratos.App {
 	return kratos.New(
 		kratos.ID(id),
 		kratos.Name(Name),
@@ -46,6 +47,7 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 		kratos.Server(
 			gs,
 			hs,
+			ss,
 		),
 	)
 }
@@ -99,7 +101,7 @@ func main() {
 		bc.Data.Redis.Addr = v
 	}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, &bc, logger)
 	if err != nil {
 		panic(err)
 	}

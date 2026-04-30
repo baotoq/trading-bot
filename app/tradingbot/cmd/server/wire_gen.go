@@ -12,6 +12,7 @@ import (
 	"tradingbot/app/tradingbot/internal/biz"
 	"tradingbot/app/tradingbot/internal/conf"
 	"tradingbot/app/tradingbot/internal/data"
+	"tradingbot/app/tradingbot/internal/data/hyperliquid"
 	"tradingbot/app/tradingbot/internal/server"
 	"tradingbot/app/tradingbot/internal/service"
 )
@@ -23,7 +24,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, bootstrap *conf.Bootstrap, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -31,10 +32,30 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
 	greeterUsecase := biz.NewGreeterUsecase(greeterRepo)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
-	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
-	app := newApp(logger, grpcServer, httpServer)
+	client, cleanup2, err := data.NewRedisClient(confData, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	strategyStateRepo := data.NewStrategyStateRepo(client, logger)
+	strategyService := service.NewStrategyService(strategyStateRepo, logger)
+	grpcServer := server.NewGRPCServer(confServer, greeterService, strategyService, logger)
+	httpServer := server.NewHTTPServer(confServer, greeterService, strategyService, logger)
+	v := server.NewStrategies(bootstrap)
+	context := newContext()
+	exchange_Hyperliquid := newExchangeConf(bootstrap)
+	exchange, err := hyperliquid.NewHyperliquidExchange(context, exchange_Hyperliquid, logger)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	v2 := hyperliquid.NewCloidDeriver()
+	recursiveBuyUsecase := biz.NewRecursiveBuyUsecase(exchange, strategyStateRepo, v2, logger)
+	scheduler := server.NewSchedulerServer(v, recursiveBuyUsecase, logger)
+	app := newApp(logger, grpcServer, httpServer, scheduler)
 	return app, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

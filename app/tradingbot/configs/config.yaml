@@ -16,3 +16,21 @@ data:
   pubsub:
     name: pubsub
     topic: trading.events
+exchange:
+  hyperliquid:
+    api_url: https://api.hyperliquid-testnet.xyz
+    master_address: "0xYOUR_MASTER_ADDRESS"
+    agent_key_env: HL_AGENT_KEY
+    testnet: true
+strategies:
+  - id: ubtc-weekly
+    coin: UBTC/USDC
+    quote_amount: "10"
+    interval: 60s
+    ladder_size: 4
+    price_offsets_bps:
+      - "-50"
+      - "-100"
+      - "-150"
+      - "-200"
+    max_slippage_bps: "300"

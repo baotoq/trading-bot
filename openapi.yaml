@@ -3,7 +3,7 @@
 
 openapi: 3.0.3
 info:
-    title: Greeter API
+    title: ""
     version: 0.0.1
 paths:
     /greeter/create/{hello}:
@@ -60,6 +60,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /v1/strategies/{strategyId}/status:
+        get:
+            tags:
+                - StrategyService
+            operationId: StrategyService_Status
+            parameters:
+                - name: strategyId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/trading.v1.StatusReply'
 components:
     schemas:
         helloworld.v1.CreateGreeterReply:
@@ -81,5 +99,30 @@ components:
             properties:
                 message:
                     type: string
+        trading.v1.RunSummary:
+            type: object
+            properties:
+                runId:
+                    type: string
+                ts:
+                    type: string
+                status:
+                    type: string
+                placed:
+                    type: integer
+                    format: int32
+                filled:
+                    type: integer
+                    format: int32
+        trading.v1.StatusReply:
+            type: object
+            properties:
+                strategyId:
+                    type: string
+                runs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/trading.v1.RunSummary'
 tags:
     - name: Greeter
+    - name: StrategyService

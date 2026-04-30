@@ -9,6 +9,7 @@ import (
 	"tradingbot/app/tradingbot/internal/biz"
 	"tradingbot/app/tradingbot/internal/conf"
 	"tradingbot/app/tradingbot/internal/data"
+	"tradingbot/app/tradingbot/internal/data/hyperliquid"
 	"tradingbot/app/tradingbot/internal/server"
 	"tradingbot/app/tradingbot/internal/service"
 
@@ -18,6 +19,15 @@ import (
 )
 
 // wireApp init kratos application.
-func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, newApp))
+func wireApp(*conf.Server, *conf.Data, *conf.Bootstrap, log.Logger) (*kratos.App, func(), error) {
+	panic(wire.Build(
+		server.ProviderSet,
+		data.ProviderSet,
+		biz.ProviderSet,
+		service.ProviderSet,
+		hyperliquid.ProviderSet,
+		newExchangeConf,
+		newApp,
+		newContext,
+	))
 }

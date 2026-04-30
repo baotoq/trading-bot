@@ -8,6 +8,28 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Exchange exchange = 3;
+  repeated Strategy strategies = 4;
+}
+
+message Exchange {
+  message Hyperliquid {
+    string api_url        = 1;
+    string master_address = 2;
+    string agent_key_env  = 3;
+    bool   testnet        = 4;
+  }
+  Hyperliquid hyperliquid = 1;
+}
+
+message Strategy {
+  string                   id                 = 1;
+  string                   coin               = 2;
+  string                   quote_amount       = 3;
+  google.protobuf.Duration interval           = 4;
+  int32                    ladder_size        = 5;
+  repeated string          price_offsets_bps  = 6;
+  string                   max_slippage_bps   = 7;
 }
 
 message Server {
