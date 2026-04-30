@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"fmt"
 
 	"tradingbot/app/tradingbot/internal/biz"
 
@@ -18,19 +19,20 @@ func NewJobScheduler(client dapr.Client) biz.JobScheduler {
 	return &daprJobScheduler{client: client}
 }
 
-func (s *daprJobScheduler) Schedule(ctx context.Context, j biz.Job) error {
+// Schedule upserts a recurring job, replacing any existing job with the same name.
+func (d *daprJobScheduler) Schedule(ctx context.Context, j biz.Job) error {
 	job := dapr.NewJob(j.Name, dapr.WithJobSchedule(j.Schedule))
 	job.Overwrite = true
 	if len(j.Data) > 0 {
 		data, err := anypb.New(wrapperspb.Bytes(j.Data))
 		if err != nil {
-			return err
+			return fmt.Errorf("marshal job data: %w", err)
 		}
 		job.Data = data
 	}
-	return s.client.ScheduleJobAlpha1(ctx, job)
+	return d.client.ScheduleJobAlpha1(ctx, job)
 }
 
-func (s *daprJobScheduler) Delete(ctx context.Context, name string) error {
-	return s.client.DeleteJobAlpha1(ctx, name)
+func (d *daprJobScheduler) Delete(ctx context.Context, name string) error {
+	return d.client.DeleteJobAlpha1(ctx, name)
 }
