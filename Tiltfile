@@ -5,7 +5,7 @@ allow_k8s_contexts(['docker-desktop', 'orbstack'])
 # Usage:
 #   tilt up                    Delve waits for debugger to attach
 #   tilt up -- --continue      Delve starts immediately (no wait)
-config.define_bool('continue', args=True, usage='Start Delve with --continue')
+config.define_bool('continue', args=False, usage='Start Delve with --continue')
 dlv_continue = config.parse().get('continue', False)
 
 dlv_flags = '--headless --listen=:2345 --api-version=2 --accept-multiclient --only-same-user=false --log'
@@ -30,6 +30,19 @@ local_resource('compile',
 local('[ -d deploy/helm/charts ] || helm dependency update deploy/helm', quiet=True)
 
 helm_repo('dapr-repo', 'https://dapr.github.io/helm-charts/', labels=['infra'])
+
+# If Dapr is not yet installed via Helm, delete any pre-existing CRDs (e.g. from
+# `dapr init`) so Helm can claim field ownership cleanly. No-ops when Helm already
+# manages the release.
+local_resource('patch-dapr-crds',
+    cmd="""
+    helm status dapr -n dapr-system 2>/dev/null | grep -q 'STATUS: deployed' || \
+        kubectl get crds -o name 2>/dev/null | grep dapr.io | xargs kubectl delete --ignore-not-found
+    """,
+    resource_deps=['dapr-repo'],
+    labels=['infra'],
+)
+
 helm_resource(
     'dapr',
     'dapr-repo/dapr',
@@ -39,7 +52,7 @@ helm_resource(
         '--create-namespace',
         '--set=global.ha.enabled=false',
     ],
-    resource_deps=['dapr-repo'],
+    resource_deps=['dapr-repo', 'patch-dapr-crds'],
     labels=['infra'],
 )
 
