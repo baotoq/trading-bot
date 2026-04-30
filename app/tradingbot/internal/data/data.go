@@ -11,7 +11,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, NewDaprClient, NewEventRepo, NewRedisClient, NewStrategyStateRepo)
+var ProviderSet = wire.NewSet(NewData, NewGreeterRepo, NewDaprClient, NewEventRepo, NewRedisClient, NewStrategyStateRepo, NewJobScheduler)
 
 type Data struct {
 	db *ent.Client
