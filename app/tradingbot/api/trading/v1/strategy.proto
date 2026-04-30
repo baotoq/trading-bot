@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package trading.v1;
 
-option go_package = "tradingbot/api/trading/v1;v1";
+option go_package = "tradingbot/app/tradingbot/api/trading/v1;v1";
 
 import "google/api/annotations.proto";
 

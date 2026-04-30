@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	v1 "tradingbot/api/trading/v1"
+	v1 "tradingbot/app/tradingbot/api/trading/v1"
 	"tradingbot/app/tradingbot/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"

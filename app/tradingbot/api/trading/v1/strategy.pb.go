@@ -215,7 +215,7 @@ const file_trading_v1_strategy_proto_rawDesc = "" +
 	"strategyId\x12*\n" +
 	"\x04runs\x18\x02 \x03(\v2\x16.trading.v1.RunSummaryR\x04runs2|\n" +
 	"\x0fStrategyService\x12i\n" +
-	"\x06Status\x12\x19.trading.v1.StatusRequest\x1a\x17.trading.v1.StatusReply\"+\x82\xd3\xe4\x93\x02%\x12#/v1/strategies/{strategy_id}/statusB\x1eZ\x1ctradingbot/api/trading/v1;v1b\x06proto3"
+	"\x06Status\x12\x19.trading.v1.StatusRequest\x1a\x17.trading.v1.StatusReply\"+\x82\xd3\xe4\x93\x02%\x12#/v1/strategies/{strategy_id}/statusB-Z+tradingbot/app/tradingbot/api/trading/v1;v1b\x06proto3"
 
 var (
 	file_trading_v1_strategy_proto_rawDescOnce sync.Once

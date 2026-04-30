@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	v1 "tradingbot/api/tradingbot/helloworld/v1"
+	v1 "tradingbot/app/tradingbot/api/helloworld/v1"
 	"tradingbot/app/tradingbot/internal/biz"
 )
 

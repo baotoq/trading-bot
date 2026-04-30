@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.1
 // - protoc             v7.34.1
-// source: tradingbot/helloworld/v1/greeter.proto
+// source: helloworld/v1/greeter.proto
 
 package v1
 
@@ -193,5 +193,5 @@ var Greeter_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "tradingbot/helloworld/v1/greeter.proto",
+	Metadata: "helloworld/v1/greeter.proto",
 }
