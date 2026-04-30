@@ -29,6 +29,8 @@ local_resource('compile',
 # local_resource would fire too late to affect the current load.
 local('[ -d deploy/helm/charts ] || helm dependency update deploy/helm', quiet=True)
 
+docker_prune_settings(num_builds=1, keep_recent=1)
+
 helm_repo('dapr-repo', 'https://dapr.github.io/helm-charts/', labels=['infra'])
 
 # If Dapr is not yet installed via Helm, delete any pre-existing CRDs (e.g. from
