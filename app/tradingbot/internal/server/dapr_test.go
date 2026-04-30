@@ -65,3 +65,24 @@ func TestDaprTradingEvent(t *testing.T) {
 	// Assert
 	assert.Equal(t, http.StatusOK, w.Code)
 }
+
+func TestDaprJobHandler(t *testing.T) {
+	// Arrange
+	srv := transhttp.NewServer()
+	sub := server.NewDaprSubscriber("pubsub")
+	called := false
+	server.RegisterJobHandler(sub, "strategy-tick-foo", func(_ context.Context, _ []byte) error {
+		called = true
+		return nil
+	})
+	sub.Mount(srv)
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/job/strategy-tick-foo", nil)
+
+	// Act
+	srv.ServeHTTP(w, r)
+
+	// Assert
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.True(t, called)
+}

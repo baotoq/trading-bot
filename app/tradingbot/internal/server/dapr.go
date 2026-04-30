@@ -68,6 +68,21 @@ func Subscribe[T any](s *DaprSubscriber, handler func(ctx context.Context, e T) 
 	})
 }
 
+// RegisterJobHandler mounts POST /job/<name> for a Dapr Jobs callback.
+func RegisterJobHandler(s *DaprSubscriber, name string, h func(ctx context.Context, data []byte) error) {
+	s.routes = append(s.routes, daprRoute{
+		path: "/job/" + name,
+		handler: func(w http.ResponseWriter, r *http.Request) {
+			body, _ := io.ReadAll(r.Body)
+			if err := h(r.Context(), body); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.WriteHeader(http.StatusOK)
+		},
+	})
+}
+
 // Mount registers /dapr/subscribe and all topic routes onto the HTTP server.
 func (s *DaprSubscriber) Mount(hs *khttp.Server) {
 	subsJSON, _ := json.Marshal(s.subs)
