@@ -1,0 +1,57 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug trading-bot",
+            "cargo": {
+                "args": ["build", "--bin=trading-bot", "--package=trading-bot"],
+                "filter": {
+                    "name": "trading-bot",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug trading-bot (release)",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--release",
+                    "--bin=trading-bot",
+                    "--package=trading-bot"
+                ],
+                "filter": {
+                    "name": "trading-bot",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=trading-bot",
+                    "--package=trading-bot"
+                ],
+                "filter": {
+                    "name": "trading-bot",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
