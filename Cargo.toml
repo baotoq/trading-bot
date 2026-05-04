@@ -11,3 +11,10 @@ tokio = { version = "1", features = ["rt", "macros", "time"] }
 chrono = "0.4"
 hyperliquid_rust_sdk = "0.6"
 ethers = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

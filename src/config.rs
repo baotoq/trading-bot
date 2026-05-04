@@ -38,6 +38,11 @@ pub enum ConfigError {
 }
 
 pub fn from_cli(cli: Cli) -> Result<Config, ConfigError> {
+    // Pre-check CLI shape before reading env so cheap non-env errors
+    // (network_required, network_conflict, unsupported_asset) surface
+    // even when HL_PRIVATE_KEY is missing.
+    cli.resolve_network()?;
+    cli.validate_asset()?;
     let raw_key = env::var(HL_PRIVATE_KEY_ENV).map_err(|_| ConfigError::MissingKey)?;
     assemble(cli, raw_key)
 }
