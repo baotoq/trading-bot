@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dca"
+version = "0.1.0"
+description = "Dollar-cost-averaging CLI for Hyperliquid spot BTC"
+requires-python = ">=3.12"
+authors = [{ name = "Bao To" }]
+dependencies = [
+    "hyperliquid-python-sdk>=0.10",
+    "typer>=0.12",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "croniter>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-mock>=3.12",
+]
+
+[project.scripts]
+dca = "dca.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dca"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "testnet: integration test that hits Hyperliquid testnet (opt-in via HL_TESTNET_KEY env var)",
+]
+addopts = "-ra"
