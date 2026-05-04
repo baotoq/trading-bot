@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from threading import Event
 
+import pytest
 from pydantic import SecretStr
 
 from dca._fake_client import FakeHyperliquidClient
@@ -106,3 +107,52 @@ def test_stop_event_set_before_loop_exits_immediately():
 
     assert fake_client.placed_orders == []
     assert clock.sleeps == []
+
+
+def test_auth_error_propagates():
+    from dca.types import AuthError
+
+    class AuthFailingClient(FakeHyperliquidClient):
+        def place_btc_buy(self, size, limit_price):
+            raise AuthError("bad signature")
+
+    fake_client = AuthFailingClient(balance=Decimal("1000"), mid=Decimal("60000"))
+    stop = Event()
+    clock = FakeClock(datetime(2026, 5, 5, 8, 59, 59))
+
+    with pytest.raises(AuthError):
+        scheduler_run(
+            client=fake_client,
+            settings=make_settings(),
+            schedule="0 9 * * *",
+            amount_usdc=Decimal("50"),
+            stop=stop,
+            clock=clock,
+        )
+
+
+def test_callback_exception_does_not_kill_daemon(caplog):
+    fake_client = FakeHyperliquidClient(balance=Decimal("1000"), mid=Decimal("60000"))
+    stop = Event()
+    clock = FakeClock(datetime(2026, 5, 5, 8, 59, 59))
+    calls = {"n": 0}
+
+    def buggy(_outcome):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("boom")
+        stop.set()
+
+    scheduler_run(
+        client=fake_client,
+        settings=make_settings(),
+        schedule="0 9 * * *",
+        amount_usdc=Decimal("50"),
+        stop=stop,
+        clock=clock,
+        on_cycle_done=buggy,
+    )
+
+    assert calls["n"] == 2
+    assert len(fake_client.placed_orders) == 2
+    assert any("on_cycle_done_failed" in r.getMessage() for r in caplog.records)

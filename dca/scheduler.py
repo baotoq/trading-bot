@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from decimal import Decimal
@@ -9,10 +8,11 @@ from threading import Event
 from typing import Callable, Protocol
 
 from croniter import croniter
+from pydantic import ValidationError
 
 from dca.config import Settings
 from dca.dca import one_buy
-from dca.types import ClientProtocol, FillResult
+from dca.types import AuthError, ClientProtocol, FillResult
 
 log = logging.getLogger("dca.scheduler")
 
@@ -34,7 +34,8 @@ class WallClock:
             remaining = (target - self.now_local()).total_seconds()
             if remaining <= 0:
                 return
-            time.sleep(min(remaining, 1.0))
+            if stop.wait(timeout=min(remaining, 1.0)):
+                return  # stop was set
 
 
 def run(
@@ -61,8 +62,14 @@ def run(
             outcome: FillResult | Exception = one_buy(
                 client, settings, amount_usdc, dry_run=False
             )
+        except (AuthError, ValidationError):
+            log.exception("cycle_failed_unrecoverable")
+            raise
         except Exception as exc:
             log.exception("cycle_failed")
             outcome = exc
         if on_cycle_done is not None:
-            on_cycle_done(outcome)
+            try:
+                on_cycle_done(outcome)
+            except Exception:
+                log.exception("on_cycle_done_failed")
