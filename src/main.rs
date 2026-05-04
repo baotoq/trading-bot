@@ -1,5 +1,6 @@
 mod cli;
 mod config;
+mod risk;
 
 use clap::Parser;
 
