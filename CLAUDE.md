@@ -16,7 +16,7 @@ cargo fmt                          # format
 
 ## Project
 
-This is `hl-dca` — a one-shot Rust CLI that places a single spot market buy on Hyperliquid per invocation, designed to be scheduled via cron for dollar-cost averaging into UBTC.
+This is `trading-bot` — a one-shot Rust CLI that places a single spot market buy on Hyperliquid per invocation, designed to be scheduled via cron for dollar-cost averaging into UBTC.
 
 The design spec lives at `docs/superpowers/specs/2026-05-04-hl-dca-bot-design.md` and is the authoritative reference for architecture decisions.
 
@@ -60,3 +60,7 @@ ts=2026-05-04T12:00:00Z network=testnet asset=UBTC usd=25 qty=0.000389 avg_px=64
 ## Auth
 
 Uses an **agent wallet** (API wallet) loaded from `HL_PRIVATE_KEY` env var. Agent wallets cannot withdraw — this is an intentional safety constraint. Never use the master wallet key.
+
+## Testing
+
+use TDD approach: write tests for each module before implementing it
