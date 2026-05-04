@@ -3768,6 +3768,7 @@ dependencies = [
  "anyhow",
  "chrono",
  "clap",
+ "ethers",
  "hyperliquid_rust_sdk",
  "thiserror 2.0.18",
  "tokio",
