@@ -28,7 +28,8 @@
     "remember@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "oh-my-claudecode@omc": true,
-    "andrej-karpathy-skills@karpathy-skills": true
+    "andrej-karpathy-skills@karpathy-skills": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "skipDangerousModePermissionPrompt": true
 }
