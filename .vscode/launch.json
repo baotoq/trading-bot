@@ -12,7 +12,7 @@
                     "kind": "bin"
                 }
             },
-            "args": [],
+            "args": ["--usd", "10.0", "--max-spend-usd", "100.0"],
             "cwd": "${workspaceFolder}"
         },
         {
