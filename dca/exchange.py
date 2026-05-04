@@ -102,6 +102,7 @@ def _parse_order_response(
 ) -> FillResult:
     if resp.get("status") != "ok":
         msg = str(resp)
+        log.warning("order_top_level_not_ok", extra={"resp": msg})
         if "signature" in msg.lower() or "unauthorized" in msg.lower():
             raise AuthError(msg)
         raise TransientNetworkError(f"order rejected: {msg}")
@@ -112,6 +113,7 @@ def _parse_order_response(
         .get("statuses", [])
     )
     if not statuses:
+        log.warning("order_empty_statuses", extra={"resp": str(resp)})
         return FillResult(
             submitted_size=submitted_size,
             filled_size=Decimal(0),
@@ -129,6 +131,7 @@ def _parse_order_response(
             status="filled",
         )
     if "resting" in s:
+        log.warning("order_unexpected_resting", extra={"status": str(s)})
         # IOC should not rest; treat as rejected
         return FillResult(
             submitted_size=submitted_size,
@@ -137,7 +140,9 @@ def _parse_order_response(
             status="rejected",
         )
     if "error" in s:
+        log.warning("order_status_error", extra={"err": str(s["error"])})
         raise TransientNetworkError(s["error"])
+    log.warning("order_unknown_status_shape", extra={"status": str(s)})
     return FillResult(
         submitted_size=submitted_size,
         filled_size=Decimal(0),
