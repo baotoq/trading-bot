@@ -174,7 +174,6 @@ def balance(
     config: Optional[Path] = typer.Option(None, "--config"),
 ):
     """Print spot USDC balance and exit."""
-    _configure_logging()
     settings = _load_settings_or_exit(config)
     client = make_client(settings)
     try:
